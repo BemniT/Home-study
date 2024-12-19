@@ -1,8 +1,12 @@
 <resources>
-    <string name="app_name">Gojo-study</string>
+    <string name="app_name">Gojo study</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
     <string name="user_name">Username</string>
     <string name="letStart">Welcom Back</string>
     <string name="secondLetStart">Login your existing Gojo Study</string>
+    <string name="home">Home</string>
+    <string name="exam">Exam</string>
+    <string name="book">Book</string>
+    <string name="profile">Profile</string>
 </resources>
