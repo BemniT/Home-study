@@ -18,6 +18,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import io.paperdb.Paper;
 
@@ -74,6 +76,10 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+    private boolean verifyPassword(String inputPassword, String storedPassword)
+    {
+        return inputPassword.equals(storedPassword);
+    }
     //WHEN THE PERSON LOGIN
     private void Autenticate(final String username, String password)
     {
@@ -84,53 +90,42 @@ public class LoginActivity extends AppCompatActivity {
         Paper.book().write(Continuity.userPassword, password);
 //        }
 
+        FirebaseFirestore db;
 
-        final DatabaseReference Rootref;
-        Rootref = FirebaseDatabase.getInstance().getReference().child("Users");
+        db = FirebaseFirestore.getInstance();
+        db.collection("Users").whereEqualTo("username", username)
+                .get()
+                .addOnCompleteListener(task -> {
 
-        Rootref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot)
-            {
-                if (snapshot.child(username).exists())
-                {
-                    Account userData = snapshot.child(username).getValue(Account.class);
-
-                    if (userData.getusername().equals(username))
+                    if(task.isSuccessful() && !task.getResult().isEmpty())
                     {
-                        if (userData.getPassword().equals(password))
+
+                        for (DocumentSnapshot document : task.getResult())
                         {
-                            Toast.makeText(LoginActivity.this, "Logged in Successfully..", Toast.LENGTH_SHORT).show();
-                            loadingBar.dismiss();
-                            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                            Continuity.currentOnlineUser = userData;
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            startActivity(intent);
-                            finish();
+                            String storedPassword = document.getString("password");
+                            Account userData = document.toObject(Account.class);
+                            if (verifyPassword(password, storedPassword))
+                            {
+                                Toast.makeText(LoginActivity.this, "Logged in Successfully..", Toast.LENGTH_SHORT).show();
+                                loadingBar.dismiss();
+                                Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                                Continuity.currentOnlineUser = userData;
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(intent);
+                                finish();
+                            }
+                            else {
+                                Toast.makeText(LoginActivity.this, "Wrong Password!", Toast.LENGTH_SHORT).show();
+                                loadingBar.dismiss();
+                            }
                         }
-                        else
-                        {
-                            Toast.makeText(LoginActivity.this, "Wrong Password!", Toast.LENGTH_SHORT).show();
-                            loadingBar.dismiss();
-                        }
+                    }else {
+                        Toast.makeText(LoginActivity.this, "You are is not Registered!", Toast.LENGTH_SHORT).show();
+                        loadingBar.dismiss();
+
                     }
-                }
-                else
-                {
-                    Toast.makeText(LoginActivity.this, "This Phone Number is not Registered!", Toast.LENGTH_SHORT).show();
-                    loadingBar.dismiss();
-                    Toast.makeText(LoginActivity.this, "Create Account First", Toast.LENGTH_SHORT).show();
-                }
 
+                });
 
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-
-
-        });
     }
 }
