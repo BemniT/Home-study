@@ -21,11 +21,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link HomeFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class HomeFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
@@ -96,12 +92,9 @@ public class HomeFragment extends Fragment {
                         for (QueryDocumentSnapshot documentSnapshot : task.getResult())
                         {
                             Post post = documentSnapshot.toObject(Post.class);
-
                             postList.add(post);
-
-                            postAdapter.notifyDataSetChanged();
                         }
-
+                        postAdapter.notifyDataSetChanged();
                     }  else
                     {
                         Log.e("Error document not found", String.valueOf(task.getException()));
