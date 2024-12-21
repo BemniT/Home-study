@@ -37,12 +37,12 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         holder.postDate.setText(post.getTime());
         holder.postMessage.setText(post.getMessage());
         holder.likeCount.setText(post.getLikes() + " Likes");
-        Picasso.get().load(post.getImageUrl()).into(holder.postImage);
+        Picasso.get().load(post.getImageUrl()).placeholder(R.drawable.profile).into(holder.postImage);
     }
 
     @Override
     public int getItemCount() {
-        return 0;
+        return postList.size();
     }
 
     public class PostViewHolder extends RecyclerView.ViewHolder {
@@ -59,6 +59,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             likeCount = itemView.findViewById(R.id.postLikeCount);
             postLikeIcon = itemView.findViewById(R.id.likeIcon);
             postComment = itemView.findViewById(R.id.postComment);
+            postImage = itemView.findViewById(R.id.postImage);
 
 
         }
