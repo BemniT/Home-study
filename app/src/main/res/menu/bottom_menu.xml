@@ -5,7 +5,7 @@
     <item
         android:id="@+id/home"
         android:title=""
-        android:icon="@drawable/home"
+        android:icon="@drawable/homefill"
         />
 
     <item
