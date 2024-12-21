@@ -2,7 +2,7 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.Homestudy" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-         <item name="colorPrimary">@color/</item>
+         <item name="colorPrimary">@color/primary_secondary</item>
     </style>
 
     <style name="Theme.Homestudy" parent="Base.Theme.Homestudy" />
