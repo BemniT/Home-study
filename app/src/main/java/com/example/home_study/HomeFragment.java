@@ -3,10 +3,23 @@ package com.example.home_study;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.example.home_study.Adapter.PostAdapter;
+import com.example.home_study.Model.Post;
+import com.google.firebase.Firebase;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -24,18 +37,16 @@ public class HomeFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
+    private RecyclerView recyclerView;
+    private PostAdapter postAdapter;
+    private List postList;
+
+    FirebaseFirestore postRef;
+
     public HomeFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment HomeFragment.
-     */
     // TODO: Rename and change types and number of parameters
     public static HomeFragment newInstance(String param1, String param2) {
         HomeFragment fragment = new HomeFragment();
@@ -53,12 +64,50 @@ public class HomeFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false);
+        View view  = inflater.inflate(R.layout.fragment_home, container, false);
+
+        recyclerView = view.findViewById(R.id.homeRecycler);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        postList = new ArrayList<>();
+        postAdapter = new PostAdapter(postList);
+        recyclerView.setAdapter(postAdapter);
+        FetchPost();
+        return view;
+
+    }
+
+    private void FetchPost()
+    {
+        postRef = FirebaseFirestore.getInstance();
+
+        postRef.collection("Posts")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()){
+                        postList.clear();
+                        for (QueryDocumentSnapshot documentSnapshot : task.getResult())
+                        {
+                            Post post = documentSnapshot.toObject(Post.class);
+
+                            postList.add(post);
+
+                            postAdapter.notifyDataSetChanged();
+                        }
+
+                    }  else
+                    {
+                        Log.e("Error document not found", String.valueOf(task.getException()));
+                    }
+                });
+
+
     }
 }
