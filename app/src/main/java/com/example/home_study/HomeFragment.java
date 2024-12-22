@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,11 +22,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link HomeFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class HomeFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
@@ -40,6 +37,7 @@ public class HomeFragment extends Fragment {
     private RecyclerView recyclerView;
     private PostAdapter postAdapter;
     private List postList;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     FirebaseFirestore postRef;
 
@@ -68,13 +66,25 @@ public class HomeFragment extends Fragment {
 
     }
 
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view  = inflater.inflate(R.layout.fragment_home, container, false);
 
+
         recyclerView = view.findViewById(R.id.homeRecycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout.setColorScheme(R.color.primary_secondary);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                FetchPost();
+            }
+        });
 
         postList = new ArrayList<>();
         postAdapter = new PostAdapter(postList);
@@ -86,6 +96,8 @@ public class HomeFragment extends Fragment {
 
     private void FetchPost()
     {
+
+        swipeRefreshLayout.setRefreshing(true);
         postRef = FirebaseFirestore.getInstance();
 
         postRef.collection("Posts")
@@ -96,18 +108,16 @@ public class HomeFragment extends Fragment {
                         for (QueryDocumentSnapshot documentSnapshot : task.getResult())
                         {
                             Post post = documentSnapshot.toObject(Post.class);
-
                             postList.add(post);
-
-                            postAdapter.notifyDataSetChanged();
                         }
-
+                        postAdapter.notifyDataSetChanged();
+                        swipeRefreshLayout.setRefreshing(false);
                     }  else
                     {
                         Log.e("Error document not found", String.valueOf(task.getException()));
+                        swipeRefreshLayout.setRefreshing(false);
                     }
                 });
-
 
     }
 }
