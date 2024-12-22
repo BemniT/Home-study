@@ -13,10 +13,10 @@
         android:layout_marginTop="16dp"
         >
 
-        <ImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/author_profile"
-            android:layout_width="60dp"
-            android:layout_height="60dp"/>
+            android:layout_width="50dp"
+            android:layout_height="50dp"/>
         <TextView
             android:id="@+id/postAuthor"
             android:layout_width="wrap_content"
@@ -68,27 +68,40 @@
         android:orientation="horizontal"
         android:layout_marginTop="8dp">
 
-        <ImageView
-            android:id="@+id/likeIcon"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@drawable/like"
-            android:layout_marginStart="8dp"
-            android:contentDescription="@string/like"
-
-            />
-        <TextView
-            android:id="@+id/postLikeCount"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
+            android:orientation="vertical"
             android:layout_marginStart="8dp"
-            />
+            >
+
+            <ImageView
+                android:id="@+id/likeIcon"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/like"
+
+                android:contentDescription="@string/like"
+
+                />
+            <TextView
+                android:id="@+id/postLikeCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:layout_gravity="center"
+                />
+
+
+        </LinearLayout>
+
 
         <ImageView
             android:id="@+id/postComment"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:src="@drawable/comment"
             android:layout_marginStart="12dp"
             android:contentDescription="@string/like"
