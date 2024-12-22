@@ -27,6 +27,7 @@ public class HomeActivity extends AppCompatActivity {
         bottomNavigationView.setSelectedItemId(R.id.home);
         bottomNavigationView.getMenu().findItem(R.id.home).setIcon(R.drawable.homefill);
 
+        replaceFragment(new HomeFragment());
         // Set up the listener for item selection
         bottomNavigationView.setOnItemSelectedListener(item -> {
             final int ID = item.getItemId();
