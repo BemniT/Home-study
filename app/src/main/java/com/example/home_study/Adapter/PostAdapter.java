@@ -44,7 +44,25 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         holder.postDate.setText(post.getTime());
         holder.postMessage.setText(post.getMessage());
 
+        String userId = Continuity.currentOnlineUser.getusername();
 
+
+        DocumentReference postRef = FirebaseFirestore.getInstance()
+                .collection("Posts")
+                .document(post.getPostId());
+
+        postRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                List<String> likedBy = (List<String>) documentSnapshot.get("likedBy");
+                if (likedBy != null && likedBy.contains(userId)) {
+
+                    holder.postLikeIcon.setImageResource(R.drawable.likefilled);
+                } else {
+
+                    holder.postLikeIcon.setImageResource(R.drawable.like);
+                }
+            }
+        });
         holder.postLikeIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -62,7 +80,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                            likedBy = new ArrayList<>();
                         }
                         if (likedBy.contains(userId)){
-//                            likedBy.remove(userId);
+                            likedBy.remove(userId);
                             postRef.update("likedBy", likedBy, "likes", likedBy.size());
                             holder.postLikeIcon.setImageResource(R.drawable.like);
                         }
