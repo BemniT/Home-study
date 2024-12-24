@@ -1,14 +1,14 @@
 {
   "project_info": {
-    "project_number": "109707578928",
-    "firebase_url": "https://home-study-c5422-default-rtdb.firebaseio.com",
-    "project_id": "home-study-c5422",
-    "storage_bucket": "home-study-c5422.firebasestorage.app"
+    "project_number": "964518277159",
+    "firebase_url": "https://bale-house-rental-default-rtdb.firebaseio.com",
+    "project_id": "bale-house-rental",
+    "storage_bucket": "bale-house-rental.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:109707578928:android:d218fe5b7a380bf39667f5",
+        "mobilesdk_app_id": "1:964518277159:android:ef8812d8f6419dd3961e02",
         "android_client_info": {
           "package_name": "com.example.home_study"
         }
@@ -16,7 +16,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAuqY-Cf4PfVWWnQ7m7l-bt2w036Dvgcok"
+          "current_key": "AIzaSyCLua9ESW-Oim9877bu9qxbUl0rJLHUp88"
         }
       ],
       "services": {
