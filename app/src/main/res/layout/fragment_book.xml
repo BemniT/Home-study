@@ -3,15 +3,50 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".BookFragment">
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="20dp"
+                >
+                <TextView
+                    android:id="@+id/textBook"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textColor="@color/black"
+                    android:layout_marginBottom="8dp"
+                    android:text="Text Books"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    />
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+                <TextView
+                    android:id="@+id/text_des"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Find course you want to study"
+                    app:layout_constraintTop_toBottomOf="@id/textBook"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    android:layout_marginTop="10dp"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    />
+
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/bookRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Book fragment"
-        android:gravity="center"
-
+        android:layout_height="wrap_content"
+        android:clipToPadding="true"
+        app:layout_constraintTop_toBottomOf="@+id/text_des"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="20dp"
         />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>
