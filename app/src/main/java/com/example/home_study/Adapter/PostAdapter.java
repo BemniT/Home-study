@@ -40,9 +40,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     @Override
     public void onBindViewHolder(@NonNull PostAdapter.PostViewHolder holder, int position) {
         Post post = postList.get(position);
-        holder.author.setText(post.getAuthor());
-        holder.postDate.setText(post.getTime());
-        holder.postMessage.setText(post.getMessage());
+
 
         String userId = Continuity.currentOnlineUser.getusername();
 
@@ -58,11 +56,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
                     holder.postLikeIcon.setImageResource(R.drawable.likefilled);
                 } else {
-
                     holder.postLikeIcon.setImageResource(R.drawable.like);
                 }
             }
         });
+
+        holder.author.setText(post.getAuthor());
+        holder.postDate.setText(post.getTime());
+        holder.postMessage.setText(post.getMessage());
         holder.postLikeIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
