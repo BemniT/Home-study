@@ -104,7 +104,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         });
         Picasso.get().load(post.getImageUrl()).placeholder(R.drawable.profile).into(holder.postImage);
         Picasso.get().load(post.getAuthorProfile()).placeholder(R.drawable.profile).into(holder.authorProfile);
-        holder.likeCount.setText(post.getLikes()+"");
+        holder.likeCount.setText("Likes:" + post.getLikes() + " ");
     }
 
     @Override
