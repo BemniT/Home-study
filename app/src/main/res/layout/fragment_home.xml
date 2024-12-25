@@ -6,6 +6,16 @@
     tools:context=".HomeFragment">
 
 
+    <TextView
+        android:id="@+id/no_post"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="28sp"
+        android:text="No post yet"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:textColor="@color/black"
+        />
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
