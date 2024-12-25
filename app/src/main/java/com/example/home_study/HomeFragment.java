@@ -2,6 +2,7 @@ package com.example.home_study;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -11,11 +12,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.home_study.Adapter.PostAdapter;
 import com.example.home_study.Model.Post;
 import com.google.firebase.Firebase;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -83,11 +91,10 @@ public class HomeFragment extends Fragment {
                 FetchPost();
             }
         });
-
-        postList = new ArrayList<>();
-        postAdapter = new PostAdapter(postList);
-        recyclerView.setAdapter(postAdapter);
         FetchPost();
+        postList = new ArrayList<>();
+
+
         return view;
 
     }
@@ -96,26 +103,30 @@ public class HomeFragment extends Fragment {
     {
 
         swipeRefreshLayout.setRefreshing(true);
-        postRef = FirebaseFirestore.getInstance();
+        DatabaseReference postRef = FirebaseDatabase.getInstance().getReference();
 
-        postRef.collection("Posts")
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()){
-                        postList.clear();
-                        for (QueryDocumentSnapshot documentSnapshot : task.getResult())
-                        {
-                            Post post = documentSnapshot.toObject(Post.class);
-                            postList.add(post);
-                        }
-                        postAdapter.notifyDataSetChanged();
-                        swipeRefreshLayout.setRefreshing(false);
-                    }  else
-                    {
-                        Log.e("Error document not found", String.valueOf(task.getException()));
-                        swipeRefreshLayout.setRefreshing(false);
-                    }
-                });
+        postRef.child("Posts");
+        postRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                swipeRefreshLayout.setRefreshing(false);
+//                postList.clear();
+
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    Post post = dataSnapshot.getValue(Post.class);
+                    postList.add(post);
+                    postAdapter = new PostAdapter(postList);
+                    recyclerView.setAdapter(postAdapter);
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                swipeRefreshLayout.setRefreshing(false);
+                Toast.makeText(getContext(), "Something went wrong!", Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
+
+
 }
