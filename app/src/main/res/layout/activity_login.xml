@@ -8,8 +8,8 @@
 
     <ImageView
         android:id="@+id/app_logo"
-        android:layout_width="170dp"
-        android:layout_height="170dp"
+        android:layout_width="270dp"
+        android:layout_height="270dp"
         android:src="@drawable/logo"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -29,9 +29,11 @@
             android:text="@string/letStart"
             android:textColor="@color/black"
             android:layout_below="@+id/app_logo"
-            android:textSize="30sp"
+            android:textSize="40sp"
             android:layout_marginTop="-20dp"
-            android:textStyle="bold"
+            android:fontFamily="@font/sansita_bold_italic"
+
+
             />
 
         <TextView
@@ -44,7 +46,8 @@
             android:text="@string/secondLetStart"
             android:textColor="@color/black"
             android:layout_below="@+id/letsStart"
-            android:textSize="10sp"
+            android:fontFamily="@font/risque_regular"
+            android:textSize="13sp"
             android:layout_centerHorizontal="true"
             />
 
@@ -56,7 +59,7 @@
             android:id="@+id/login_phonenumber"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:background="@drawable/bar"
+            android:background="@drawable/bar2"
             android:layout_below="@+id/app_logo"
             android:layout_marginLeft="80dp"
             android:layout_marginRight="50dp"
@@ -66,10 +69,9 @@
             app:layout_constraintTop_toBottomOf="@id/describe"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:textColor="@color/black"
-            android:textColorHint="@color/black"
+
             android:textSize="17sp"
-            android:textStyle="bold"
+
             />
 
         <ImageView
@@ -95,19 +97,19 @@
             android:layout_below="@+id/login_phonenumber"
             android:layout_marginLeft="80dp"
             android:layout_marginRight="50dp"
-            android:layout_marginTop="35dp"
+            android:layout_marginTop="45dp"
             android:inputType="textPassword"
             android:paddingLeft="35dp"
             android:hint="@string/password"
-            android:textColor="@color/black"
-            android:textColorHint="@color/black"
-            android:background="@drawable/bar"
+
+            android:background="@drawable/bar2"
+
             app:layout_constraintTop_toBottomOf="@id/login_phonenumber"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
 
             android:textSize="17sp"
-            android:textStyle="bold"
+
 
             />
 
@@ -116,7 +118,7 @@
             android:layout_height="55dp"
             android:layout_centerHorizontal="true"
             android:layout_below="@id/login_phonenumber"
-            android:layout_marginTop="22dp"
+            android:layout_marginTop="32dp"
             android:layout_marginLeft="75dp"
             android:src="@drawable/password"
             app:layout_constraintRight_toLeftOf="@id/login_password"
@@ -129,9 +131,9 @@
     <Button
         android:id="@+id/login_btn"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="55dp"
         android:layout_marginStart="50dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="60dp"
         android:layout_marginEnd="50dp"
         android:layout_marginBottom="10dp"
         android:backgroundTint="@color/primary_secondary"
@@ -139,7 +141,7 @@
         android:text="@string/login"
         android:textStyle="bold"
         android:textColor="@color/white"
-        android:textSize="24sp"
+        android:textSize="20sp"
         app:layout_constraintTop_toBottomOf="@id/login_password"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
