@@ -94,6 +94,8 @@ public class HomeFragment extends Fragment {
 
         postList = new ArrayList<>();
         FetchPost();
+        postAdapter = new PostAdapter(postList);
+        recyclerView.setAdapter(postAdapter);
         return view;
 
     }
@@ -102,9 +104,8 @@ public class HomeFragment extends Fragment {
     {
 
         swipeRefreshLayout.setRefreshing(true);
-        DatabaseReference postRef = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference postRef = FirebaseDatabase.getInstance().getReference().child("Posts");
 
-        postRef.child("Posts");
         postRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -113,11 +114,15 @@ public class HomeFragment extends Fragment {
 
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     Post post = dataSnapshot.getValue(Post.class);
-                    postList.add(post);
+                    if (post != null)
+                    {
+                        Log.d("Post","Fetched Post" + post.getPostId());
+                        postList.add(post);
+                    }
+
                 }
 
-                postAdapter = new PostAdapter(postList);
-                recyclerView.setAdapter(postAdapter);
+                postAdapter.notifyDataSetChanged();
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
