@@ -14,15 +14,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.home_study.Model.Post;
 import com.example.home_study.Prevalent.Continuity;
 import com.example.home_study.R;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -102,13 +99,11 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                 @Override
                 public void onClick(View v) {
 
-                    userLikesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    userLikesRef.child(postID).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                             if (snapshot.exists()) {
-
-
                                 userLikesRef.child(postID).removeValue();
                                 postLikesRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
@@ -119,7 +114,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                                             holder.likeCount.setText(String.valueOf(currentLikes - 1));
                                             holder.postLikeIcon.setImageResource(R.drawable.like);
                                         } else {
-
+                                            int currentLikes = snapshot.getValue(Integer.class);
+                                            postLikesRef.setValue(currentLikes + 1);
+                                            holder.likeCount.setText(String.valueOf(currentLikes + 1));
+                                            holder.postLikeIcon.setImageResource(R.drawable.likefilled);
                                         }
                                     }
 

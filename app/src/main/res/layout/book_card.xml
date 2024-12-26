@@ -9,6 +9,7 @@
     android:padding="20dp"
     >
     <ImageView
+        android:id="@+id/bookImage"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_gravity="center"
