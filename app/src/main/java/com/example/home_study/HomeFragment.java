@@ -91,10 +91,9 @@ public class HomeFragment extends Fragment {
                 FetchPost();
             }
         });
-        FetchPost();
+
         postList = new ArrayList<>();
-
-
+        FetchPost();
         return view;
 
     }
@@ -110,14 +109,15 @@ public class HomeFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 swipeRefreshLayout.setRefreshing(false);
-//                postList.clear();
+                postList.clear();
 
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     Post post = dataSnapshot.getValue(Post.class);
                     postList.add(post);
-                    postAdapter = new PostAdapter(postList);
-                    recyclerView.setAdapter(postAdapter);
                 }
+
+                postAdapter = new PostAdapter(postList);
+                recyclerView.setAdapter(postAdapter);
             }
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
