@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.example.home_study.Adapter.BookAdapter;
 import com.example.home_study.Model.Book;
 import com.example.home_study.Prevalent.Continuity;
 import com.google.firebase.database.DataSnapshot;
@@ -39,6 +41,8 @@ public class BookFragment extends Fragment {
     private String mParam2;
     private List bookList;
     private RecyclerView bookRecycler;
+
+    BookAdapter bookAdapter;
 
 
     public BookFragment() {
@@ -77,10 +81,15 @@ public class BookFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_book, container, false);
         bookRecycler = view.findViewById(R.id.bookRecyclerView);
+        bookRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
 
-
+        String userId = Continuity.currentOnlineUser.getusername();
         bookList = new ArrayList<>();
 
+        fetchUserGrade(userId);
+        bookAdapter = new BookAdapter(bookList, getActivity());
+
+        bookRecycler.setAdapter(bookAdapter);
         return view;
     }
 
@@ -107,16 +116,20 @@ public class BookFragment extends Fragment {
 
     private void fetchTextBook(String grade)
     {
-        DatabaseReference bookRef = FirebaseDatabase.getInstance().getReference().child("TextBooks");
+        DatabaseReference bookRef = FirebaseDatabase.getInstance().getReference().child("TextBooks")
+                .child(grade);
         bookRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 bookList.clear();
 
-                if (snapshot.exists())
+                for (DataSnapshot dataSnapshot : snapshot.getChildren())
                 {
-
+                    Book book = dataSnapshot.getValue(Book.class);
+                    bookList.add(book);
                 }
+
+                bookAdapter.notifyDataSetChanged();
             }
 
             @Override
