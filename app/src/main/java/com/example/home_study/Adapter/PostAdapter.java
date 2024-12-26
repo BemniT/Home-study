@@ -74,7 +74,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (snapshot.exists())
                     {
-                        holder.postLikeIcon.setImageResource(R.drawable.likefilled);
+                        holder.postLikeIcon.setImageResource(R.drawable.likefill);
                     }
                     else {
                         holder.postLikeIcon.setImageResource(R.drawable.like);
@@ -111,7 +111,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                                             int currentLikes = snapshot.getValue(Integer.class);
                                             postLikesRef.setValue(currentLikes + 1);
                                             holder.likeCount.setText(String.valueOf(currentLikes + 1));
-                                            holder.postLikeIcon.setImageResource(R.drawable.likefilled);
+                                            holder.postLikeIcon.setImageResource(R.drawable.likefill);
                                         }
                                     }
 
@@ -130,11 +130,11 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                                             int currentLikes = snapshot.getValue(Integer.class);
                                             postLikesRef.setValue(currentLikes + 1);
                                             holder.likeCount.setText(String.valueOf(currentLikes + 1));
-                                            holder.postLikeIcon.setImageResource(R.drawable.likefilled);
+                                            holder.postLikeIcon.setImageResource(R.drawable.likefill);
                                         } else {
                                             postLikesRef.setValue(1);
                                             holder.likeCount.setText("1");
-                                            holder.postLikeIcon.setImageResource(R.drawable.likefilled);
+                                            holder.postLikeIcon.setImageResource(R.drawable.likefill);
                                         }
                                     }
 

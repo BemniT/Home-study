@@ -59,7 +59,7 @@
             android:id="@+id/login_phonenumber"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:background="@drawable/bar"
+            android:background="@drawable/bar2"
             android:layout_below="@+id/app_logo"
             android:layout_marginLeft="80dp"
             android:layout_marginRight="50dp"
@@ -102,7 +102,7 @@
             android:paddingLeft="35dp"
             android:hint="@string/password"
 
-            android:background="@drawable/bar"
+            android:background="@drawable/bar2"
 
             app:layout_constraintTop_toBottomOf="@id/login_phonenumber"
             app:layout_constraintLeft_toLeftOf="parent"
