@@ -1,5 +1,6 @@
 package com.example.home_study.Adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,9 +50,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     @Override
     public void onBindViewHolder(@NonNull PostAdapter.PostViewHolder holder, int position) {
         Post post = postList.get(position);
-        String userId = Continuity.currentOnlineUser.getusername();
-        String postID = post.getPostId();
+        String userId = Continuity.currentOnlineUser !=null ?Continuity.currentOnlineUser.getusername():null;
+        String postID = post != null ? post.getPostId() : null;
 
+        if (postID == null){
+            Log.e("PostAdapter", "User ID or Post ID is null!");
+            Toast.makeText(holder.itemView.getContext(), "Invalid data encountered", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
 
             holder.author.setText(post.getAuthor());
