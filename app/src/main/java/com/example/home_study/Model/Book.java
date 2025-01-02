@@ -2,11 +2,12 @@ package com.example.home_study.Model;
 
 public class Book {
 
-    private String bookTitle, bookGrade, bookImage;
+    private String bookTitle, bookGrade;
+    private int bookImage;
     public Book() {
     }
 
-    public Book(String bookTitle, String bookGrade, String bookImage) {
+    public Book(String bookTitle, String bookGrade, int bookImage) {
         this.bookTitle = bookTitle;
         this.bookGrade = bookGrade;
         this.bookImage = bookImage;
@@ -28,11 +29,11 @@ public class Book {
         this.bookGrade = bookGrade;
     }
 
-    public String getBookImage() {
+    public int getBookImage() {
         return bookImage;
     }
 
-    public void setBookImage(String bookImage) {
+    public void setBookImage(int bookImage) {
         this.bookImage = bookImage;
     }
 }
