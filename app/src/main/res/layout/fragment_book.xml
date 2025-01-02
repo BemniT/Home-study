@@ -8,7 +8,7 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="20dp"
+
                 >
                 <TextView
                     android:id="@+id/textBook"
@@ -20,6 +20,8 @@
                     android:text="Text Books"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginLeft="20dp"
                     />
 
                 <TextView
@@ -32,6 +34,7 @@
                     android:layout_marginTop="10dp"
                     android:textSize="12sp"
                     android:textStyle="bold"
+                    android:layout_marginLeft="20dp"
                     />
 
 
@@ -44,6 +47,7 @@
         app:layout_constraintTop_toBottomOf="@+id/text_des"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+
         android:layout_marginTop="20dp"
         />
 
