@@ -72,14 +72,13 @@ public class BookFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_book, container, false);
         bookRecycler = view.findViewById(R.id.bookRecyclerView);
         bookRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        bookRecycler.setHasFixedSize(true);
         bookList = new ArrayList<>();
-        BookAdapter bookAdapter = new BookAdapter(bookList, getActivity());
 
         loadBooks();
 
+        BookAdapter bookAdapter = new BookAdapter(bookList, getActivity());
         bookRecycler.setAdapter(bookAdapter);
-
-        bookRecycler.setHasFixedSize(true);
 
         return view;
     }
