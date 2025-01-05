@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.home_study.ContentActivity;
 import com.example.home_study.Model.Book;
 import com.example.home_study.R;
@@ -43,14 +45,18 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull BookAdapter.ViewHolder holder, int position) {
 
         Book book = bookList.get(position);
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = 4;
-        Bitmap bitmap = BitmapFactory.decodeResource(bookContext.getResources(), book.getBookImage(), options);
 
-        holder.bookImage.setImageBitmap(bitmap);
+
+        Glide.with(bookContext)
+                .load(book.getBookImage())
+//                .placeholder(R.drawable.placeholder)
+//                .error(R.drawable.error_image)
+                .into(holder.bookImage);
+
         holder.bookTitle.setText(book.getBookTitle());
         holder.bookGrade.setText(book.getBookGrade());
 
+        Log.d("Book", "Book Title: "+ book.getBookTitle());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

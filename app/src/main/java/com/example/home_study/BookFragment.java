@@ -73,7 +73,19 @@ public class BookFragment extends Fragment {
         bookRecycler = view.findViewById(R.id.bookRecyclerView);
         bookRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
         bookList = new ArrayList<>();
+        BookAdapter bookAdapter = new BookAdapter(bookList, getActivity());
 
+        loadBooks();
+
+        bookRecycler.setAdapter(bookAdapter);
+
+        bookRecycler.setHasFixedSize(true);
+
+        return view;
+    }
+
+    private void loadBooks()
+    {
         bookList.add(new Book("Biology", "Grade 9", R.drawable.biology));
         bookList.add(new Book("Mathematics", "Grade 9", R.drawable.math));
         bookList.add(new Book("Physics", "Grade 9", R.drawable.biology));
@@ -81,11 +93,6 @@ public class BookFragment extends Fragment {
         bookList.add(new Book("Chemistry", "Grade 9", R.drawable.biology));
         bookList.add(new Book("Chemistry", "Grade 9", R.drawable.biology));
 
-
-        BookAdapter bookAdapter = new BookAdapter(bookList, getActivity());
-
-        bookRecycler.setAdapter(bookAdapter);
-        return view;
     }
 
 }
