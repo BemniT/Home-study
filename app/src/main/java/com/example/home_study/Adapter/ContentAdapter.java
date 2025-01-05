@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.home_study.Model.Content;
+import com.example.home_study.PdfViewerActivity;
 import com.example.home_study.R;
 import com.squareup.picasso.Picasso;
 
@@ -26,11 +27,15 @@ public class ContentAdapter extends RecyclerView.Adapter<ContentAdapter.ViewHold
 
 
     private List<Content> contentList;
-    private Activity contentActivity;
+    private OnContentSelectedListener listener;
 
-    public ContentAdapter(List<Content> contentList, Activity contentActivity) {
+    public interface OnContentSelectedListener {
+        void onContentSelected(Content content);
+    }
+
+    public ContentAdapter(List<Content> contentList, OnContentSelectedListener listener) {
         this.contentList = contentList;
-        this.contentActivity = contentActivity;
+        this.listener = listener;
     }
 
     @NonNull
@@ -55,8 +60,10 @@ public class ContentAdapter extends RecyclerView.Adapter<ContentAdapter.ViewHold
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Intent intent =  new Intent(contentActivity, )
-
+                if (listener != null)
+                {
+                    listener.onContentSelected(content);
+                }
             }
         });
 
