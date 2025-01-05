@@ -14,14 +14,6 @@ public class Content {
     }
 
 
-    public String getContentImage() {
-        return contentImage;
-    }
-
-    public void setContentImage(String contentImage) {
-        this.contentImage = contentImage;
-    }
-
     public String getContentName() {
         return contentName;
     }
@@ -44,5 +36,13 @@ public class Content {
 
     public void setPdfUrl(String pdfUrl) {
         this.pdfUrl = pdfUrl;
+    }
+
+    public String getContentImage() {
+        return contentImage;
+    }
+
+    public void setContentImage(String contentImage) {
+        this.contentImage = contentImage;
     }
 }

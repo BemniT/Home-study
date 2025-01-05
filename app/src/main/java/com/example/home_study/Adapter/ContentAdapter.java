@@ -1,7 +1,10 @@
 package com.example.home_study.Adapter;
 
+import static androidx.fragment.app.FragmentManager.TAG;
+
 import android.app.Activity;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.home_study.Model.Content;
 import com.example.home_study.R;
+import com.squareup.picasso.Picasso;
 
 import org.w3c.dom.Text;
 
@@ -44,12 +48,15 @@ public class ContentAdapter extends RecyclerView.Adapter<ContentAdapter.ViewHold
 
         holder.chapter.setText(content.getContentName());
         holder.chapterSubject.setText(content.getContentSubject());
+        Picasso.get().load(content.getContentImage()).placeholder(R.drawable.biology).into(holder.contentImage);
 
+        Log.d("Content", "ContentName: "+ content.getContentName());
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent =  new Intent(contentActivity, )
+//                Intent intent =  new Intent(contentActivity, )
+
             }
         });
 
