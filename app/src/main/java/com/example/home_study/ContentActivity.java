@@ -89,50 +89,59 @@ public class ContentActivity extends AppCompatActivity {
 
     private void downloadAndOpenPdf(String pdfUrl)
     {
-        new Thread(()->{
+        String fileName = pdfUrl.substring(pdfUrl.lastIndexOf("/") + 1);
+        File pdfFile = new File(getCacheDir(), fileName);
 
-            try {
-                URL url = new URL(pdfUrl);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.connect();
+        if (pdfFile.exists())
+        {
+            openPdfViewActivity(pdfFile);
+        }else {
+            new Thread(()->{
 
-                if (connection.getResponseCode() == HttpURLConnection.HTTP_OK)
-                {
-                    InputStream inputStream = connection.getInputStream();
+                try {
+                    URL url = new URL(pdfUrl);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.connect();
 
-                    File cacheDir = getCacheDir();
-                    File pdfFile = new File(cacheDir, "temp.pdf");
-                    FileOutputStream outputStream = new FileOutputStream(pdfFile);
-
-                    byte[] buffer = new byte[1024];
-                    int len;
-                    while((len = inputStream.read(buffer)) != -1)
+                    if (connection.getResponseCode() == HttpURLConnection.HTTP_OK)
                     {
-                        outputStream.write(buffer, 0, len);
+                        InputStream inputStream = connection.getInputStream();
+
+//                        File cacheDir = getCacheDir();
+//                        File pdfFile = new File(cacheDir, "temp.pdf");
+                        FileOutputStream outputStream = new FileOutputStream(pdfFile);
+
+                        byte[] buffer = new byte[1024];
+                        int len;
+                        while((len = inputStream.read(buffer)) != -1)
+                        {
+                            outputStream.write(buffer, 0, len);
+                        }
+
+                        outputStream.close();
+                        inputStream.close();
+
+                        runOnUiThread(()->{
+
+                            openPdfViewActivity(pdfFile);
+                        });
+                    }else {
+                        runOnUiThread(()->{
+                            Toast.makeText(this, "Failed to download PDF", Toast.LENGTH_SHORT).show();
+                        });
                     }
+                }catch (Exception e){
 
-                    outputStream.close();
-                    inputStream.close();
-
+                    Log.e("PDF download","error"+e.getMessage());
                     runOnUiThread(()->{
-
-                        openPdfViewActivity(pdfFile);
-                            });
-                }else {
-                    runOnUiThread(()->{
-                        Toast.makeText(this, "Failed to download PDF", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Error downloading PDF", Toast.LENGTH_SHORT).show();
                     });
+
                 }
-            }catch (Exception e){
 
-                Log.e("PDF download","error"+e.getMessage());
-                runOnUiThread(()->{
-                    Toast.makeText(this, "Error downloading PDF", Toast.LENGTH_SHORT).show();
-                });
+            }).start();
+        }
 
-            }
-
-        }).start();
     }
 
     private void openPdfViewActivity(File pdfFile) {

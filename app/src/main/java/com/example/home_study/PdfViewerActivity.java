@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.github.barteksc.pdfviewer.PDFView;
+import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
+import com.github.barteksc.pdfviewer.util.FitPolicy;
 
 import java.io.File;
 
@@ -26,8 +28,12 @@ public class PdfViewerActivity extends AppCompatActivity {
             if (filePath.exists()){
                 pdfView.fromFile(filePath)
                         .enableSwipe(true)
+                        .defaultPage(0)
                         .enableDoubletap(true)
                         .swipeHorizontal(false)
+                        .spacing(10)
+                        .scrollHandle(new DefaultScrollHandle(this))
+                        .pageFitPolicy(FitPolicy.WIDTH)
                         .load();
             }
         }
