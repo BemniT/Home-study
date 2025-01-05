@@ -41,12 +41,13 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 
+    implementation("com.github.barteksc:androidpdfviewer:3.1.0-beta.1")
 //    implementation ("com.github.User:Repo:Tag")
     implementation("com.tom-roush:pdfbox-android:2.0.27.0")
     implementation ("com.github.bumptech.glide:glide:4.15.1")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1")
 
-//    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.github.jitpack:gradle-simple:1.0")
     implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
 //    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
 //    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
