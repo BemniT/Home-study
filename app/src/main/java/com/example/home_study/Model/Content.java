@@ -2,15 +2,16 @@ package com.example.home_study.Model;
 
 public class Content {
 
-    private String contentName, contentSubject, pdfUrl, contentImage;
+    private String contentName, contentSubject, pdfUrl;
+    private int  contentImage;
     public Content() {
     }
 
-    public Content(String contentName, String contentSubject, String pdfUrl, String contentImage) {
+    public Content(String contentName, String contentSubject, int contentImage, String pdfUrl) {
         this.contentName = contentName;
         this.contentSubject = contentSubject;
-        this.pdfUrl = pdfUrl;
         this.contentImage = contentImage;
+        this.pdfUrl = pdfUrl;
     }
 
 
@@ -38,11 +39,11 @@ public class Content {
         this.pdfUrl = pdfUrl;
     }
 
-    public String getContentImage() {
+    public int getContentImage() {
         return contentImage;
     }
 
-    public void setContentImage(String contentImage) {
+    public void setContentImage(int contentImage) {
         this.contentImage = contentImage;
     }
 }

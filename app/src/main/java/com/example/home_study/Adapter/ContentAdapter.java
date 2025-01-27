@@ -14,6 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.home_study.Model.Content;
 import com.example.home_study.PdfViewerActivity;
 import com.example.home_study.R;
@@ -29,13 +30,16 @@ public class ContentAdapter extends RecyclerView.Adapter<ContentAdapter.ViewHold
     private List<Content> contentList;
     private OnContentSelectedListener listener;
 
+    private Activity contentActivity;
+
     public interface OnContentSelectedListener {
         void onContentSelected(Content content);
     }
 
-    public ContentAdapter(List<Content> contentList, OnContentSelectedListener listener) {
+    public ContentAdapter(List<Content> contentList, OnContentSelectedListener listener, Activity contentActivity) {
         this.contentList = contentList;
         this.listener = listener;
+        this.contentActivity = contentActivity;
     }
 
     @NonNull
@@ -53,7 +57,12 @@ public class ContentAdapter extends RecyclerView.Adapter<ContentAdapter.ViewHold
 
         holder.chapter.setText(content.getContentName());
         holder.chapterSubject.setText(content.getContentSubject());
-        Picasso.get().load(content.getContentImage()).placeholder(R.drawable.biology).into(holder.contentImage);
+        Glide.with(contentActivity)
+                .load(content.getContentImage())
+//                .placeholder(R.drawable.placeholder)
+//                .error(R.drawable.error_image)
+                .into(holder.contentImage);
+
 
         Log.d("Content", "ContentName: "+ content.getContentName());
 

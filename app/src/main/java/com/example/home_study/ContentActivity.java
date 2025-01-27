@@ -30,6 +30,7 @@ import java.util.List;
 
 public class ContentActivity extends AppCompatActivity {
 
+    private Content content;
     private ImageView back;
     private RecyclerView contentRecycler;
     private ContentAdapter contentAdapter;
@@ -46,45 +47,91 @@ public class ContentActivity extends AppCompatActivity {
         back = findViewById(R.id.backImage);
         back.setOnClickListener(v -> finish());
         contentRecycler.setLayoutManager(new LinearLayoutManager(this));
-        fetchChapters(bookTitle);
+
         contentRecycler = findViewById(R.id.contentRecycler);
         contentList = new ArrayList<>();
-        contentAdapter = new ContentAdapter(contentList, this::onContentSelected);
+        loadStaticChapters(bookTitle);
+        contentAdapter = new ContentAdapter(contentList, this::onContentSelected, this);
 
         contentRecycler.setAdapter(contentAdapter);
 
         Log.d("BookTitle", "Book: "+ bookTitle);
 
     }
-    private void fetchChapters(String chapter)
+
+    private void loadStaticChapters(String bookTitle)
     {
+        contentList.clear();
+
+        if (bookTitle.equals("Biology")) {
+            contentList.add(new Content("Introduction to Biology", "Biology", R.drawable.biology, null));
+            contentList.add(new Content("Cell Structure and Function", "Biology", R.drawable.biology, null));
+            contentList.add(new Content("Genetics", "Biology", R.drawable.biology, null));
+        } else if (bookTitle.equalsIgnoreCase("Physics")) {
+            contentList.add(new Content("Introduction to Physics", "Physics", R.drawable.physics, null));
+            contentList.add(new Content("Motion and Forces", "Physics", R.drawable.physics, null));
+            contentList.add(new Content("Energy and Work", "Physics", R.drawable.physics, null));
+        } else {
+//            contentList.add(new Content("Default Chapter 1", bookTitle, R.drawable.default_image, null));
+//            contentList.add(new Content("Default Chapter 2", bookTitle, R.drawable.default_image, null));
+        }
+
+        fetchChapters(bookTitle);
+
+    }
+    private void fetchChapters(String chapter) {
         DatabaseReference contentRe = FirebaseDatabase.getInstance().getReference()
                 .child("TextBooks")
-                .child(chapter).child("content");
+                .child(chapter)
+                .child("Content");
 
         contentRe.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                contentList.clear();
-                for (DataSnapshot dataSnapshot : snapshot.getChildren())
-                {
-                    Content content = dataSnapshot.getValue(Content.class);
-                    contentList.add(content);
+                if (snapshot.exists()) {
+                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                        String unitTitle = dataSnapshot.getKey(); // Chapter title
+                        String pdfUrl = dataSnapshot.child("pdfUrl").getValue(String.class); // PDF URL
+                        Log.e("Unit", "Title: " + unitTitle + " PDF URL: " + pdfUrl);
+
+                        // Match unitTitle with contentList
+                        boolean found = false;
+                        for (Content content : contentList) {
+                            if (unitTitle != null && content.getContentName().equalsIgnoreCase(unitTitle)) {
+                                content.setPdfUrl(pdfUrl); // Set PDF URL for the Content object
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if (!found) {
+                            // If no match, create a new Content and add it to the list
+                            contentList.add(new Content(unitTitle, chapter, R.drawable.math, pdfUrl));
+                        }
+                    }
+                    contentAdapter.notifyDataSetChanged(); // Notify adapter of data changes
+                } else {
+                    Log.e("Firebase", "No content found for chapter: " + chapter);
+                    Toast.makeText(ContentActivity.this, "No chapters available for " + chapter, Toast.LENGTH_SHORT).show();
                 }
-                contentAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
-                Toast.makeText(ContentActivity.this, "Failed to load Content: " + error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(ContentActivity.this, "Failed to load content: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+
     private void onContentSelected(Content content) {
         String pdfUrl = content.getPdfUrl();
-        downloadAndOpenPdf(pdfUrl);
+        if (pdfUrl != null){
+            downloadAndOpenPdf(pdfUrl);
+        }else {
+            Toast.makeText(this, "PDF not available for this chapter", Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     private void downloadAndOpenPdf(String pdfUrl)
@@ -109,7 +156,7 @@ public class ContentActivity extends AppCompatActivity {
 
 //                        File cacheDir = getCacheDir();
 //                        File pdfFile = new File(cacheDir, "temp.pdf");
-                        FileOutputStream outputStream = new FileOutputStream(pdfFile);
+                        FileOutputStream outputStream =  new FileOutputStream(pdfFile);
 
                         byte[] buffer = new byte[1024];
                         int len;
