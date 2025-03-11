@@ -1,6 +1,6 @@
 package com.example.home_study.Adapter;
 
-import static androidx.fragment.app.FragmentManager.TAG;
+
 
 import android.app.Activity;
 import android.content.Intent;
@@ -16,11 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.home_study.Model.Content;
-import com.example.home_study.PdfViewerActivity;
-import com.example.home_study.R;
-import com.squareup.picasso.Picasso;
 
-import org.w3c.dom.Text;
+import com.example.home_study.R;
 
 import java.util.List;
 
