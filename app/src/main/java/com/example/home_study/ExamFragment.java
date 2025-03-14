@@ -3,62 +3,52 @@ package com.example.home_study;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link ExamFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class ExamFragment extends Fragment {
+import com.example.home_study.Adapter.ExamAdapter;
+import com.example.home_study.Model.Book;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+import java.util.ArrayList;
+import java.util.List;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
-    public ExamFragment() {
-        // Required empty public constructor
-    }
+ public class ExamFragment extends Fragment {
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ExamFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ExamFragment newInstance(String param1, String param2) {
-        ExamFragment fragment = new ExamFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
+    private RecyclerView examRecycler;
+     private List bookList;
+    private ExamAdapter examAdapter;
+    private String selectedSubject, selectedChapter;
+     public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                              Bundle savedInstanceState) {
+         View view = inflater.inflate(R.layout.fragment_exam, container, false);
+         examRecycler = view.findViewById(R.id.examRecyclerView);
+         examRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+         examRecycler.setHasFixedSize(true);
+         bookList = new ArrayList<>();
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_exam, container, false);
-    }
+         loadBooks();
+
+         ExamAdapter examAdapter = new ExamAdapter(bookList, getActivity());
+         examRecycler.setAdapter(examAdapter);
+
+         return view;
+     }
+
+     private void loadBooks()
+     {
+         bookList.add(new Book("English", "Grade 9", R.drawable.english));
+         bookList.add(new Book("Mathematics", "Grade 9", R.drawable.math));
+         bookList.add(new Book("Physics", "Grade 9", R.drawable.physics));
+         bookList.add(new Book("Biology", "Grade 9", R.drawable.biology));
+         bookList.add(new Book("Chemistry", "Grade 9", R.drawable.chemistry));
+         bookList.add(new Book("Geography", "Grade 9", R.drawable.geography));
+         bookList.add(new Book("History", "Grade 9", R.drawable.history));
+
+     }
 }
