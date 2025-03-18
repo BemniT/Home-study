@@ -72,8 +72,6 @@ public class ExamContentActivity extends AppCompatActivity {
 
     private void onExamContentSelected(ExamContent examContent) {
 
-        Toast.makeText(this, examContent.getContentName(), Toast.LENGTH_SHORT).show();
-
         Intent intent = new Intent(ExamContentActivity.this, ExamCenterActivity.class);
         intent.putExtra("chapter", examContent.getContentName());
         intent.putExtra("subject", examContent.getContentSubject());
