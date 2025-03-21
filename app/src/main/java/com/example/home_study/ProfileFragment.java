@@ -1,5 +1,6 @@
 package com.example.home_study;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -7,6 +8,12 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.example.home_study.Model.Account;
+import com.example.home_study.Prevalent.Continuity;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -23,6 +30,10 @@ public class ProfileFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private ImageView profilePic, editBtn;
+    private TextView userName, userEmail;
+
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -53,12 +64,34 @@ public class ProfileFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_profile, container, false);
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+
+        profilePic = view.findViewById(R.id.profilePic);
+        editBtn = view.findViewById(R.id.editProfile);
+        userName = view.findViewById(R.id.userName);
+        userEmail = view.findViewById(R.id.userEmail);
+
+
+        Glide.with(getContext()).load(Continuity.currentOnlineUser.getimageUrl())
+                .into(profilePic);
+        userName.setText(Continuity.currentOnlineUser.getName());
+        userEmail.setText(Continuity.currentOnlineUser.getEmail());
+
+        editBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent  = new Intent(getContext(), EditProfileActivity.class);
+                startActivity(intent);
+            }
+        });
+        return view;
     }
 }
