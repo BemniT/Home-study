@@ -48,15 +48,15 @@ public class ExamCenterActivity extends AppCompatActivity {
 
         chooses = findViewById(R.id.questionChoose);
 
-        
+
         selectedSubject = getIntent().getStringExtra("subject");
         selectedChapter = getIntent().getStringExtra("chapter");
-        
+
         questionList = new ArrayList<>();
 
         title.setText(selectedChapter);
         questionRef = FirebaseDatabase.getInstance().getReference().child("Exams")
-                        .child(selectedSubject).child(selectedChapter);
+                .child(selectedSubject).child(selectedChapter);
 
         fetchQuestions();
 
@@ -109,8 +109,7 @@ public class ExamCenterActivity extends AppCompatActivity {
 
                 if (selectedAnswer.equals(questions.getCorrectAnswer()))
                 {
-                   explanation.setText("✅ Correct! " + questions.getExplanation());
-//                            holder.explanation.setTextColor(R.color.Green);
+                    explanation.setText("✅ Correct! " + questions.getExplanation());
                 }else {
                     explanation.setText("❌ Incorrect! " + questions.getExplanation());
                 }
