@@ -69,6 +69,7 @@ public class ExamCenterActivity extends AppCompatActivity {
                 if (currentQuestionIndex < questionList.size() - 1){
                     currentQuestionIndex++;
                     displayQuestion();
+                    explanation.setText("Explanation");
                 }
             }
         });
@@ -79,11 +80,10 @@ public class ExamCenterActivity extends AppCompatActivity {
                 if (currentQuestionIndex > 0){
                     currentQuestionIndex--;
                     displayQuestion();
+                    explanation.setText("Explanation");
                 }
             }
         });
-
-
     }
 
     private void displayQuestion() {
@@ -92,7 +92,7 @@ public class ExamCenterActivity extends AppCompatActivity {
 
         ExamCenter questions = questionList.get(currentQuestionIndex);
         question.setText((currentQuestionIndex + 1) + ". " +questions.getQuestion());
-        questionCounter.setText("Question " + (currentQuestionIndex + 1) + " of " + questionList.size());
+        questionCounter.setText("Question" + " " + (currentQuestionIndex + 1) + " of " + questionList.size());
 
         chooses.removeAllViews();
         for (String option : questions.getOptions()){
