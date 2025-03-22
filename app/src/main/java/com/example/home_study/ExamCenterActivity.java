@@ -48,7 +48,6 @@ public class ExamCenterActivity extends AppCompatActivity {
 
         chooses = findViewById(R.id.questionChoose);
 
-
         selectedSubject = getIntent().getStringExtra("subject");
         selectedChapter = getIntent().getStringExtra("chapter");
 
@@ -115,8 +114,6 @@ public class ExamCenterActivity extends AppCompatActivity {
                 }
             }
         });
-
-
     }
 
     private void fetchQuestions() {
@@ -141,6 +138,7 @@ public class ExamCenterActivity extends AppCompatActivity {
                     nextBtn.setEnabled(false);
                 }
             }
+
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(ExamCenterActivity.this, "Failed to loaded questions", Toast.LENGTH_SHORT).show();
