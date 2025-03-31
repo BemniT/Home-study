@@ -236,11 +236,11 @@
                 android:layout_alignParentLeft="true"
                 app:cardCornerRadius="5dp"
                 android:layout_weight="1"
-                android:backgroundTintMode="screen"
                 android:layout_margin="2dp"
                 app:cardElevation="1dp"
                 >
                 <TextView
+                    android:id="@+id/classPointTxt"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:text="Class point"
@@ -248,6 +248,8 @@
                     android:padding="5dp"
                     android:layout_gravity="center"
                     android:gravity="center"
+                    android:background="@color/black_low_low"
+
                     />
             </androidx.cardview.widget.CardView>
 
@@ -269,6 +271,7 @@
                 app:cardElevation="1dp"
                 >
                 <TextView
+                    android:id="@+id/attendance"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
