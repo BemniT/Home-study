@@ -8,8 +8,11 @@ import android.os.Bundle;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
@@ -20,6 +23,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.home_study.Adapter.ExamContentAdapter;
+import com.example.home_study.Adapter.ExamContentAdapter;
+import com.example.home_study.Model.ExamContent;
+import com.example.home_study.Model.ExamContent;
 import com.example.home_study.Model.UserHelper;
 import com.example.home_study.Prevalent.Continuity;
 
@@ -34,7 +41,9 @@ import com.google.firebase.storage.StorageTask;
 import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -59,22 +68,18 @@ public class ProfileFragment extends Fragment {
     private StorageReference profilePictureRef;
 
     private ImageView profilePic, editBtn;
-    private TextView userName, userEmail;
+    private TextView userName, userEmail, attendance, classPoint ;
+
+    private RecyclerView listRecycler;
+    private List course;
+    private boolean isClassPointSelected = true;
+    private ExamContentAdapter examContentAdapter;
 
 
     public ProfileFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ProfileFragment.
-     */
-    // TODO: Rename and change types and number of parameters
     public static ProfileFragment newInstance(String param1, String param2) {
         ProfileFragment fragment = new ProfileFragment();
         Bundle args = new Bundle();
@@ -130,6 +135,44 @@ public class ProfileFragment extends Fragment {
         editBtn = view.findViewById(R.id.editProfile);
         userName = view.findViewById(R.id.userName);
         userEmail = view.findViewById(R.id.userEmail);
+        listRecycler = view.findViewById(R.id.subjectList);
+        attendance = view.findViewById(R.id.attendance);
+        classPoint = view.findViewById(R.id.classPointTxt);
+        
+        course = new ArrayList();
+        examContentAdapter = new ExamContentAdapter(course,this::onExamContentSelected , getActivity());
+        
+        listRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        listRecycler.setHasFixedSize(true);
+        listRecycler.setAdapter(examContentAdapter);
+        loadCourse();
+
+
+
+        classPoint.setOnClickListener(v -> {
+
+            if (!isClassPointSelected){
+                attendance.setBackgroundColor(ContextCompat.getColor(getContext(),R.color.white));
+                classPoint.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.black_low_low));
+                isClassPointSelected = true;
+                loadCourse();
+            }
+        });
+
+        attendance.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isClassPointSelected){
+                    attendance.setBackgroundColor(ContextCompat.getColor(getContext(),R.color.black_low_low));
+                    classPoint.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.white));
+                    isClassPointSelected = false;
+                    loadCourseAttendance();
+                }
+            }
+        });
+
+
+        
 
 
         Glide.with(getContext()).load(Continuity.currentOnlineUser.getimageUrl())
@@ -147,6 +190,48 @@ public class ProfileFragment extends Fragment {
         return view;
     }
 
+    private void onExamContentSelected(ExamContent examContent) {
+
+        Intent intent;
+        if (isClassPointSelected) {
+            intent = new Intent(getContext(), EditProfileActivity.class);
+            Toast.makeText(getContext(), "this is class point", Toast.LENGTH_SHORT).show();
+
+        } else {
+            intent = new Intent(getContext(), EditProfileActivity.class);
+            Toast.makeText(getContext(), "this is attendance", Toast.LENGTH_SHORT).show();
+        }
+        intent.putExtra("course_name", examContent.getContentSubject());
+        startActivity(intent);
+    }
+
+
+    private void loadCourse()
+    {
+        course.clear();
+        course.add(new ExamContent("English", "Score", R.drawable.english));
+        course.add(new ExamContent("Mathematics", "Score", R.drawable.math));
+        course.add(new ExamContent("Physics", "Score", R.drawable.physics));
+        course.add(new ExamContent("Biology", "Score", R.drawable.biology));
+        course.add(new ExamContent("Chemistry", "Score", R.drawable.chemistry));
+        course.add(new ExamContent("Geography", "Score", R.drawable.geography));
+        course.add(new ExamContent("History", "Score", R.drawable.history));
+        examContentAdapter.notifyDataSetChanged();
+
+    }
+
+    private void loadCourseAttendance()
+    {
+        course.clear();
+        course.add(new ExamContent("English", "Grade 9", R.drawable.english));
+        course.add(new ExamContent("Mathematics", "Grade 9", R.drawable.math));
+        course.add(new ExamContent("Physics", "Grade 9", R.drawable.physics));
+        course.add(new ExamContent("Biology", "Grade 9", R.drawable.biology));
+        course.add(new ExamContent("Chemistry", "Grade 9", R.drawable.chemistry));
+        course.add(new ExamContent("Geography", "Grade 9", R.drawable.geography));
+        course.add(new ExamContent("History", "Grade 9", R.drawable.history));
+        examContentAdapter.notifyDataSetChanged();
+    }
 
     private final ActivityResultLauncher<Intent> photoLibraryLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
