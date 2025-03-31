@@ -7,14 +7,45 @@
     tools:context=".ProfileFragment"
     android:background="@color/black_low_low"
     >
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:fitsSystemWindows="true"
+        >
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar_setting"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+
+            />
+    </com.google.android.material.appbar.AppBarLayout>
 <ScrollView
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:scrollbars="none"
+    android:overScrollMode="always"
+    >
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        >
 
+        <com.canhub.cropper.CropImageView
+            android:id="@+id/cropImageView"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:layout_weight="1"
+            android:src="@drawable/profile"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
 
         <FrameLayout
             android:id="@+id/profileContainer"
@@ -46,6 +77,8 @@
                 android:backgroundTint="@color/white"
                 app:civ_circle_background_color="@color/black_low_low"
                 />
+
+
 
         </FrameLayout>
 
@@ -181,14 +214,85 @@
             </LinearLayout>
 
         </LinearLayout>
+        <LinearLayout
+            android:id="@+id/cardContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/linearLayout"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginLeft="24dp"
+            android:layout_marginRight="24dp"
+            android:layout_marginTop="10dp"
+            android:paddingVertical="7dp"
+            android:paddingHorizontal="7dp"
+            android:background="@color/white"
+            >
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.cardview.widget.CardView
+                android:id="@+id/classPoint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                app:cardCornerRadius="5dp"
+                android:layout_weight="1"
+                android:backgroundTintMode="screen"
+                android:layout_margin="2dp"
+                app:cardElevation="1dp"
+                >
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Class point"
+                    android:textSize="14sp"
+                    android:padding="5dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    />
+            </androidx.cardview.widget.CardView>
+
+            <Space
+                android:layout_width="6dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                />
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/classAttend"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:padding="10dp"
+                app:cardCornerRadius="5dp"
+                android:layout_weight="1"
+                android:layout_margin="2dp"
+                app:cardElevation="1dp"
+                >
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:background="@color/white"
+                    android:gravity="center"
+                    android:padding="5dp"
+                    android:text="Attendance"
+                    android:textSize="14sp"
+                    />
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/subjectList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/cardContainer"
+            android:layout_marginTop="10dp"
+            />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 
 
-</ScrollView>
-
-
-
+    </ScrollView>
 </FrameLayout>
