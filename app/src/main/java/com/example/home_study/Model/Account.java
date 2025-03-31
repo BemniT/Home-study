@@ -1,18 +1,27 @@
 package com.example.home_study.Model;
 public class Account
 {
-    private String name, password, username, image, address;
+    private String name, password, username, imageUrl, address, email;
 
     public Account()
     {
     }
 
-    public Account(String name, String password, String username, String image, String address) {
+    public Account(String name, String password, String username, String imageUrl, String address, String email) {
         this.name = name;
         this.password = password;
         this.username = username;
-        this.image = image;
+        this.imageUrl = imageUrl;
         this.address = address;
+        this.email = email;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getName() {
@@ -39,12 +48,12 @@ public class Account
         this.username = username;
     }
 
-    public String getImage() {
-        return image;
+    public String getimageUrl() {
+        return imageUrl;
     }
 
-    public void setImage(String image) {
-        this.image = image;
+    public void setimageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getAddress() {
