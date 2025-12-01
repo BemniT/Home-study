@@ -1,14 +1,52 @@
 {
   "project_info": {
-    "project_number": "964518277159",
-    "firebase_url": "https://bale-house-rental-default-rtdb.firebaseio.com",
-    "project_id": "bale-house-rental",
-    "storage_bucket": "bale-house-rental.appspot.com"
+    "project_number": "1041052914588",
+    "firebase_url": "https://ethiostore-17d9f-default-rtdb.firebaseio.com",
+    "project_id": "ethiostore-17d9f",
+    "storage_bucket": "ethiostore-17d9f.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:964518277159:android:ef8812d8f6419dd3961e02",
+        "mobilesdk_app_id": "1:1041052914588:android:b7df9e2928b6dd5b266e59",
+        "android_client_info": {
+          "package_name": "com.example.adminplaystore"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCizXd7VFgbQ29-oDnegBLDPRDNiEdrKP8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1041052914588:android:dcd2751d2217c184266e59",
+        "android_client_info": {
+          "package_name": "com.example.ethiostore"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCizXd7VFgbQ29-oDnegBLDPRDNiEdrKP8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1041052914588:android:ee16f129b8c83225266e59",
         "android_client_info": {
           "package_name": "com.example.home_study"
         }
@@ -16,7 +54,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCLua9ESW-Oim9877bu9qxbUl0rJLHUp88"
+          "current_key": "AIzaSyCizXd7VFgbQ29-oDnegBLDPRDNiEdrKP8"
         }
       ],
       "services": {

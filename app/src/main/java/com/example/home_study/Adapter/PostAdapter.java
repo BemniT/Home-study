@@ -46,16 +46,56 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     @Override
     public void onBindViewHolder(@NonNull PostAdapter.PostViewHolder holder, int position) {
         Post post = postList.get(position);
-        String userId = Continuity.currentOnlineUser.getusername();
+        String userId = Continuity.userId;
         String postID = post.getPostId();
 
 
 
-            holder.author.setText(post.getAuthor());
+            DatabaseReference adminUserRef = FirebaseDatabase.getInstance().getReference()
+                    .child("Users");
+            DatabaseReference adminRef = FirebaseDatabase.getInstance().getReference()
+                            .child("School_Admins")
+                    .child(post.getAdminId());
+            adminRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (!snapshot.exists()) return;
+                    String adminUserId = snapshot.child("userId").getValue(String.class);
+
+                    if (adminUserId != null){
+                        adminUserRef.child(adminUserId)
+                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        if (!snapshot.exists()) return;
+
+                                        String adminName = snapshot.child("name").getValue(String.class);
+                                        String adminProfileImage = snapshot.child("profileImage").getValue(String.class);
+
+                                        holder.author.setText(adminName);
+                                        Picasso.get().load(adminProfileImage).placeholder(R.drawable.profile)
+                                                .into(holder.authorProfile);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+//            holder.author.setText(post.getTime());
             holder.postDate.setText(post.getTime());
             holder.postMessage.setText(post.getMessage());
-            Picasso.get().load(post.getImageUrl()).placeholder(R.drawable.profile).into(holder.postImage);
-            Picasso.get().load(post.getAuthorProfile()).placeholder(R.drawable.profile).into(holder.authorProfile);
+            Picasso.get().load(post.getPostImage()).placeholder(R.drawable.profile).into(holder.postImage);
+//            Picasso.get().load(post.getPostImage()).placeholder(R.drawable.profile).into(holder.authorProfile);
             holder.likeCount.setText(post.getLikes()+"");
 
             DatabaseReference userLikesRef = FirebaseDatabase.getInstance().getReference()
@@ -162,8 +202,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             });
 
         }
-
-
 
 
     @Override

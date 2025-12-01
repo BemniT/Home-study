@@ -175,10 +175,10 @@ public class ProfileFragment extends Fragment {
         
 
 
-        Glide.with(getContext()).load(Continuity.currentOnlineUser.getimageUrl())
-                .into(profilePic);
-        userName.setText(Continuity.currentOnlineUser.getName());
-        userEmail.setText(Continuity.currentOnlineUser.getEmail());
+//        Glide.with(getContext()).load(Continuity.currentOnlineUser.getimageUrl())
+//                .into(profilePic);
+//        userName.setText(Continuity.currentOnlineUser.getName());
+//        userEmail.setText(Continuity.currentOnlineUser.getEmail());
 
         editBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -264,7 +264,7 @@ public class ProfileFragment extends Fragment {
     private void uploadImage() {
         if (uriContent != null) {  // Ensure that uriContent is not null before uploading
             final StorageReference fileRef = profilePictureRef
-                    .child(Continuity.currentOnlineUser.getusername() + ".jpg");
+                    .child(Continuity.currentOnlineUser.getUsername() + ".jpg");
 
             uploadTask = fileRef.putFile(uriContent);
 
@@ -288,13 +288,13 @@ public class ProfileFragment extends Fragment {
                         HashMap<String, Object> userData = new HashMap<>();
                         userData.put("imageUrl", myUri);
 
-                        ref.child(Continuity.currentOnlineUser.getusername()).updateChildren(userData)
+                        ref.child(Continuity.currentOnlineUser.getUsername()).updateChildren(userData)
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
                                             Toast.makeText(getContext(), "Profile Updated", Toast.LENGTH_SHORT).show();
-                                            Continuity.currentOnlineUser.setimageUrl(myUri);
+                                            Continuity.currentOnlineUser.setImageUrl(myUri);
                                         } else {
                                             Toast.makeText(getContext(), "Error occurred, try again", Toast.LENGTH_SHORT).show();
                                         }

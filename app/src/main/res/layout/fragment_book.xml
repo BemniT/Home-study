@@ -38,7 +38,6 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 android:layout_marginTop="5dp"
                 android:textSize="18sp"
-
                 android:layout_marginLeft="20dp" />
 
             <androidx.recyclerview.widget.RecyclerView

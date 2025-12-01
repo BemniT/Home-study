@@ -3,35 +3,25 @@ package com.example.home_study.Model;
 public class Post {
 
     private String postId;
-    private String authorProfile;
-    private String author;
+
+    private String adminId;
     private String time;
     private String message;
-    private String imageUrl;
+    private String postImage;
     private int likes;
     private int comments;
 
     public Post() {
     }
 
-
-
-    public Post(String author, String time, String message, String imageUrl, int likes, int comments, String authorProfile, String postId) {
-        this.author = author;
+    public Post(String postId, String adminId, String time, String postImage, String message, int likes, int comments) {
+        this.postId = postId;
+        this.adminId = adminId;
         this.time = time;
+        this.postImage = postImage;
         this.message = message;
-        this.imageUrl = imageUrl;
         this.likes = likes;
         this.comments = comments;
-        this.authorProfile = authorProfile;
-        this.postId = postId;
-    }
-    public String getAuthorProfile() {
-        return authorProfile;
-    }
-
-    public void setAuthorProfile(String authorProfile) {
-        this.authorProfile = authorProfile;
     }
 
     public String getPostId() {
@@ -42,12 +32,12 @@ public class Post {
         this.postId = postId;
     }
 
-    public String getAuthor() {
-        return author;
+    public String getAdminId() {
+        return adminId;
     }
 
-    public void setAuthor(String author) {
-        this.author = author;
+    public void setAdminId(String adminId) {
+        this.adminId = adminId;
     }
 
     public String getTime() {
@@ -66,12 +56,12 @@ public class Post {
         this.message = message;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public String getPostImage() {
+        return postImage;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setPostImage(String postImage) {
+        this.postImage = postImage;
     }
 
     public int getLikes() {
