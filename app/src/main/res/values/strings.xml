@@ -16,4 +16,5 @@
     <string name="book_title">Book Title</string>
     <string name="grade">Grade</string>
     <string name="book_icon">Book Icon</string>
+    <string name="list_teachers">Your Teachers</string>
 </resources>

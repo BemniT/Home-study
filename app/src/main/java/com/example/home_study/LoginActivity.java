@@ -19,6 +19,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Objects;
+
 import io.paperdb.Paper;
 
 public class LoginActivity extends AppCompatActivity {
@@ -96,14 +98,25 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
+
                         if(!snapshot.exists()){
                             loadingBar.dismiss();
                             Toast.makeText(LoginActivity.this, "User not found", Toast.LENGTH_SHORT).show();
                             return;
                         }
 
+
                         DataSnapshot userSnap = snapshot.getChildren().iterator().next();
 
+                        // checking the role of the user
+                        String role = userSnap.child("role").getValue(String.class);
+                        if (!"student".equals(role)){
+                            loadingBar.dismiss();
+                            Toast.makeText(LoginActivity.this, "You're not a student", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        //mapping the users attributes to the account class
                         Account account = userSnap.getValue(Account.class);
 
                         if(account == null){

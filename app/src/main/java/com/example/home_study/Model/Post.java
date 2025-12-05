@@ -7,21 +7,30 @@ public class Post {
     private String adminId;
     private String time;
     private String message;
-    private String postImage;
+    private String postUrl;
     private int likes;
-    private int comments;
+    private int likeCount;
+//    private int comments;
 
     public Post() {
     }
 
-    public Post(String postId, String adminId, String time, String postImage, String message, int likes, int comments) {
+    public Post(String postId, String adminId, String time, String postUrl, String message,int likeCount, int likes) {
         this.postId = postId;
         this.adminId = adminId;
         this.time = time;
-        this.postImage = postImage;
+        this.postUrl = postUrl;
         this.message = message;
-        this.likes = likes;
-        this.comments = comments;
+        this.likeCount = likeCount;
+//        this.comments = comments;
+    }
+
+    public int getLikeCount() {
+        return likeCount;
+    }
+
+    public void setLikeCount(int likeCount) {
+        this.likeCount = likeCount;
     }
 
     public String getPostId() {
@@ -56,27 +65,12 @@ public class Post {
         this.message = message;
     }
 
-    public String getPostImage() {
-        return postImage;
+
+    public String getPostUrl() {
+        return postUrl;
     }
 
-    public void setPostImage(String postImage) {
-        this.postImage = postImage;
-    }
-
-    public int getLikes() {
-        return likes;
-    }
-
-    public void setLikes(int likes) {
-        this.likes = likes;
-    }
-
-    public int getComments() {
-        return comments;
-    }
-
-    public void setComments(int comments) {
-        this.comments = comments;
+    public void setPostUrl(String postUrl) {
+        this.postUrl = postUrl;
     }
 }

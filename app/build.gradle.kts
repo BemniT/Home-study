@@ -34,10 +34,10 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("com.google.android.material:material:1.13.0")
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
-    implementation("com.google.firebase:firebase-database:22.0.1")
-    implementation("com.google.firebase:firebase-firestore:26.0.2")
+    // Refresher
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("com.google.firebase:firebase-storage:22.0.1")
+
+    implementation("androidx.activity:activity:1.8.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
@@ -48,12 +48,22 @@ dependencies {
     implementation ("com.github.bumptech.glide:glide:5.0.5")
     annotationProcessor ("com.github.bumptech.glide:compiler:5.0.5")
 
+    //    For responsiveness
+    implementation("com.intuit.sdp:sdp-android:1.0.6")
+    implementation("com.intuit.ssp:ssp-android:1.0.6")
+
     implementation("com.github.jitpack:gradle-simple:1.0")
     implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
 //    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
 //    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
 //    implementation("androidx.room:room-compiler-processing-testing:2.6.1")
 //    implementation ("com.firebaseui:firebase-ui-database:8.0.2")
+
+    // Firebase Dependency
+    implementation ("com.google.firebase:firebase-core:21.1.1")
+    implementation("com.google.firebase:firebase-database:22.0.1")
+    implementation("com.google.firebase:firebase-firestore:26.0.2")
+    implementation("com.google.firebase:firebase-storage:22.0.1")
 //    implementation ("com.google.firebase:firebase-database:20.3.0")
 //    implementation ("com.google.firebase:firebase-storage:20.3.0")
     implementation ("com.google.firebase:firebase-analytics")
@@ -66,6 +76,5 @@ dependencies {
     implementation("com.vanniktech:android-image-cropper:4.6.0")
     implementation ("com.github.yalantis:ucrop:2.2.6")
 
-    implementation ("com.google.firebase:firebase-core:21.1.1")
 
 }

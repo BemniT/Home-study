@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:layout_marginBottom="16dp">
+    >
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -88,7 +88,7 @@
             android:id="@+id/postComment"
             android:layout_width="23dp"
             android:layout_height="23dp"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="30dp"
             android:layout_marginTop="2dp"
             android:contentDescription="@string/like"
             android:src="@drawable/comment2" />
@@ -124,13 +124,7 @@
              android:textAlignment="center"
              android:textSize="12sp" />
 
-         <TextView
-             android:id="@+id/likeText"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:text="Likes"
-             android:layout_marginStart="4dp"
-             android:textSize="14dp" />
+
      </LinearLayout>
 
 

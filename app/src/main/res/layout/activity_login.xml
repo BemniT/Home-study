@@ -4,11 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:overScrollMode="never"
+    android:scrollbars="none"
     tools:context=".LoginActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingBottom="20dp"
         >
 
     <ImageView
@@ -32,12 +35,9 @@
             app:layout_constraintRight_toRightOf="parent"
             android:text="@string/letStart"
             android:textColor="@color/black"
-            android:layout_below="@+id/app_logo"
             android:textSize="40sp"
             android:layout_marginTop="-20dp"
             android:fontFamily="@font/sansita_bold_italic"
-
-
             />
 
         <TextView
@@ -49,22 +49,15 @@
             app:layout_constraintRight_toRightOf="parent"
             android:text="@string/secondLetStart"
             android:textColor="@color/black"
-            android:layout_below="@+id/letsStart"
             android:fontFamily="@font/risque_regular"
             android:textSize="13sp"
-            android:layout_centerHorizontal="true"
             />
-
-
-
-
 
         <EditText
             android:id="@+id/login_phonenumber"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:background="@drawable/bar2"
-            android:layout_below="@+id/app_logo"
             android:layout_marginLeft="80dp"
             android:layout_marginRight="50dp"
             android:layout_marginTop="50dp"
@@ -73,7 +66,6 @@
             app:layout_constraintTop_toBottomOf="@id/describe"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-
             android:textSize="17sp"
 
             />
@@ -82,8 +74,6 @@
             android:id="@+id/userImg"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_centerHorizontal="true"
-            android:layout_below="@id/letsStart"
             app:layout_goneMarginRight="10dp"
             android:layout_marginTop="46dp"
             android:layout_marginLeft="75dp"
@@ -93,35 +83,26 @@
             app:layout_constraintLeft_toLeftOf="parent"
             />
 
-
         <EditText
             android:id="@+id/login_password"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_below="@+id/login_phonenumber"
             android:layout_marginLeft="80dp"
             android:layout_marginRight="50dp"
             android:layout_marginTop="45dp"
             android:inputType="textPassword"
             android:paddingLeft="35dp"
             android:hint="@string/password"
-
             android:background="@drawable/bar2"
-
             app:layout_constraintTop_toBottomOf="@id/login_phonenumber"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-
             android:textSize="17sp"
-
-
             />
 
         <ImageView
             android:layout_width="55dp"
             android:layout_height="55dp"
-            android:layout_centerHorizontal="true"
-            android:layout_below="@id/login_phonenumber"
             android:layout_marginTop="32dp"
             android:layout_marginLeft="75dp"
             android:src="@drawable/password"
@@ -129,7 +110,6 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@id/userImg"
             />
-
 
 
     <Button
@@ -150,8 +130,6 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         />
-
-
 
         <LinearLayout
             android:id="@+id/linear_layout1"

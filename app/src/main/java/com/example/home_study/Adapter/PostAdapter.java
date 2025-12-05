@@ -8,6 +8,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.home_study.Model.Post;
@@ -18,6 +19,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
@@ -50,7 +53,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         String postID = post.getPostId();
 
 
-
+// To locate the admin of the school from the user node
             DatabaseReference adminUserRef = FirebaseDatabase.getInstance().getReference()
                     .child("Users");
             DatabaseReference adminRef = FirebaseDatabase.getInstance().getReference()
@@ -67,7 +70,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                                 .addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        if (!snapshot.exists()) return;
+                                         if (!snapshot.exists()) return;
 
                                         String adminName = snapshot.child("name").getValue(String.class);
                                         String adminProfileImage = snapshot.child("profileImage").getValue(String.class);
@@ -91,110 +94,92 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
                 }
             });
-//            holder.author.setText(post.getTime());
-            holder.postDate.setText(post.getTime());
-            holder.postMessage.setText(post.getMessage());
-            Picasso.get().load(post.getPostImage()).placeholder(R.drawable.profile).into(holder.postImage);
-//            Picasso.get().load(post.getPostImage()).placeholder(R.drawable.profile).into(holder.authorProfile);
-            holder.likeCount.setText(post.getLikes()+"");
 
+            //to save the liked post on the respective user on there user node
             DatabaseReference userLikesRef = FirebaseDatabase.getInstance().getReference()
                     .child("Users")
                     .child(userId)
-                    .child("liked");
+                    .child("likedPosts")
+                    .child(post.getPostId());
 
-            DatabaseReference postLikesRef = FirebaseDatabase.getInstance().getReference()
+            //to save the number of likes of that post
+            DatabaseReference postLikeCountRef = FirebaseDatabase.getInstance().getReference()
                     .child("Posts")
                     .child(postID)
-                    .child("likes");
+                    .child("likeCount");
+            //on the respective post to save the user Id
+            DatabaseReference postLikedRef = FirebaseDatabase.getInstance().getReference().child("Posts")
+                    .child(post.getPostId())
+                    .child("likes")
+                    .child(userId);
 
-//        check if the user like the post
-            userLikesRef.child(postID).addListenerForSingleValueEvent(new ValueEventListener() {
+        userLikesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()){
+                    holder.postLikeIcon.setImageResource(R.drawable.likefill);
+                }else{
+                    holder.postLikeIcon.setImageResource(R.drawable.like);
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+
+            postLikeCountRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists())
-                    {
-                        holder.postLikeIcon.setImageResource(R.drawable.likefill);
-                    }
-                    else {
-                        holder.postLikeIcon.setImageResource(R.drawable.like);
-                    }
+                    Integer count = snapshot.getValue(Integer.class);
+                    holder.likeCount.setText((count == null ? 0 : count)+ " Likes");
                 }
+
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-
                 }
             });
 
+            //Check if hte user liked ot not
 
 
-
+            //Liking and disliking logic
             holder.postLikeIcon.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
-                    userLikesRef.child(postID).addListenerForSingleValueEvent(new ValueEventListener() {
+// Like and dislike logic the add and erase the user Id from the post likes node and post ID from the users node
+                    userLikesRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            boolean hasLiked = snapshot.exists();
 
-                            if (snapshot.exists()) {
-                                userLikesRef.child(postID).removeValue();
-                                postLikesRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        if (snapshot.exists()) {
-                                            int currentLikes = snapshot.getValue(Integer.class);
-                                            postLikesRef.setValue(currentLikes - 1);
-                                            holder.likeCount.setText(String.valueOf(currentLikes - 1));
-                                            holder.postLikeIcon.setImageResource(R.drawable.like);
-                                        } else {
-                                            int currentLikes = snapshot.getValue(Integer.class);
-                                            postLikesRef.setValue(currentLikes + 1);
-                                            holder.likeCount.setText(String.valueOf(currentLikes + 1));
-                                            holder.postLikeIcon.setImageResource(R.drawable.likefill);
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
-                            }else {
-
-                                userLikesRef.child(postID).setValue(true);
-                                postLikesRef.child(postID).addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        if (snapshot.exists()) {
-                                            int currentLikes = snapshot.getValue(Integer.class);
-                                            postLikesRef.setValue(currentLikes + 1);
-                                            holder.likeCount.setText(String.valueOf(currentLikes + 1));
-                                            holder.postLikeIcon.setImageResource(R.drawable.likefill);
-                                        } else {
-                                            postLikesRef.setValue(1);
-                                            holder.likeCount.setText("1");
-                                            holder.postLikeIcon.setImageResource(R.drawable.likefill);
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
+                            if (hasLiked){
+                                //unlike
+                                holder.postLikeIcon.setImageResource(R.drawable.like);
+                                userLikesRef.removeValue();
+                                postLikedRef.removeValue();
+                                updateLikeCount(postLikeCountRef,-1);
+                            }else{
+                                holder.postLikeIcon.setImageResource(R.drawable.likefill);
+                                userLikesRef.setValue(true);
+                                postLikedRef.setValue(true);
+                                updateLikeCount(postLikeCountRef, 1);
                             }
                         }
+
                         @Override
-                        public void onCancelled (@NonNull DatabaseError error){
-
-                        }
-
+                        public void onCancelled(@NonNull DatabaseError error) {
+        }
                     });
-
                 }
             });
-            holder.postComment.setOnClickListener(new View.OnClickListener() {
+
+        holder.postDate.setText(post.getTime());
+        holder.postMessage.setText(post.getMessage());
+        Picasso.get().load(post.getPostUrl()).placeholder(R.drawable.profile).into(holder.postImage);
+//        holder.likeCount.setText(post.getLikeCount() + " Likes");
+
+        holder.postComment.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Toast.makeText(v.getContext(), "Comment Unavailable", Toast.LENGTH_SHORT).show();
@@ -202,6 +187,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             });
 
         }
+
+
 
 
     @Override
@@ -231,5 +218,23 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
 
         }
+    }
+
+    private void updateLikeCount(DatabaseReference ref, int i) {
+        ref.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                Integer current = currentData.getValue(Integer.class);
+                if (current == null) current= 0;
+                currentData.setValue(Math.max(0, current + i));
+                return Transaction.success(currentData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot snapshot) {
+            }
+        });
+
     }
 }
