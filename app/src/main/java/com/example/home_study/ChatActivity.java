@@ -1,24 +1,189 @@
 package com.example.home_study;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.ProgressBar;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.home_study.Adapter.Chat_ListTeacherAdapter;
+import com.example.home_study.Model.ChatTeacher;
+import com.example.home_study.Prevalent.Continuity;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ChatActivity extends AppCompatActivity {
 
+    private RecyclerView recyclerView;
+    private ProgressBar progressBar;
+    private Chat_ListTeacherAdapter adapter;
+    private List<ChatTeacher> teacherList = new ArrayList<>();
+    private Set<String> loadedTeacherIds = new HashSet<>();
+
+    private DatabaseReference studentRef, coursesRef, assignmentRef, teachersRef, usersRef;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_chat);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+//            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+//            return insets;
+//        });
+
+        recyclerView = (RecyclerView) findViewById(R.id.userRecyclerView);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new Chat_ListTeacherAdapter(teacherList);
+        recyclerView.setAdapter(adapter);
+
+        studentRef = FirebaseDatabase.getInstance().getReference("Students");
+        coursesRef = FirebaseDatabase.getInstance().getReference("Courses");
+        assignmentRef = FirebaseDatabase.getInstance().getReference("TeacherAssignments");
+        teachersRef = FirebaseDatabase.getInstance().getReference("Teachers");
+        usersRef = FirebaseDatabase.getInstance().getReference("Users");
+
+        loadStudentTeachers();
+    }
+
+    private void loadStudentTeachers() {
+        String userId = Continuity.userId;
+
+        studentRef.orderByChild("userId")
+                .equalTo(userId)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot studentSnap) {
+                        if (!studentSnap.exists()){
+                            Log.e("chatActivity", "No student record fount ");
+                            return;
+                        }
+
+                        for (DataSnapshot snapshot : studentSnap.getChildren())
+                        {
+                            String grade = snapshot.child("grade").getValue(String.class);
+                            String section = snapshot.child("section").getValue(String.class);
+
+                            Log.d("chat_debug", "Student grade= " + grade + ", student section= " + section);
+
+                            if (grade == null || section == null){
+                                Log.d("chat_debug", "grade and section is null");
+                            }
+
+                            loadCoursesForStudent(grade, section);
+                            break;
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
+
+    private void loadCoursesForStudent(String grade, String section) {
+
+        coursesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot courseSnap) {
+                for (DataSnapshot c : courseSnap.getChildren()){
+                    String courseGrade = c.child("grade").getValue(String.class);
+                    String courseSection = c.child("section").getValue(String.class);
+
+                    Log.d("chat_debug","checking course -> grade= " + courseGrade + ", section= " + courseSection);
+                    if ( grade.equals(courseGrade) && section.equals(courseSection))
+                    {
+                        String courseId = c.getKey();
+                        loadTeachersForCourse(courseId);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
         });
+    }
+
+    private void loadTeachersForCourse(String courseId) {
+
+        assignmentRef.orderByChild("courseId")
+                .equalTo(courseId)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot assignShot) {
+                        for (DataSnapshot a : assignShot.getChildren()){
+
+                            String teacherId = a.child("teacherId").getValue(String.class);
+                            resolveTeacher(teacherId);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+    }
+
+    private void resolveTeacher(String teacherId) {
+
+        if (loadedTeacherIds.contains(teacherId)){
+            return;
+        }
+        loadedTeacherIds.add(teacherId);
+        teachersRef.child(teacherId)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot teacherSnap) {
+
+                        String userId = teacherSnap.child("userId").getValue(String.class);
+
+                        usersRef.child(userId)
+                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot userSnap) {
+
+                                        if (!userSnap.exists()) return;
+                                        String name = userSnap.child("name").getValue(String.class);
+
+                                        teacherList.add(new ChatTeacher(teacherId, userId, name));
+
+                                        adapter.notifyDataSetChanged();
+                                        progressBar.setVisibility(GONE);
+                                        recyclerView.setVisibility(VISIBLE);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
     }
 }

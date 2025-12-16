@@ -10,6 +10,19 @@ import android.os.CountDownTimer;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.*;
+import android.util.Log;
+// for the test purpose
+import com.google.firebase.FirebaseApp;
+
+import java.util.Collections;
+import java.util.HashMap;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.SetOptions;
 
 import com.example.home_study.Model.Account;
 import com.example.home_study.Prevalent.Continuity;
@@ -43,7 +56,7 @@ public class LoginActivity extends AppCompatActivity {
         loadingBar = new ProgressDialog(this);
 
 
-//        rememberMe = (CheckBox) findViewById(R.id.rememberMe_check);
+
 
         loginButton.setOnClickListener(new View.OnClickListener()
         {

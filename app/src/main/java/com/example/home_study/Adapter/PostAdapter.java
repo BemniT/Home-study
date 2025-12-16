@@ -176,7 +176,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
         holder.postDate.setText(post.getTime());
         holder.postMessage.setText(post.getMessage());
-        Picasso.get().load(post.getPostUrl()).placeholder(R.drawable.profile).into(holder.postImage);
+        Picasso.get().load(post.getPostUrl()).placeholder(R.drawable.comment).into(holder.postImage);
 //        holder.likeCount.setText(post.getLikeCount() + " Likes");
 
         holder.postComment.setOnClickListener(new View.OnClickListener() {

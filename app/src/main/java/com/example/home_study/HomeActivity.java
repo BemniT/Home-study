@@ -5,7 +5,9 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -26,6 +28,16 @@ public class HomeActivity extends AppCompatActivity {
         // Set the default selected item (Home icon with 'homefill')
         bottomNavigationView.setSelectedItemId(R.id.home);
         bottomNavigationView.getMenu().findItem(R.id.home).setIcon(R.drawable.homefill);
+
+        chat = (ImageView) findViewById(R.id.chat);
+
+        chat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HomeActivity.this, ChatActivity.class);
+                startActivity(intent);
+            }
+        });
 
         replaceFragment(new HomeFragment());
         // Set up the listener for item selection
