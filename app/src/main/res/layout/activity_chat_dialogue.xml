@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
     tools:context=".ChatDialogue">
+
     <View
         android:id="@+id/viewBackground"
         android:layout_width="match_parent"

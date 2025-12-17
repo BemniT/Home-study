@@ -3,6 +3,7 @@ package com.example.home_study;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -78,7 +79,20 @@ public class ChatDialogue extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
 
         chatRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ChatMessageAdapter(messageList, currentUserId);
+        adapter = new ChatMessageAdapter(messageList, currentUserId,
+
+                new ChatMessageAdapter.OnMessageActionListener(){
+
+            @Override
+            public void onEdit(Message message, int postion) {
+                showEditDialog(message);
+            }
+
+            @Override
+            public void onDelete(Message message, int postion) {
+                deleteMessage(message);
+            }
+        });
         chatRecyclerView.setAdapter(adapter);
 
         firestore = FirebaseFirestore.getInstance();
@@ -99,7 +113,35 @@ public class ChatDialogue extends AppCompatActivity {
 
     }
 
+    private void showEditDialog(Message message) {
+        EditText editText = new EditText(this);
+        editText.setText(message.getText());
 
+        new AlertDialog.Builder(this)
+                .setTitle("Edit message")
+                .setView(editText)
+                .setPositiveButton("Save", (dialog, which) -> {
+                    String newText = editText.getText().toString().trim();
+                    if (!newText.isEmpty()){
+                        chatRef.child(message.getMessageId())
+                                .updateChildren(new HashMap<String,Object>(){{
+                                    put("text", newText);
+                                    put("edited", true);
+                                }});
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void deleteMessage(Message message) {
+
+        chatRef.child(message.getMessageId())
+                .updateChildren(new HashMap<String,Object>(){{
+                    put("text","This message was deleted");
+                    put("deleted", true);
+                }});
+    }
     private void listenForMessages() {
 
 
@@ -108,8 +150,15 @@ public class ChatDialogue extends AppCompatActivity {
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
 
                 Message msg = snapshot.getValue(Message.class);
+                msg.setMessageId(snapshot.getKey());
 
                 if (msg != null){
+
+                    if (msg.getReceiverId().equals(currentUserId) && !msg.isSeen()){
+                        chatRef.child(msg.getMessageId())
+                                .child("seen")
+                                .setValue(true);
+                    }
                     messageList.add(msg);
                     adapter.notifyItemInserted(messageList.size() - 1);
                     chatRecyclerView.scrollToPosition(messageList.size() - 1);
@@ -151,14 +200,18 @@ public class ChatDialogue extends AppCompatActivity {
 
         long now = System.currentTimeMillis();
 
+        DatabaseReference newMsgRef = chatRef.push();
+        String messageId = newMsgRef.getKey();
         Message message = new Message(
                 currentUserId,
                 otherUserId,
                 text,
-                now
+                now,
+                false, false, false
         );
 
-        chatRef.push().setValue(message)
+        message.setMessageId(messageId);
+        newMsgRef.setValue(message)
                 .addOnSuccessListener(aVoid -> {
                     inputMessage.setText("");
                 })

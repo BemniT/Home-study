@@ -1,11 +1,17 @@
 package com.example.home_study.Adapter;
 
+import static android.view.View.VISIBLE;
+
+import android.app.AlertDialog;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.utils.widget.ImageFilterView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.home_study.Model.Chat;
@@ -20,11 +26,15 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private static final int RECEIVED = 2;
 
     private List<Message> messages;
+
     private String currentUserId;
 
-    public ChatMessageAdapter(List<Message> messages, String currentUserId) {
+    private OnMessageActionListener listener;
+
+    public ChatMessageAdapter(List<Message> messages, String currentUserId, OnMessageActionListener listener) {
         this.messages = messages;
         this.currentUserId = currentUserId;
+        this.listener = listener;
     }
 
     @Override
@@ -47,10 +57,59 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         return new MessageViewHolder(view);
     }
 
+    public interface OnMessageActionListener{
+        void onEdit(Message message, int postion);
+        void onDelete(Message message, int postion);
+    }
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
-        ((MessageViewHolder) holder).messageText.setText(messages.get(position).getText());
+        Message message = messages.get(position);
+
+
+
+
+        if (message.getSenderId().equals(currentUserId)){
+            if (message.isSeen()){
+                ((MessageViewHolder) holder).seenIcon.setImageResource(R.drawable.double_check);
+            } else {
+                ((MessageViewHolder) holder).seenIcon.setImageResource(R.drawable.single_check);
+            }
+        }
+
+        holder.itemView.setOnLongClickListener(v -> {
+            if (!message.getSenderId().equals(currentUserId)){ return true;}
+
+            new AlertDialog.Builder(v.getContext())
+                    .setTitle("Message Options")
+                    .setItems(new String[]{"Edit", "Delete"}, ((dialog, which) -> {
+                        if (which == 0){
+                            listener.onEdit(message, position);
+                        } else {
+                            listener.onDelete(message,position);
+                        }
+                    })).show();
+//            if (message.getSenderId().equals(currentUserId)){
+//                showDeleteDialog(messageKey);
+//            }
+            return true;
+        });
+
+        if (message.isDeleted()){
+            ((MessageViewHolder) holder).messageText.setText("This message was deleted");
+            ((MessageViewHolder) holder).messageText.setTextColor(Color.GRAY);
+        } else{
+            ((MessageViewHolder) holder).messageText.setText(messages.get(position).getText());
+            ((MessageViewHolder) holder).messageText.setTextColor(Color.BLACK);
+        }
+        if (message.isEdited()){
+            ((MessageViewHolder) holder).editedText.setVisibility(View.VISIBLE);
+            ((MessageViewHolder) holder).editedText.setText("edited");
+        } else {
+            ((MessageViewHolder) holder).editedText.setVisibility(View.GONE);
+        }
+
+
     }
 
     @Override
@@ -60,10 +119,13 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     static class MessageViewHolder extends RecyclerView.ViewHolder{
 
-        TextView messageText;
+        TextView messageText, editedText;
+        ImageView seenIcon;
         public MessageViewHolder(@NonNull View itemView) {
             super(itemView);
             messageText = itemView.findViewById(R.id.textMessage);
+            seenIcon = itemView.findViewById(R.id.seenIcon);
+            editedText = itemView.findViewById(R.id.textEditedText);
         }
     }
 }
