@@ -4,6 +4,7 @@ import static android.view.View.VISIBLE;
 
 import android.app.AlertDialog;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import com.example.home_study.Model.Chat;
 import com.example.home_study.Model.Message;
 import com.example.home_study.R;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -67,8 +69,6 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         Message message = messages.get(position);
 
 
-
-
         if (message.getSenderId().equals(currentUserId)){
             if (message.isSeen()){
                 ((MessageViewHolder) holder).seenIcon.setImageResource(R.drawable.double_check);
@@ -79,6 +79,10 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         holder.itemView.setOnLongClickListener(v -> {
             if (!message.getSenderId().equals(currentUserId)){ return true;}
+            if (message.isDeleted()){
+                Toast.makeText(v.getContext(), "Deleted messages cannot be edited", Toast.LENGTH_SHORT).show();
+                return true;
+            }
 
             new AlertDialog.Builder(v.getContext())
                     .setTitle("Message Options")
@@ -98,6 +102,7 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if (message.isDeleted()){
             ((MessageViewHolder) holder).messageText.setText("This message was deleted");
             ((MessageViewHolder) holder).messageText.setTextColor(Color.GRAY);
+            ((MessageViewHolder) holder).messageText.setTypeface(null, Typeface.ITALIC);
         } else{
             ((MessageViewHolder) holder).messageText.setText(messages.get(position).getText());
             ((MessageViewHolder) holder).messageText.setTextColor(Color.BLACK);
@@ -110,6 +115,19 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
 
 
+    }
+
+    public void animateChange(RecyclerView recyclerView, int position){
+        RecyclerView.ViewHolder holder =
+                recyclerView.findViewHolderForAdapterPosition(position);
+
+        if (holder != null){
+            holder.itemView.setAlpha(0.3f);
+            holder.itemView.animate()
+                    .alpha(1f)
+                    .setDuration(300)
+                    .start();
+        }
     }
 
     @Override

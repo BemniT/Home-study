@@ -7,7 +7,7 @@
     android:animateLayoutChanges="true"
     tools:context=".ChatActivity">
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <ImageView
         android:id="@+id/imageBack"
         android:layout_width="@dimen/_30sdp"
         android:layout_height="@dimen/_30sdp"

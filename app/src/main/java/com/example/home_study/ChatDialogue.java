@@ -54,6 +54,19 @@ public class ChatDialogue extends AppCompatActivity {
     private String currentUserId, otherUserId, chatId;
     private ChatMessageAdapter adapter;
     private List<Message> messageList = new ArrayList<>();
+    private boolean isChatOpen = false;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        isChatOpen = true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        isChatOpen = false;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +93,6 @@ public class ChatDialogue extends AppCompatActivity {
 
         chatRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ChatMessageAdapter(messageList, currentUserId,
-
                 new ChatMessageAdapter.OnMessageActionListener(){
 
             @Override
@@ -97,7 +109,7 @@ public class ChatDialogue extends AppCompatActivity {
 
         firestore = FirebaseFirestore.getInstance();
 
-        chatId = generateChatId(currentUserId, otherUserId);
+        chatId = generateChatId( otherUserId,currentUserId);
 
         messageRef = firestore
                 .collection("Chats")
@@ -112,6 +124,7 @@ public class ChatDialogue extends AppCompatActivity {
         sentButton.setOnClickListener(v -> sendMessage());
 
     }
+
 
     private void showEditDialog(Message message) {
         EditText editText = new EditText(this);
@@ -154,11 +167,15 @@ public class ChatDialogue extends AppCompatActivity {
 
                 if (msg != null){
 
+                    if (isChatOpen && msg.getReceiverId().equals(currentUserId) && !msg.isSeen())
+                    {
                     if (msg.getReceiverId().equals(currentUserId) && !msg.isSeen()){
                         chatRef.child(msg.getMessageId())
                                 .child("seen")
                                 .setValue(true);
                     }
+                    }
+
                     messageList.add(msg);
                     adapter.notifyItemInserted(messageList.size() - 1);
                     chatRecyclerView.scrollToPosition(messageList.size() - 1);
@@ -171,7 +188,21 @@ public class ChatDialogue extends AppCompatActivity {
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
 
+                Message updated = snapshot.getValue(Message.class);
+                if (updated == null) return;
+
+                updated.setMessageId(snapshot.getKey());
+
+                for (int i = 0; i< messageList.size(); i++){
+                    if (messageList.get(i).getMessageId().equals(updated.getMessageId())){
+                        messageList.set(i, updated);
+                        adapter.notifyItemChanged(i);
+                        adapter.animateChange(chatRecyclerView, i);
+                        break;
+                    }
+                }
             }
+
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
@@ -188,8 +219,6 @@ public class ChatDialogue extends AppCompatActivity {
 
             }
         });
-
-
     }
 
     private void sendMessage() {
