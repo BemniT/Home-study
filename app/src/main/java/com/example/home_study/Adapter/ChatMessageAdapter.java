@@ -107,7 +107,7 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             ((MessageViewHolder) holder).messageText.setText(messages.get(position).getText());
             ((MessageViewHolder) holder).messageText.setTextColor(Color.BLACK);
         }
-        if (message.isEdited()){
+        if (message.isEdited() && !message.isDeleted()){
             ((MessageViewHolder) holder).editedText.setVisibility(View.VISIBLE);
             ((MessageViewHolder) holder).editedText.setText("edited");
         } else {

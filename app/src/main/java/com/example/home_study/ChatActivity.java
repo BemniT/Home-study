@@ -13,8 +13,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.home_study.Adapter.Chat_ListTeacherAdapter;
+import com.example.home_study.Adapter.ChatListAdapter;
 import com.example.home_study.Model.ChatTeacher;
+import com.example.home_study.Model.ChatUser;
 import com.example.home_study.Prevalent.Continuity;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -31,8 +32,8 @@ public class ChatActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
-    private Chat_ListTeacherAdapter adapter;
-    private List<ChatTeacher> teacherList = new ArrayList<>();
+    private ChatListAdapter adapter;
+    private List<ChatUser> chatUserList = new ArrayList<>();
     private Set<String> loadedTeacherIds = new HashSet<>();
 
     private DatabaseReference studentRef, coursesRef, assignmentRef, teachersRef, usersRef;
@@ -51,7 +52,7 @@ public class ChatActivity extends AppCompatActivity {
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new Chat_ListTeacherAdapter(teacherList);
+        adapter = new ChatListAdapter(chatUserList);
         recyclerView.setAdapter(adapter);
 
         studentRef = FirebaseDatabase.getInstance().getReference("Students");
@@ -60,7 +61,9 @@ public class ChatActivity extends AppCompatActivity {
         teachersRef = FirebaseDatabase.getInstance().getReference("Teachers");
         usersRef = FirebaseDatabase.getInstance().getReference("Users");
 
+        loadAdmins();
         loadStudentTeachers();
+
     }
 
     private void loadStudentTeachers() {
@@ -165,8 +168,10 @@ public class ChatActivity extends AppCompatActivity {
 
                                         if (!userSnap.exists()) return;
                                         String name = userSnap.child("name").getValue(String.class);
+                                        String profileImage = userSnap.child("profileImage").getValue(String.class);
 
-                                        teacherList.add(new ChatTeacher(teacherId, userId, name));
+                                        ChatUser chatUser = new ChatUser(userId, name, profileImage,teacherSnap.child("course").getValue(String.class),"TEACHER");
+                                        chatUserList.add(chatUser);
 
                                         adapter.notifyDataSetChanged();
                                         progressBar.setVisibility(GONE);
@@ -184,6 +189,49 @@ public class ChatActivity extends AppCompatActivity {
                     public void onCancelled(@NonNull DatabaseError error) {
 
                     }
+
                 });
+    }
+
+    private void loadAdmins(){
+        DatabaseReference adminRef = FirebaseDatabase.getInstance().getReference("School_Admins");
+
+        adminRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot adminSnap : snapshot.getChildren()){
+                    String userId = adminSnap.child("userId").getValue(String.class);
+
+                    usersRef.child(userId)
+                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot userShot) {
+                                    if (!userShot.exists()) return;
+
+                                    ChatUser admin = new ChatUser(
+                                            userId,
+                                            userShot.child("name").getValue(String.class),
+                                            userShot.child("profileImage").getValue(String.class),
+                                            "Director",
+                                            "ADMIN"
+                                            );
+
+                                    chatUserList.add(0, admin);
+                                    adapter.notifyDataSetChanged();
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 }

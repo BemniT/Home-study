@@ -3,17 +3,23 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="@dimen/_8sdp">
+    android:padding="@dimen/_2sdp">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:cardCornerRadius="10dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        android:background="@drawable/cricle2"
+
         >
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:padding="14dp"
+            android:background="@drawable/cricle2"
+            >
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/imageProfile"
@@ -42,7 +48,7 @@
                 android:layout_marginEnd="@dimen/_8sdp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="@color/black_low"
+                android:textColor="@color/black"
                 android:textSize="@dimen/_13ssp"
                 app:layout_constraintBottom_toTopOf="@id/viewSupporter"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -50,14 +56,15 @@
                 />
 
             <TextView
-                android:id="@+id/userEmail"
+                android:id="@+id/userSubject"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/_8sdp"
                 android:layout_marginStart="@dimen/_8sdp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="@color/black_low_low"
+                android:textColor="@color/black_low"
+                android:text="Subject"
                 android:textSize="@dimen/_10ssp"
                 app:layout_constraintStart_toEndOf="@id/imageProfile"
                 app:layout_constraintTop_toBottomOf="@id/viewSupporter"

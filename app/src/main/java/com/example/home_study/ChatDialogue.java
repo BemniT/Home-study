@@ -34,6 +34,8 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.SetOptions;
+import com.squareup.picasso.Picasso;
+
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -42,10 +44,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class ChatDialogue extends AppCompatActivity {
 
     private RecyclerView chatRecyclerView;
     private EditText inputMessage;
+    private CircleImageView profileImage;
     private View sentButton;
     private ProgressBar progressBar;
     private DatabaseReference chatRef;
@@ -81,10 +86,14 @@ public class ChatDialogue extends AppCompatActivity {
 
         FirebaseApp.initializeApp(this);
         currentUserId = Continuity.userId;
-        otherUserId = getIntent().getStringExtra("teacherUserID");
+        otherUserId = getIntent().getStringExtra("otherUserId");
 
-        String name = getIntent().getStringExtra("teacherName");
+        String name = getIntent().getStringExtra("name");
+        String profileImageUrl = getIntent().getStringExtra("image");
         ((TextView) findViewById(R.id.textName)).setText(name);
+        profileImage = (CircleImageView) findViewById(R.id.profileImage);
+        Picasso.get().load(profileImageUrl).placeholder(R.drawable.profile_image).into(profileImage);
+
 
         chatRecyclerView = findViewById(R.id.chatRecyclerView);
         inputMessage = findViewById(R.id.inputChat);
@@ -129,19 +138,26 @@ public class ChatDialogue extends AppCompatActivity {
     private void showEditDialog(Message message) {
         EditText editText = new EditText(this);
         editText.setText(message.getText());
+        editText.setSelection(editText.getText().length());
 
         new AlertDialog.Builder(this)
                 .setTitle("Edit message")
                 .setView(editText)
                 .setPositiveButton("Save", (dialog, which) -> {
+
+
                     String newText = editText.getText().toString().trim();
-                    if (!newText.isEmpty()){
+                    String oldText = message.getText().trim();
+
+                    if (newText.isEmpty() || newText.equals(oldText)){
+                        return;
+                    }
                         chatRef.child(message.getMessageId())
                                 .updateChildren(new HashMap<String,Object>(){{
                                     put("text", newText);
                                     put("edited", true);
                                 }});
-                    }
+
                 })
                 .setNegativeButton("Cancel", null)
                 .show();

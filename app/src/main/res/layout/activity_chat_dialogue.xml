@@ -5,7 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
-    tools:context=".ChatDialogue">
+    android:fitsSystemWindows="true"
+    tools:context=".ChatDialogue"
+    android:background="@color/white"
+    >
 
     <View
         android:id="@+id/viewBackground"
@@ -34,22 +37,35 @@
         android:src="@drawable/back"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/white"
+        app:tint="@color/black"
         />
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/imageInfo"
-        android:layout_width="@dimen/_30sdp"
-        android:layout_height="@dimen/_30sdp"
-        android:layout_marginTop="@dimen/_12sdp"
-        android:layout_marginEnd="@dimen/_16sdp"
-        android:layout_marginRight="@dimen/_16sdp"
-        android:padding="@dimen/_4sdp"
-        android:src="@drawable/book"
-        app:layout_constraintEnd_toEndOf="parent"
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/profileImage"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+
+        android:layout_marginStart="10dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="@id/toolbarView"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/white"
+        app:layout_constraintStart_toEndOf="@id/backImage"
         />
+<!--    <androidx.appcompat.widget.AppCompatImageView-->
+<!--        android:id="@+id/imageInfo"-->
+<!--        android:layout_width="@dimen/_30sdp"-->
+<!--        android:layout_height="@dimen/_30sdp"-->
+<!--        android:layout_marginTop="@dimen/_12sdp"-->
+<!--        android:layout_marginEnd="@dimen/_16sdp"-->
+<!--        android:layout_marginRight="@dimen/_16sdp"-->
+<!--        android:padding="@dimen/_4sdp"-->
+<!--        android:src="@drawable/profile_image"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:tint="@color/white"-->
+<!--        />-->
+
+
 
     <TextView
         android:id="@+id/textName"
@@ -60,12 +76,11 @@
         android:ellipsize="end"
         android:gravity="center"
         android:maxLines="1"
-        android:textColor="@color/white"
+        android:textColor="@color/black"
         android:textSize="@dimen/_14ssp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/backImage"
-        app:layout_constraintEnd_toStartOf="@id/imageInfo"
-        app:layout_constraintStart_toEndOf="@id/backImage"
+        app:layout_constraintStart_toEndOf="@id/profileImage"
         app:layout_constraintTop_toTopOf="@id/backImage"/>
 
     <View
@@ -84,7 +99,7 @@
         android:clipToPadding="false"
         android:orientation="vertical"
         android:overScrollMode="never"
-        android:padding="@dimen/_20sdp"
+        android:padding="@dimen/_10sdp"
         app:stackFromEnd="true"
         android:visibility="gone"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
@@ -104,28 +119,35 @@
 
         />
 
-    <FrameLayout
+    <androidx.cardview.widget.CardView
         android:id="@+id/layoutSend"
         android:layout_width="@dimen/_40sdp"
         android:layout_height="@dimen/_40sdp"
         android:layout_marginEnd="@dimen/_16sdp"
-        android:layout_marginRight="@dimen/_16sdp"
+        android:layout_marginRight="@dimen/_15sdp"
         android:layout_marginBottom="@dimen/_12ssp"
         android:background="@color/black_low_low"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:cardCornerRadius="40dp"
+        >
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginStart="@dimen/_4sdp"
-            android:layout_marginLeft="@dimen/_4sdp"
-            android:padding="@dimen/_8sdp"
-            android:src="@drawable/send"
-            app:tint="@color/white"
-            />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:padding="@dimen/_8sdp"
+                android:src="@drawable/send"
 
-    </FrameLayout>
+                android:backgroundTint="@color/primary_secondary"
+                android:background="@color/primary_secondary"
+                app:tint="@color/white"
+                />
+
+        </androidx.cardview.widget.CardView>
+
+
+
     <EditText
         android:id="@+id/inputChat"
         android:layout_width="0dp"
@@ -135,14 +157,14 @@
         android:layout_marginEnd="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"
         android:layout_marginBottom="@dimen/_12ssp"
-        android:background="@color/black_low_low"
-        android:hint="message"
+        android:background="@drawable/circle"
+        android:hint="Message"
         android:imeOptions="actionSend"
         android:importantForAutofill="no"
         android:inputType="text"
         android:paddingStart="@dimen/_16sdp"
         android:paddingEnd="@dimen/_16sdp"
-        android:textColor="@color/white"
+        android:textColor="@color/black"
         android:textColorHint="@color/black_low"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/layoutSend"
