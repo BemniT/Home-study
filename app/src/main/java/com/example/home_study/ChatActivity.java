@@ -5,6 +5,7 @@ import static android.view.View.VISIBLE;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import androidx.activity.EdgeToEdge;
@@ -33,6 +34,7 @@ public class ChatActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private ChatListAdapter adapter;
+    private ImageView imageBack;
     private List<ChatUser> chatUserList = new ArrayList<>();
     private Set<String> loadedTeacherIds = new HashSet<>();
 
@@ -50,6 +52,10 @@ public class ChatActivity extends AppCompatActivity {
 
         recyclerView = (RecyclerView) findViewById(R.id.userRecyclerView);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        imageBack = (ImageView) findViewById(R.id.imageBack);
+        imageBack.setOnClickListener(v->{
+            finish();
+        });
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ChatListAdapter(chatUserList);
@@ -115,7 +121,8 @@ public class ChatActivity extends AppCompatActivity {
                     if ( grade.equals(courseGrade) && section.equals(courseSection))
                     {
                         String courseId = c.getKey();
-                        loadTeachersForCourse(courseId);
+                        String courseName = c.child("name").getValue(String.class);
+                        loadTeachersForCourse(courseId, courseName);
                     }
                 }
             }
@@ -127,7 +134,7 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    private void loadTeachersForCourse(String courseId) {
+    private void loadTeachersForCourse(String courseId, String courseName) {
 
         assignmentRef.orderByChild("courseId")
                 .equalTo(courseId)
@@ -137,7 +144,7 @@ public class ChatActivity extends AppCompatActivity {
                         for (DataSnapshot a : assignShot.getChildren()){
 
                             String teacherId = a.child("teacherId").getValue(String.class);
-                            resolveTeacher(teacherId);
+                            resolveTeacher(teacherId, courseName);
                         }
                     }
 
@@ -148,7 +155,7 @@ public class ChatActivity extends AppCompatActivity {
                 });
     }
 
-    private void resolveTeacher(String teacherId) {
+    private void resolveTeacher(String teacherId, String courseName) {
 
         if (loadedTeacherIds.contains(teacherId)){
             return;
@@ -170,7 +177,7 @@ public class ChatActivity extends AppCompatActivity {
                                         String name = userSnap.child("name").getValue(String.class);
                                         String profileImage = userSnap.child("profileImage").getValue(String.class);
 
-                                        ChatUser chatUser = new ChatUser(userId, name, profileImage,teacherSnap.child("course").getValue(String.class),"TEACHER");
+                                        ChatUser chatUser = new ChatUser(userId, name, profileImage,courseName,"TEACHER");
                                         chatUserList.add(chatUser);
 
                                         adapter.notifyDataSetChanged();

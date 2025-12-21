@@ -43,6 +43,15 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
         ChatUser chatUser = list.get(position);
         holder.teacherName.setText(chatUser.getName());
         Picasso.get().load(chatUser.getProfileImage()).placeholder(R.drawable.profile_image).into(holder.profileImage);
+        holder.userSubject.setText(chatUser.getSubstitle());
+
+        if (chatUser.getUnreadCount() > 0){
+            holder.unreadCounter.setVisibility(View.VISIBLE);
+            holder.unreadCounter.setText(String.valueOf(chatUser.getUnreadCount()));
+        }else {
+            holder.unreadCounter.setVisibility(View.GONE);
+        }
+
         holder.itemView.setOnClickListener( v -> {
            Intent intent = new Intent(v.getContext(), ChatDialogue.class);
            intent.putExtra("otherUserId", chatUser.getUserId());
@@ -66,12 +75,14 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView teacherName;
+        private TextView teacherName, userSubject, unreadCounter;
         private CircleImageView profileImage;
         private ImageView backBtn;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            unreadCounter = itemView.findViewById(R.id.badgeReceivedMessage);
+            userSubject = itemView.findViewById(R.id.userSubject);
             teacherName = itemView.findViewById(R.id.userName);
             profileImage = itemView.findViewById(R.id.imageProfile);
             backBtn = itemView.findViewById(R.id.imageBack);

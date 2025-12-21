@@ -7,6 +7,7 @@ import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -27,22 +28,18 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentChange;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
+
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.SetOptions;
+
 import com.squareup.picasso.Picasso;
 
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -52,6 +49,7 @@ public class ChatDialogue extends AppCompatActivity {
     private EditText inputMessage;
     private CircleImageView profileImage;
     private View sentButton;
+    private ImageView imageBack;
     private ProgressBar progressBar;
     private DatabaseReference chatRef;
     private FirebaseFirestore firestore;
@@ -65,6 +63,11 @@ public class ChatDialogue extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         isChatOpen = true;
+        DatabaseReference metaRef = FirebaseDatabase.getInstance().getReference("ChatMeta")
+                .child(chatId)
+                .child("unread")
+                .child(currentUserId);
+        metaRef.setValue(0);
     }
 
     @Override
@@ -87,6 +90,11 @@ public class ChatDialogue extends AppCompatActivity {
         FirebaseApp.initializeApp(this);
         currentUserId = Continuity.userId;
         otherUserId = getIntent().getStringExtra("otherUserId");
+
+        imageBack = (ImageView) findViewById(R.id.backImage);
+        imageBack.setOnClickListener(v->{
+            finish();
+        });
 
         String name = getIntent().getStringExtra("name");
         String profileImageUrl = getIntent().getStringExtra("image");
@@ -182,15 +190,13 @@ public class ChatDialogue extends AppCompatActivity {
                 msg.setMessageId(snapshot.getKey());
 
                 if (msg != null){
-
-                    if (isChatOpen && msg.getReceiverId().equals(currentUserId) && !msg.isSeen())
-                    {
-                    if (msg.getReceiverId().equals(currentUserId) && !msg.isSeen()){
+                    // To make sent message seen
+                    if (isChatOpen && msg.getReceiverId().equals(currentUserId) && !msg.isSeen()){
                         chatRef.child(msg.getMessageId())
                                 .child("seen")
                                 .setValue(true);
                     }
-                    }
+
 
                     messageList.add(msg);
                     adapter.notifyItemInserted(messageList.size() - 1);
@@ -259,6 +265,11 @@ public class ChatDialogue extends AppCompatActivity {
         newMsgRef.setValue(message)
                 .addOnSuccessListener(aVoid -> {
                     inputMessage.setText("");
+                    DatabaseReference metaRef = FirebaseDatabase.getInstance().getReference("ChatMeta")
+                            .child(chatId)
+                            .child("unread")
+                            .child(otherUserId);
+                    metaRef.setValue(ServerValue.increment(1));
                 })
                 .addOnFailureListener(e -> {
                     Log.e("Chat", "message sent failed", e);
