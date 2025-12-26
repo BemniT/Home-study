@@ -72,7 +72,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                                          if (!snapshot.exists()) return;
 
-                                        String adminName = snapshot.child("name").getValue(String.class);
+                                         String adminName = snapshot.child("name").getValue(String.class);
                                         String adminProfileImage = snapshot.child("profileImage").getValue(String.class);
 
                                         holder.author.setText(adminName);

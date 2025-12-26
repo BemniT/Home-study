@@ -25,6 +25,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -179,7 +180,8 @@ public class ChatActivity extends AppCompatActivity {
 
                                         ChatUser chatUser = new ChatUser(userId, name, profileImage,courseName,"TEACHER");
                                         chatUserList.add(chatUser);
-
+                                        listenForUnreadCounts(chatUser);
+                                        listenForChatMeta(chatUser);
                                         adapter.notifyDataSetChanged();
                                         progressBar.setVisibility(GONE);
                                         recyclerView.setVisibility(VISIBLE);
@@ -224,6 +226,8 @@ public class ChatActivity extends AppCompatActivity {
                                             );
 
                                     chatUserList.add(0, admin);
+                                    listenForUnreadCounts(admin);
+                                    listenForChatMeta(admin);
                                     adapter.notifyDataSetChanged();
                                 }
 
@@ -240,5 +244,79 @@ public class ChatActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void listenForUnreadCounts(ChatUser chatUser)
+    {
+        String chatId = generateChatId(chatUser.getUserId(), Continuity.userId);
+
+        DatabaseReference unreadRef = FirebaseDatabase.getInstance().getReference("ChatMeta")
+                .child(chatId)
+                .child("unread")
+                .child(Continuity.userId);
+
+        unreadRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int count = snapshot.exists() ? snapshot.getValue(Integer.class) : 0;
+                chatUser.setUnreadCount(count);
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private String generateChatId(String a, String b) {
+        if (a.compareTo(b) < 0) return a + "_" + b;
+        return b + "_" + a;
+    }
+
+    private void listenForChatMeta(ChatUser user){
+        String chatId = generateChatId(user.getUserId(), Continuity.userId);
+
+        DatabaseReference metaRef = FirebaseDatabase.getInstance()
+                .getReference("ChatMeta")
+                .child(chatId);
+
+        metaRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.exists()) return;
+
+                DataSnapshot last = snapshot.child("lastMessage");
+
+                user.setLastMessage(last.child("text").getValue(String.class));
+                user.setLastMessageSenderId(last.child("senderId").getValue(String.class));
+                user.setLastMessageSeen(Boolean.TRUE.equals(last.child("seen").getValue(Boolean.class)));
+
+
+                Long time = last.child("timestamp").getValue(Long.class);
+                user.setLastMessageTime(time != null ? time:0L);
+
+                int unread = snapshot.child("unread")
+                        .child(Continuity.userId).getValue(Integer.class) != null
+                        ? snapshot.child("unread").child(Continuity.userId).getValue(Integer.class) :0;
+
+                user.setUnreadCount(unread);
+
+                sortChats();
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void sortChats(){
+        Collections.sort(chatUserList, (a, b) ->
+                Long.compare(b.getLastMessageTime(), a.getLastMessageTime())
+                );
     }
 }

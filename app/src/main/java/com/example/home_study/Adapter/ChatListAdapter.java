@@ -1,6 +1,8 @@
 package com.example.home_study.Adapter;
 
 import android.content.Intent;
+import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.home_study.ChatDialogue;
 import com.example.home_study.Model.ChatTeacher;
 import com.example.home_study.Model.ChatUser;
+import com.example.home_study.Prevalent.Continuity;
 import com.example.home_study.R;
 import com.squareup.picasso.Picasso;
 
@@ -43,14 +46,54 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
         ChatUser chatUser = list.get(position);
         holder.teacherName.setText(chatUser.getName());
         Picasso.get().load(chatUser.getProfileImage()).placeholder(R.drawable.profile_image).into(holder.profileImage);
-        holder.userSubject.setText(chatUser.getSubstitle());
 
-        if (chatUser.getUnreadCount() > 0){
-            holder.unreadCounter.setVisibility(View.VISIBLE);
-            holder.unreadCounter.setText(String.valueOf(chatUser.getUnreadCount()));
+        
+
+        if (chatUser.getLastMessage() != null){
+            holder.lastMessage.setText(chatUser.getLastMessage());
+
+
         }else {
-            holder.unreadCounter.setVisibility(View.GONE);
+            holder.lastMessage.setText(chatUser.getSubstitle());
+
         }
+
+        if (chatUser.getLastMessageTime() > 0 )
+        {
+            String test = String.valueOf(chatUser.getLastMessageTime());
+            Log.e("time", test);
+
+            holder.lastMessageTime.setVisibility(View.VISIBLE);
+            holder.lastMessageTime.setText(
+                    DateUtils.getRelativeTimeSpanString(
+                            chatUser.getLastMessageTime(),
+                            System.currentTimeMillis(),
+                            DateUtils.MINUTE_IN_MILLIS
+                    )
+
+            );
+        }
+        //case 1: if the last messgae sent by this current user
+
+        String senderId = chatUser.getLastMessageSenderId();
+        if (senderId!= null && senderId.equals(Continuity.userId)){
+            holder.seenIcon.setVisibility(View.VISIBLE);
+            holder.unreadCounter.setVisibility(View.GONE);
+
+            holder.seenIcon.setImageResource(chatUser.isLastMessageSeen() ? R.drawable.double_check : R.drawable.single_check);
+        } else {
+
+            holder.seenIcon.setVisibility(View.GONE);
+            if (chatUser.getUnreadCount() > 0){
+                holder.unreadCounter.setVisibility(View.VISIBLE);
+                holder.unreadCounter.setText(String.valueOf(chatUser.getUnreadCount()));
+            }else {
+                holder.unreadCounter.setVisibility(View.GONE);
+            }
+        }
+
+
+
 
         holder.itemView.setOnClickListener( v -> {
            Intent intent = new Intent(v.getContext(), ChatDialogue.class);
@@ -75,17 +118,19 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView teacherName, userSubject, unreadCounter;
+        private TextView teacherName, lastMessage, unreadCounter, lastMessageTime;
         private CircleImageView profileImage;
-        private ImageView backBtn;
+        private ImageView backBtn, seenIcon;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             unreadCounter = itemView.findViewById(R.id.badgeReceivedMessage);
-            userSubject = itemView.findViewById(R.id.userSubject);
+            lastMessage = itemView.findViewById(R.id.lastMessage);
             teacherName = itemView.findViewById(R.id.userName);
             profileImage = itemView.findViewById(R.id.imageProfile);
             backBtn = itemView.findViewById(R.id.imageBack);
+            lastMessageTime = itemView.findViewById(R.id.lastMessageTime);
+            seenIcon = itemView.findViewById(R.id.seenIcon);
         }
     }
 }

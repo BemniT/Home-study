@@ -10,48 +10,136 @@
     android:background="@color/white">
 
     <LinearLayout
-    android:id="@+id/toolbarContainer"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="15dp"
-    android:orientation="horizontal"
-    android:background="@drawable/yourstaff"
-    android:elevation="10dp"
+        android:id="@+id/toolbarContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/_8sdp"
+        android:paddingStart="@dimen/_8sdp"
+        android:paddingEnd="@dimen/_10sdp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         >
 
-    <ImageView
-        android:id="@+id/imageBack"
-        android:layout_width="@dimen/_32sdp"
-        android:layout_height="@dimen/_32sdp"
-        android:src="@drawable/back"
-        />
+        <ImageView
+            android:id="@+id/imageBack"
+            android:layout_width="@dimen/_28sdp"
+            android:layout_height="@dimen/_28sdp"
+            android:src="@drawable/back"
+            />
 
-    <TextView
-        android:layout_gravity="center"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/list_staff"
-        android:textColor="@color/black"
-        android:textSize="@dimen/_14ssp"
-        android:layout_marginStart="@dimen/_16sdp"
-
-        />
+            <TextView
+                android:id="@+id/titleBars"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/message"
+                android:textColor="@color/black"
+                android:textSize="@dimen/_14ssp"
+                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_weight="1"
+                />
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/cardContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="2dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="2dp"
 
-            <FrameLayout
+        android:orientation="horizontal"
+        android:background="@drawable/yourstaff"
+        app:layout_constraintTop_toBottomOf="@id/toolbarContainer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        >
 
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginTop="@dimen/_8sdp"
-                android:background="@color/white"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/toolbarContainer"
-                tools:layout_editor_absoluteX="16dp">
+        <androidx.cardview.widget.CardView
+            android:id="@+id/allCard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:layout_weight="1"
+            android:padding="@dimen/_15sdp"
+            app:cardCornerRadius="@dimen/_15sdp">
+
+            <TextView
+                android:id="@+id/allText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/primary_secondary"
+                android:text="All"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_12ssp"
+                android:layout_gravity="center"
+                />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/adminCard"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/_18sdp"
+            app:cardCornerRadius="@dimen/_15sdp"
+            android:layout_gravity="center"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:padding="@dimen/_20sdp"
+            android:layout_weight="1"
+
+            >
+
+            <TextView
+                android:id="@+id/adminText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Admins"
+                android:textSize="@dimen/_12ssp"
+                android:textColor="@color/black"
+                android:layout_gravity="center"
+
+                />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/teachersCard"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/_18sdp"
+            app:cardCornerRadius="@dimen/_15sdp"
+            android:layout_gravity="center"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:padding="@dimen/_20sdp"
+            android:layout_weight="1"
+            >
+
+            <TextView
+                android:id="@+id/teacherText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Teachers"
+                android:textSize="@dimen/_12ssp"
+                android:textColor="@color/black"
+                android:layout_gravity="center"
+                />
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:background="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardContainer"
+        tools:layout_editor_absoluteX="16dp">
 
 
 

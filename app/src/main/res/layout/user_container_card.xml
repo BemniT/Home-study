@@ -45,7 +45,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_8sdp"
-                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_50sdp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textColor="@color/black"
@@ -56,30 +56,63 @@
                 />
 
             <TextView
-                android:id="@+id/userSubject"
+                android:id="@+id/lastMessage"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/_8sdp"
+                android:layout_marginEnd="@dimen/_50sdp"
                 android:layout_marginStart="@dimen/_8sdp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textColor="@color/black_low"
                 android:text="Subject"
-                android:textSize="@dimen/_10ssp"
+                android:textSize="@dimen/_12ssp"
                 app:layout_constraintStart_toEndOf="@id/imageProfile"
                 app:layout_constraintTop_toBottomOf="@id/viewSupporter"
+                app:layout_constraintEnd_toEndOf="@id/lastMessageTime"
+                />
+
+
+            <TextView
+                android:id="@+id/lastMessageTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_4sdp"
+                android:layout_marginEnd="@dimen/_40sdp"
+                android:maxLines="1"
+                android:textColor="@color/black_low"
+                android:textSize="@dimen/_12ssp"
+                app:layout_constraintStart_toEndOf="@id/userName"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+
+                />
+
+
+            <ImageView
+                android:id="@+id/seenIcon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="@dimen/_30sdp"
+                android:layout_marginTop="@dimen/_1sdp"
+                android:backgroundTint="@color/primary_secondary"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lastMessageTime"
+                app:layout_constraintBottom_toBottomOf="parent"
+
+
                 />
 
             <TextView
                 android:id="@+id/badgeReceivedMessage"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:background="@drawable/circle"
-                android:backgroundTint="@color/red"
+                android:backgroundTint="@color/primary_secondary"
+                android:layout_marginEnd="@dimen/_30sdp"
+                android:layout_marginTop="@dimen/_8sdp"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:gravity="center"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/lastMessageTime"
                 app:layout_constraintBottom_toBottomOf="parent"
                 android:textColor="@color/white"
                 android:visibility="gone"

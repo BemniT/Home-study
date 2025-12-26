@@ -13,10 +13,12 @@
         android:theme="@style/Theme.Homestudy"
         tools:targetApi="31">
         <activity
+            android:name=".ProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".ChatDialogue"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize"
-            />
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ChatActivity"
             android:exported="false" />

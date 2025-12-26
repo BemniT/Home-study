@@ -5,6 +5,7 @@ import static android.view.View.VISIBLE;
 import android.app.AlertDialog;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -68,6 +69,13 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         Message message = messages.get(position);
 
+
+        ((MessageViewHolder) holder).textSentTime.setText(
+                DateUtils.getRelativeTimeSpanString(
+                        message.getTimeStamp(),
+                        System.currentTimeMillis(),
+                        DateUtils.MINUTE_IN_MILLIS
+                ));
 
         if (message.getSenderId().equals(currentUserId)){
             if (message.isSeen()){
@@ -137,10 +145,11 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     static class MessageViewHolder extends RecyclerView.ViewHolder{
 
-        TextView messageText, editedText;
+        TextView messageText, editedText, textSentTime;
         ImageView seenIcon;
         public MessageViewHolder(@NonNull View itemView) {
             super(itemView);
+            textSentTime = itemView.findViewById(R.id.textDateTime);
             messageText = itemView.findViewById(R.id.textMessage);
             seenIcon = itemView.findViewById(R.id.seenIcon);
             editedText = itemView.findViewById(R.id.textEditedText);

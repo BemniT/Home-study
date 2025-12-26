@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.FirebaseApp;
 import com.example.home_study.Adapter.ChatMessageAdapter;
 import com.example.home_study.Model.Chat;
@@ -29,9 +30,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
-import com.google.firebase.firestore.CollectionReference;
-
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import com.squareup.picasso.Picasso;
 
@@ -40,6 +38,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -52,8 +51,6 @@ public class ChatDialogue extends AppCompatActivity {
     private ImageView imageBack;
     private ProgressBar progressBar;
     private DatabaseReference chatRef;
-    private FirebaseFirestore firestore;
-    private CollectionReference messageRef;
     private String currentUserId, otherUserId, chatId;
     private ChatMessageAdapter adapter;
     private List<Message> messageList = new ArrayList<>();
@@ -64,10 +61,30 @@ public class ChatDialogue extends AppCompatActivity {
         super.onStart();
         isChatOpen = true;
         DatabaseReference metaRef = FirebaseDatabase.getInstance().getReference("ChatMeta")
-                .child(chatId)
-                .child("unread")
-                .child(currentUserId);
-        metaRef.setValue(0);
+                .child(chatId);
+
+
+
+        metaRef.child("unread")
+                .child(currentUserId)
+                .setValue(0);
+        metaRef.child("lastMessage")
+                .get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+                    @Override
+                    public void onSuccess(DataSnapshot dataSnapshot) {
+                        if (!dataSnapshot.exists()) return;
+
+                        String senderId = dataSnapshot.child("senderId").getValue(String.class);
+                        Boolean seen = dataSnapshot.child("seen").getValue(Boolean.class);
+
+                        if (senderId !=null && !senderId.equals(currentUserId)
+                        && (seen == null || !seen )){
+                            metaRef.child("lastMessage").child("seen").setValue(true);
+                        }
+
+                    }
+                });
+
     }
 
     @Override
@@ -92,9 +109,9 @@ public class ChatDialogue extends AppCompatActivity {
         otherUserId = getIntent().getStringExtra("otherUserId");
 
         imageBack = (ImageView) findViewById(R.id.backImage);
-        imageBack.setOnClickListener(v->{
-            finish();
-        });
+//        imageBack.setOnClickListener(v ->{
+//            onBackPressed();
+//        } );
 
         String name = getIntent().getStringExtra("name");
         String profileImageUrl = getIntent().getStringExtra("image");
@@ -124,14 +141,8 @@ public class ChatDialogue extends AppCompatActivity {
         });
         chatRecyclerView.setAdapter(adapter);
 
-        firestore = FirebaseFirestore.getInstance();
-
         chatId = generateChatId( otherUserId,currentUserId);
 
-        messageRef = firestore
-                .collection("Chats")
-                .document(chatId)
-                .collection("Messages");
 
         chatRef = FirebaseDatabase.getInstance().getReference("Chats")
                         .child(chatId)
@@ -266,10 +277,19 @@ public class ChatDialogue extends AppCompatActivity {
                 .addOnSuccessListener(aVoid -> {
                     inputMessage.setText("");
                     DatabaseReference metaRef = FirebaseDatabase.getInstance().getReference("ChatMeta")
-                            .child(chatId)
-                            .child("unread")
-                            .child(otherUserId);
-                    metaRef.setValue(ServerValue.increment(1));
+                            .child(chatId);
+
+                    Map<String, Object> lastMessage = new HashMap<>();
+                    lastMessage.put("text",text);
+                    lastMessage.put("senderId",currentUserId);
+                    lastMessage.put("timestamp",ServerValue.TIMESTAMP);
+                    lastMessage.put("seen",false);
+
+                    metaRef.child("lastMessage").setValue(lastMessage);
+
+                    metaRef.child("unread")
+                            .child(otherUserId)
+                            .setValue(ServerValue.increment(1));
                 })
                 .addOnFailureListener(e -> {
                     Log.e("Chat", "message sent failed", e);
