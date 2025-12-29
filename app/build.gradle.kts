@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("com.google.gms.google-services")
+    id("org.jetbrains.kotlin.android")
 }
 
 android {
@@ -20,52 +21,69 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
 
+
+
 dependencies {
 
-    implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.2.0")
-    implementation("com.google.firebase:firebase-database:21.0.0")
-    implementation("com.google.firebase:firebase-firestore:25.1.1")
+    // AndroidX / UI
+    implementation("androidx.appcompat:appcompat:1.7.1")
+    implementation("com.google.android.material:material:1.13.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation("com.google.firebase:firebase-storage:21.0.1")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-
+    implementation("androidx.activity:activity:1.8.0")
+    implementation("androidx.cardview:cardview:1.0.0")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    
+    // Utilities & libs
     implementation("com.github.barteksc:androidpdfviewer:3.1.0-beta.1")
-//    implementation ("com.github.User:Repo:Tag")
     implementation("com.tom-roush:pdfbox-android:2.0.27.0")
-    implementation ("com.github.bumptech.glide:glide:4.15.1")
-    annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1")
+    implementation("com.github.bumptech.glide:glide:5.0.5")
+    annotationProcessor("com.github.bumptech.glide:compiler:5.0.5")
 
-    implementation("com.github.jitpack:gradle-simple:1.0")
-    implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
-//    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
-//    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
-//    implementation("androidx.room:room-compiler-processing-testing:2.6.1")
-//    implementation ("com.firebaseui:firebase-ui-database:8.0.2")
-//    implementation ("com.google.firebase:firebase-database:20.3.0")
-//    implementation ("com.google.firebase:firebase-storage:20.3.0")
-//    implementation ("com.google.firebase:firebase-analytics:21.5.1")
-    //implementation 'com.github.rey5137:material:1.3.1'-->
-    implementation ("androidx.cardview:cardview:1.0.0")
-    implementation ("androidx.recyclerview:recyclerview:1.3.2")
-    implementation ("io.github.pilgr:paperdb:2.7.2")
-    implementation ("de.hdodenhof:circleimageview:3.1.0")
-    implementation ("com.squareup.picasso:picasso:2.71828")
-    implementation("com.vanniktech:android-image-cropper:4.5.0")
-    implementation ("com.github.yalantis:ucrop:2.2.6")
+    implementation("com.intuit.sdp:sdp-android:1.0.6")
+    implementation("com.intuit.ssp:ssp-android:1.0.6")
 
-    implementation ("com.google.firebase:firebase-core:21.1.1")
+    implementation("io.github.pilgr:paperdb:2.7.2")
+    implementation("de.hdodenhof:circleimageview:3.1.0")
+    implementation("com.squareup.picasso:picasso:2.71828")
+    implementation("com.vanniktech:android-image-cropper:4.6.0")
+    implementation("com.github.yalantis:ucrop:2.2.6")
+
+   // Firebase BOM – keep versions consistent via BOM
+    implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
+
+    // Firebase modules (use boM-managed versions)
+    implementation("com.google.firebase:firebase-database")
+    implementation("com.google.firebase:firebase-storage")
+//    implementation("com.google.firebase:firebase-analytics")
+
+    // Firestore (use ktx)
+    implementation("com.google.firebase:firebase-firestore")
+    // Kotlin runtime required by Firestore internals (even if app is Java)
+//    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")
+
+    // AndroidX DataStore (preferences) required by Firestore heartbeat/storage
+    implementation("androidx.datastore:datastore-preferences-core:1.1.1")
+
+    // Optional: DataStore core if you use it elsewhere (kept compatible)
+    implementation("androidx.datastore:datastore-core:1.1.1")
+
+    // Other test / tooling
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.3.0")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
 
 }

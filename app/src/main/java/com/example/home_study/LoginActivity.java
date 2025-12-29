@@ -6,10 +6,23 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.view.View;
 import android.widget.*;
+import android.util.Log;
+// for the test purpose
+import com.google.firebase.FirebaseApp;
+
+import java.util.Collections;
+import java.util.HashMap;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.SetOptions;
 
 import com.example.home_study.Model.Account;
 import com.example.home_study.Prevalent.Continuity;
@@ -18,16 +31,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Objects;
 
 import io.paperdb.Paper;
 
 public class LoginActivity extends AppCompatActivity {
 
 
+    private EditText editTxtUserName, editTxtPassword;
     private Button loginButton;
-    private EditText loginUserName, login_Password;
     private ProgressDialog loadingBar;
     private CheckBox rememberMe;
     private TextView AdminLink,notAdminLink, log_signUp;
@@ -36,29 +49,29 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        loginUserName = (EditText) findViewById(R.id.login_phonenumber);
-        login_Password = (EditText) findViewById(R.id.login_password);
+        editTxtUserName = (EditText) findViewById(R.id.login_phonenumber);
+        editTxtPassword = (EditText) findViewById(R.id.login_password);
         loginButton = (Button) findViewById(R.id.login_btn);
 
         loadingBar = new ProgressDialog(this);
 
 
-//        rememberMe = (CheckBox) findViewById(R.id.rememberMe_check);
+
 
         loginButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v) {
-                String password = login_Password.getText().toString();
-                String username = loginUserName.getText().toString();
+                String studentPassword = editTxtPassword.getText().toString();
+                String studentUsername = editTxtUserName.getText().toString();
 
-                if (TextUtils.isEmpty(password))
+                if (TextUtils.isEmpty(studentPassword))
                 {
-                    Toast.makeText(LoginActivity.this, "Password Missing!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "Insert Password please", Toast.LENGTH_SHORT).show();
                 }
-                else if (TextUtils.isEmpty(username))
+                else if (TextUtils.isEmpty(studentUsername))
                 {
-                    Toast.makeText(LoginActivity.this, "Phone Number Missing!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "Insert Username please", Toast.LENGTH_SHORT).show();
                 }
                 else
                 {
@@ -67,7 +80,7 @@ public class LoginActivity extends AppCompatActivity {
                     loadingBar.setCanceledOnTouchOutside(false);
                     loadingBar.show();
 
-                    Autenticate(username, password);
+                    Autenticate(studentUsername, studentPassword);
 
                 }
             }
@@ -81,59 +94,73 @@ public class LoginActivity extends AppCompatActivity {
         return inputPassword.equals(storedPassword);
     }
     //WHEN THE PERSON LOGIN
-    private void Autenticate(final String username, String password)
-    {
+    private void Autenticate(final String studentUsername, String studentPassword) {
 //        if (rememberMe.isChecked())
 //        {
-        Paper.init(this);
-        Paper.book().write(Continuity.userNamekey, username);
-        Paper.book().write(Continuity.userPassword, password);
+//        Paper.init(this);
+//        Paper.book().write(Continuity.userNamekey, username);
+//        Paper.book().write(Continuity.userPassword, password);
 //        }
 
-        final DatabaseReference Rootref;
-        Rootref = FirebaseDatabase.getInstance().getReference().child("Users");
+        final DatabaseReference rootRef;
+        rootRef = FirebaseDatabase.getInstance().getReference().child("Users");
 
-        Rootref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot)
-            {
-                if (snapshot.child(username).exists())
-                {
-                    Account userData = snapshot.child(username).getValue(Account.class);
+        rootRef.orderByChild("username")
+                .equalTo(studentUsername)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                    if (userData.getusername().equals(username))
-                    {
-                        if (userData.getPassword().equals(password))
-                        {
-                            Toast.makeText(LoginActivity.this, "Logged in Successfully..", Toast.LENGTH_SHORT).show();
+
+                        if(!snapshot.exists()){
                             loadingBar.dismiss();
-                            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                            Continuity.currentOnlineUser = userData;
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            startActivity(intent);
-                            finish();
+                            Toast.makeText(LoginActivity.this, "User not found", Toast.LENGTH_SHORT).show();
+                            return;
                         }
-                        else
-                        {
-                            Toast.makeText(LoginActivity.this, "Wrong Password!", Toast.LENGTH_SHORT).show();
+
+
+                        DataSnapshot userSnap = snapshot.getChildren().iterator().next();
+
+                        // checking the role of the user
+                        String role = userSnap.child("role").getValue(String.class);
+                        if (!"student".equals(role)){
                             loadingBar.dismiss();
+                            Toast.makeText(LoginActivity.this, "You're not a student", Toast.LENGTH_SHORT).show();
+                            return;
                         }
+
+                        //mapping the users attributes to the account class
+                        Account account = userSnap.getValue(Account.class);
+
+                        if(account == null){
+                            loadingBar.dismiss();
+                            Toast.makeText(LoginActivity.this, "Login Error!!!", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        if (!verifyPassword(studentPassword, account.getPassword())){
+                            loadingBar.dismiss();
+                            Toast.makeText(LoginActivity.this, "Wrong Password", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        loadingBar.dismiss();
+                        Continuity.userId= account.getUserId();
+                        Continuity.currentOnlineUser = account;
+
+                        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+
                     }
-                }
-                else
-                {
-                    Toast.makeText(LoginActivity.this, "You are not Registered!", Toast.LENGTH_SHORT).show();
-                    loadingBar.dismiss();
-                }
 
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        loadingBar.dismiss();
+                        Toast.makeText(LoginActivity.this, "Database Error", Toast.LENGTH_SHORT).show();
 
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error)
-            {
-
-            }
-        });
+                    }
+                });
 
     }
 }

@@ -3,35 +3,34 @@ package com.example.home_study.Model;
 public class Post {
 
     private String postId;
-    private String authorProfile;
-    private String author;
+
+    private String adminId;
     private String time;
     private String message;
-    private String imageUrl;
+    private String postUrl;
     private int likes;
-    private int comments;
+    private int likeCount;
+//    private int comments;
 
     public Post() {
     }
 
-
-
-    public Post(String author, String time, String message, String imageUrl, int likes, int comments, String authorProfile, String postId) {
-        this.author = author;
-        this.time = time;
-        this.message = message;
-        this.imageUrl = imageUrl;
-        this.likes = likes;
-        this.comments = comments;
-        this.authorProfile = authorProfile;
+    public Post(String postId, String adminId, String time, String postUrl, String message,int likeCount, int likes) {
         this.postId = postId;
-    }
-    public String getAuthorProfile() {
-        return authorProfile;
+        this.adminId = adminId;
+        this.time = time;
+        this.postUrl = postUrl;
+        this.message = message;
+        this.likeCount = likeCount;
+//        this.comments = comments;
     }
 
-    public void setAuthorProfile(String authorProfile) {
-        this.authorProfile = authorProfile;
+    public int getLikeCount() {
+        return likeCount;
+    }
+
+    public void setLikeCount(int likeCount) {
+        this.likeCount = likeCount;
     }
 
     public String getPostId() {
@@ -42,12 +41,12 @@ public class Post {
         this.postId = postId;
     }
 
-    public String getAuthor() {
-        return author;
+    public String getAdminId() {
+        return adminId;
     }
 
-    public void setAuthor(String author) {
-        this.author = author;
+    public void setAdminId(String adminId) {
+        this.adminId = adminId;
     }
 
     public String getTime() {
@@ -66,27 +65,12 @@ public class Post {
         this.message = message;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+
+    public String getPostUrl() {
+        return postUrl;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public int getLikes() {
-        return likes;
-    }
-
-    public void setLikes(int likes) {
-        this.likes = likes;
-    }
-
-    public int getComments() {
-        return comments;
-    }
-
-    public void setComments(int comments) {
-        this.comments = comments;
+    public void setPostUrl(String postUrl) {
+        this.postUrl = postUrl;
     }
 }

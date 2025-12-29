@@ -1,11 +1,17 @@
 package com.example.home_study;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -13,12 +19,19 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 public class HomeActivity extends AppCompatActivity {
 
     BottomNavigationView bottomNavigationView;
-    private ImageView chat;
+    private ImageView chat, profile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.drawer_layout), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
 
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         bottomNavigationView.setBackground(null);
@@ -26,6 +39,24 @@ public class HomeActivity extends AppCompatActivity {
         // Set the default selected item (Home icon with 'homefill')
         bottomNavigationView.setSelectedItemId(R.id.home);
         bottomNavigationView.getMenu().findItem(R.id.home).setIcon(R.drawable.homefill);
+
+        chat = (ImageView) findViewById(R.id.chat);
+        profile = (ImageView) findViewById(R.id.profile);
+
+        profile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HomeActivity.this, ProfileActivity.class);
+                startActivity(intent);
+            }
+        });
+        chat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HomeActivity.this, ChatActivity.class);
+                startActivity(intent);
+            }
+        });
 
         replaceFragment(new HomeFragment());
         // Set up the listener for item selection
@@ -54,7 +85,7 @@ public class HomeActivity extends AppCompatActivity {
 
                 case R.id.profile:
                     item.setIcon(R.drawable.profile); // Active icon
-                    replaceFragment(new ProfileFragment());
+                    replaceFragment(new ChatBotFragment());
                     break;
             }
             return true;
