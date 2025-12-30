@@ -10,11 +10,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.home_study.ChatDialogue;
-import com.example.home_study.Model.ChatTeacher;
 import com.example.home_study.Model.ChatUser;
+
 import com.example.home_study.Prevalent.Continuity;
 import com.example.home_study.R;
 import com.squareup.picasso.Picasso;
@@ -111,6 +112,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
 
     }
 
+
     @Override
     public int getItemCount() {
         return list.size();
@@ -132,5 +134,14 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
             lastMessageTime = itemView.findViewById(R.id.lastMessageTime);
             seenIcon = itemView.findViewById(R.id.seenIcon);
         }
+    }
+
+    public void submitList(List<ChatUser> newList) {
+        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(
+                new ChatUserDiffCallback(this.list, newList)
+        );
+        this.list.clear();
+        this.list.addAll(newList);
+        diff.dispatchUpdatesTo(this);
     }
 }

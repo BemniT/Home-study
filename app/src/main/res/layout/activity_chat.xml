@@ -1,187 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
-    android:fitsSystemWindows="true"
-    tools:openDrawer="start"
+    android:id="@+id/chatActivity"
     android:background="@color/white">
 
+    <!-- Toolbar -->
     <LinearLayout
-        android:id="@+id/toolbarContainer"
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:orientation="horizontal"
-        android:paddingTop="@dimen/_8sdp"
-        android:paddingStart="@dimen/_8sdp"
-        android:paddingEnd="@dimen/_10sdp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        >
+        android:gravity="center_vertical"
+        android:paddingHorizontal="12dp"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/imageBack"
-            android:layout_width="@dimen/_28sdp"
-            android:layout_height="@dimen/_28sdp"
-            android:src="@drawable/back"
-            />
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/back"/>
 
-            <TextView
-                android:id="@+id/titleBars"
-                android:gravity="center"
-                android:layout_gravity="center"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/message"
-                android:textColor="@color/black"
-                android:textSize="@dimen/_14ssp"
-                android:layout_marginEnd="@dimen/_8sdp"
-                android:layout_weight="1"
-                />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/cardContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="2dp"
-        android:paddingStart="4dp"
-        android:paddingEnd="2dp"
-
-        android:orientation="horizontal"
-        android:background="@drawable/yourstaff"
-        app:layout_constraintTop_toBottomOf="@id/toolbarContainer"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        >
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/allCard"
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginStart="@dimen/_8sdp"
-            android:layout_marginEnd="@dimen/_8sdp"
-            android:layout_weight="1"
-            android:padding="@dimen/_15sdp"
-            app:cardCornerRadius="@dimen/_15sdp">
-
-            <TextView
-                android:id="@+id/allText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@color/primary_secondary"
-                android:text="All"
-                android:textColor="@color/white"
-                android:textSize="@dimen/_12ssp"
-                android:layout_gravity="center"
-                />
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/adminCard"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/_18sdp"
-            app:cardCornerRadius="@dimen/_15sdp"
-            android:layout_gravity="center"
-            android:layout_marginStart="@dimen/_8sdp"
-            android:layout_marginEnd="@dimen/_8sdp"
-            android:padding="@dimen/_20sdp"
-            android:layout_weight="1"
-
-            >
-
-            <TextView
-                android:id="@+id/adminText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Admins"
-                android:textSize="@dimen/_12ssp"
-                android:textColor="@color/black"
-                android:layout_gravity="center"
-
-                />
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/teachersCard"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/_18sdp"
-            app:cardCornerRadius="@dimen/_15sdp"
-            android:layout_gravity="center"
-            android:layout_marginStart="@dimen/_8sdp"
-            android:layout_marginEnd="@dimen/_8sdp"
-            android:padding="@dimen/_20sdp"
-            android:layout_weight="1"
-            >
-
-            <TextView
-                android:id="@+id/teacherText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Teachers"
-                android:textSize="@dimen/_12ssp"
-                android:textColor="@color/black"
-                android:layout_gravity="center"
-                />
-        </androidx.cardview.widget.CardView>
+            android:layout_marginStart="16dp"
+            android:text="Messages"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"/>
     </LinearLayout>
 
+    <!-- Filter Pills -->
+    <HorizontalScrollView
+        android:id="@+id/filterScroll"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:scrollbars="none"
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
 
-    <FrameLayout
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="8dp">
+
+            <TextView
+                android:id="@+id/allCard"
+                style="@style/ChatFilterPill"
+                android:text="All"
+                android:background="@drawable/pill_selected"/>
+
+            <TextView
+                android:id="@+id/adminCard"
+                style="@style/ChatFilterPill"
+                android:text="Admins"
+                android:background="@drawable/pill_unselected"
+                />
+
+            <TextView
+                android:id="@+id/teachersCard"
+                style="@style/ChatFilterPill"
+                android:text="Teachers"
+                android:background="@drawable/pill_unselected"
+                />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- Chat list -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/userRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="@dimen/_8sdp"
-        android:background="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cardContainer"
-        tools:layout_editor_absoluteX="16dp">
+        android:paddingTop="8dp"
+        android:clipToPadding="false"
+        app:layout_constraintTop_toBottomOf="@id/filterScroll"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
-
-
-
-
-
-    <androidx.recyclerview.widget.RecyclerView
-    android:id="@+id/userRecyclerView"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:clipToPadding="false"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/toolbarContainer"
-    android:orientation="vertical"
-    android:overScrollMode="never"
-    android:padding="8dp"
-    android:visibility="gone"
-    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
+    <!-- Loading -->
     <ProgressBar
-    android:id="@+id/progressBar"
-    android:layout_width="@dimen/_25sdp"
-    android:layout_height="34dp"
-    android:layout_gravity="center"
-    android:outlineAmbientShadowColor="@color/primary_secondary"
-    android:progressBackgroundTint="@color/primary_secondary"
-    android:progressDrawable="@drawable/progressbar_layer" />
+        android:id="@+id/progressBar"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-    <TextView
-    android:id="@+id/textErrorMessage"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:layout_marginStart="@dimen/_24sdp"
-    android:layout_marginEnd="@dimen/_24sdp"
-    android:gravity="center"
-    android:textColor="@color/design_default_color_error"
-    android:textSize="@dimen/_12ssp"
-    android:visibility="gone"
-
-        />
-            </FrameLayout>
-
-
- </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

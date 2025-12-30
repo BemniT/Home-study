@@ -5,17 +5,21 @@ import static android.view.View.VISIBLE;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.home_study.Adapter.ChatListAdapter;
-import com.example.home_study.Model.ChatTeacher;
 import com.example.home_study.Model.ChatUser;
 import com.example.home_study.Prevalent.Continuity;
 import com.google.firebase.database.DataSnapshot;
@@ -36,8 +40,13 @@ public class ChatActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private ChatListAdapter adapter;
     private ImageView imageBack;
+    private TextView all,admin,teacher;
     private List<ChatUser> chatUserList = new ArrayList<>();
+    List<ChatUser> allChats = new ArrayList<>();
+    List<ChatUser> visibleChats = new ArrayList<>();
+
     private Set<String> loadedTeacherIds = new HashSet<>();
+    private ChatCategory selectedCategory = ChatCategory.ALL;
 
     private DatabaseReference studentRef, coursesRef, assignmentRef, teachersRef, usersRef;
     @Override
@@ -45,11 +54,11 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_chat);
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-//            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-//            return insets;
-//        });
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.chatActivity), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
 
         recyclerView = (RecyclerView) findViewById(R.id.userRecyclerView);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
@@ -58,8 +67,31 @@ public class ChatActivity extends AppCompatActivity {
             finish();
         });
 
+        all = findViewById(R.id.allCard);
+        admin=  findViewById(R.id.adminCard);
+        teacher = findViewById(R.id.teachersCard);
+
+        all.setOnClickListener(v -> {
+            selectedCategory = ChatCategory.ALL;
+            selectedPill(all,admin,teacher);
+            applyFilter();
+        });
+        admin.setOnClickListener(v -> {
+            selectedCategory = ChatCategory.ADMIN;
+            selectedPill(admin,all,teacher);
+
+            applyFilter();
+        });
+        teacher.setOnClickListener(v -> {
+            selectedCategory = ChatCategory.TEACHER;
+            selectedPill(teacher,all,admin);
+
+            applyFilter();
+        });
+
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ChatListAdapter(chatUserList);
+        adapter = new ChatListAdapter(visibleChats);
         recyclerView.setAdapter(adapter);
 
         studentRef = FirebaseDatabase.getInstance().getReference("Students");
@@ -73,6 +105,25 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
+    public enum ChatCategory{
+        ALL,
+        ADMIN,
+        TEACHER
+    }
+
+    private void applyFilter() {
+
+        List<ChatUser> filtered = new ArrayList<>();
+
+        for (ChatUser user : chatUserList){
+            if (selectedCategory == ChatCategory.ALL
+                || (selectedCategory == selectedCategory.ADMIN && "ADMIN".equals(user.getRole()))
+                    || (selectedCategory == selectedCategory.TEACHER && "TEACHER".equals(user.getRole()))){
+                filtered.add(user);
+            }
+        }
+        adapter.submitList(filtered);
+    }
     private void loadStudentTeachers() {
         String userId = Continuity.userId;
 
@@ -180,9 +231,10 @@ public class ChatActivity extends AppCompatActivity {
 
                                         ChatUser chatUser = new ChatUser(userId, name, profileImage,courseName,"TEACHER");
                                         chatUserList.add(chatUser);
+                                        applyFilter();
                                         listenForUnreadCounts(chatUser);
                                         listenForChatMeta(chatUser);
-                                        adapter.notifyDataSetChanged();
+//                                        adapter.notifyDataSetChanged();
                                         progressBar.setVisibility(GONE);
                                         recyclerView.setVisibility(VISIBLE);
                                     }
@@ -226,9 +278,10 @@ public class ChatActivity extends AppCompatActivity {
                                             );
 
                                     chatUserList.add(0, admin);
+                                    applyFilter();
                                     listenForUnreadCounts(admin);
                                     listenForChatMeta(admin);
-                                    adapter.notifyDataSetChanged();
+//                                    adapter.notifyDataSetChanged();
                                 }
 
                                 @Override
@@ -260,7 +313,9 @@ public class ChatActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 int count = snapshot.exists() ? snapshot.getValue(Integer.class) : 0;
                 chatUser.setUnreadCount(count);
-                adapter.notifyDataSetChanged();
+//                adapter.notifyDataSetChanged();
+                applyFilter();
+                updatePillBadges();
             }
 
             @Override
@@ -303,8 +358,9 @@ public class ChatActivity extends AppCompatActivity {
 
                 user.setUnreadCount(unread);
 
-                sortChats();
-                adapter.notifyDataSetChanged();
+                sortAndApply();
+                updatePillBadges();
+//                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -314,9 +370,46 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    private void sortChats(){
-        Collections.sort(chatUserList, (a, b) ->
+    private int getUnreadForRole(String role){
+        int total = 0;
+        for (ChatUser u : chatUserList){
+            if (role == null || role.equals(u.getRole())){
+                total += u.getUnreadCount();
+            }
+        }
+        return total;
+    }
+
+    private void updatePillBadges() {
+        TextView all = findViewById(R.id.allCard);
+        TextView admin = findViewById(R.id.adminCard);
+        TextView teacher = findViewById(R.id.teachersCard);
+
+        int allUnread = getUnreadForRole(null);
+        int adminUnread = getUnreadForRole("ADMIN");
+        int teacherUnread = getUnreadForRole("TEACHER");
+
+        all.setText(allUnread > 0 ? "All (" + allUnread + ")" : "All");
+        admin.setText(adminUnread > 0 ? "Admins (" + adminUnread + ")" : "Admins");
+        teacher.setText(teacherUnread > 0 ? "Teachers (" + teacherUnread + ")" : "Teachers");
+
+    }
+    private void sortAndApply() {
+        List<ChatUser> sorted = new ArrayList<>(chatUserList);
+        Collections.sort(sorted, (a, b) ->
                 Long.compare(b.getLastMessageTime(), a.getLastMessageTime())
-                );
+        );
+        chatUserList = sorted;
+        applyFilter();
+    }
+    private void selectedPill(View selected, View... others){
+        selected.setBackgroundResource(R.drawable.pill_selected);
+        selected.animate().scaleX(1.05f).scaleY(1.05f).setDuration(120).start();
+
+        for (View v: others ){
+            v.setBackgroundResource(R.drawable.pill_unselected);
+            v.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
+
+        }
     }
 }
