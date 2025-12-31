@@ -22,5 +22,5 @@
     <item
         android:id="@+id/profile"
         android:title=""
-        android:icon="@drawable/bot"/>
+        android:icon="@drawable/bot_icon_outline"/>
 </menu>

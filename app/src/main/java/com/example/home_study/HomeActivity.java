@@ -14,12 +14,17 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.example.home_study.Model.Account;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class HomeActivity extends AppCompatActivity {
 
     BottomNavigationView bottomNavigationView;
-    private ImageView chat, profile;
+    private ImageView chat;
+    private CircleImageView profileTop;
+    Account user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,10 +45,13 @@ public class HomeActivity extends AppCompatActivity {
         bottomNavigationView.setSelectedItemId(R.id.home);
         bottomNavigationView.getMenu().findItem(R.id.home).setIcon(R.drawable.homefill);
 
-        chat = (ImageView) findViewById(R.id.chat);
-        profile = (ImageView) findViewById(R.id.profile);
 
-        profile.setOnClickListener(new View.OnClickListener() {
+        chat = (ImageView) findViewById(R.id.chat);
+        profileTop =  findViewById(R.id.profile);
+//        String profileImage = getIntent().getStringExtra("profileImage");
+//        Picasso.get().load(profileImage).placeholder(R.drawable.profile_image).into(profileTop);
+//        Log.d("image",profileImage);
+        profileTop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(HomeActivity.this, ProfileActivity.class);
@@ -84,8 +92,8 @@ public class HomeActivity extends AppCompatActivity {
                     break;
 
                 case R.id.profile:
-                    item.setIcon(R.drawable.profile); // Active icon
-                    replaceFragment(new ChatBotFragment());
+                    item.setIcon(R.drawable.bot_icon_filled); // Active icon
+                    replaceFragment(new ClassFragment());
                     break;
             }
             return true;
@@ -96,7 +104,8 @@ public class HomeActivity extends AppCompatActivity {
         bottomNavigationView.getMenu().findItem(R.id.home).setIcon(R.drawable.home); // Default icon
         bottomNavigationView.getMenu().findItem(R.id.book).setIcon(R.drawable.book);
         bottomNavigationView.getMenu().findItem(R.id.exam).setIcon(R.drawable.exam);
-        bottomNavigationView.getMenu().findItem(R.id.profile).setIcon(R.drawable.profile);
+        bottomNavigationView.getMenu().findItem(R.id.profile).setIcon(R.drawable.bot_icon_outline);
+
     }
 
     private void replaceFragment(Fragment fragment) {

@@ -23,7 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:minWidth="70dp"
-            android:background="@color/LightBlue2"
+            android:background="@drawable/bg_user_botmessage"
             >
 
         <TextView
@@ -36,7 +36,7 @@
             android:paddingBottom="@dimen/_8sdp"
             android:layout_marginEnd="@dimen/_4sdp"
             app:layout_constraintWidth_max="wrap"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:textSize="@dimen/_13ssp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -69,7 +69,7 @@
                     android:id="@+id/textDateTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/black"
+                    android:textColor="@color/white"
                     android:textSize="@dimen/_10ssp"
                     android:layout_gravity="center"
                     android:gravity="center"
@@ -81,6 +81,7 @@
                     android:layout_height="@dimen/_14sdp"
                     app:layout_constraintEnd_toEndOf="parent"
                     android:src="@drawable/single_check"
+                    android:backgroundTint="@color/white"
 
                     app:layout_constraintTop_toBottomOf="@id/textMessage"
                     />

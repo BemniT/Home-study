@@ -17,12 +17,12 @@ public class ChatUserDiffCallback extends DiffUtil.Callback {
 
     @Override
     public int getOldListSize() {
-        return oldList.size();
+        return oldList == null ? 0 : oldList.size();
     }
 
     @Override
     public int getNewListSize() {
-        return newList.size();
+        return newList == null ? 0 : newList.size();
     }
 
     @Override
@@ -33,11 +33,16 @@ public class ChatUserDiffCallback extends DiffUtil.Callback {
 
     @Override
     public boolean areContentsTheSame(int oldPos, int newPos) {
-        ChatUser o = oldList.get(oldPos);
-        ChatUser n = newList.get(newPos);
+        ChatUser old = oldList.get(oldPos);
+        ChatUser neu = newList.get(newPos);
 
-        return o.getLastMessageTime() == n.getLastMessageTime()
-                && o.getUnreadCount() == n.getUnreadCount()
-                && o.isLastMessageSeen() == n.isLastMessageSeen();
+        return old.getUnreadCount() == neu.getUnreadCount()
+                && old.isLastMessageSeen() == neu.isLastMessageSeen()
+                && old.getLastMessageTime() == neu.getLastMessageTime()
+                && safe(old.getLastMessage()).equals(safe(neu.getLastMessage()));
+    }
+
+    private String safe(String s) {
+        return s == null ? "" : s;
     }
 }

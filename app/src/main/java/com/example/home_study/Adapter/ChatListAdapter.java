@@ -20,13 +20,14 @@ import com.example.home_study.Prevalent.Continuity;
 import com.example.home_study.R;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHolder> {
 
-    private List<ChatUser> list;
+    private List<ChatUser> list = new ArrayList<>();
 
     public ChatListAdapter(List<ChatUser> list) {
         this.list = list;
@@ -140,8 +141,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
         DiffUtil.DiffResult diff = DiffUtil.calculateDiff(
                 new ChatUserDiffCallback(this.list, newList)
         );
-        this.list.clear();
-        this.list.addAll(newList);
+        this.list = newList;
         diff.dispatchUpdatesTo(this);
     }
 }

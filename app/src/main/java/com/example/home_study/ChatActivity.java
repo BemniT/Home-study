@@ -45,7 +45,7 @@ public class ChatActivity extends AppCompatActivity {
     List<ChatUser> allChats = new ArrayList<>();
     List<ChatUser> visibleChats = new ArrayList<>();
 
-    private Set<String> loadedTeacherIds = new HashSet<>();
+    private final Set<String> loadedUserIds = new HashSet<>();
     private ChatCategory selectedCategory = ChatCategory.ALL;
 
     private DatabaseReference studentRef, coursesRef, assignmentRef, teachersRef, usersRef;
@@ -115,13 +115,16 @@ public class ChatActivity extends AppCompatActivity {
 
         List<ChatUser> filtered = new ArrayList<>();
 
-        for (ChatUser user : chatUserList){
-            if (selectedCategory == ChatCategory.ALL
-                || (selectedCategory == selectedCategory.ADMIN && "ADMIN".equals(user.getRole()))
-                    || (selectedCategory == selectedCategory.TEACHER && "TEACHER".equals(user.getRole()))){
-                filtered.add(user);
+        for (ChatUser u : chatUserList) {
+            if (selectedCategory == ChatCategory.ALL) {
+                filtered.add(u);
+            } else if (selectedCategory == ChatCategory.ADMIN && "ADMIN".equals(u.getRole())) {
+                filtered.add(u);
+            } else if (selectedCategory == ChatCategory.TEACHER && "TEACHER".equals(u.getRole())) {
+                filtered.add(u);
             }
         }
+
         adapter.submitList(filtered);
     }
     private void loadStudentTeachers() {
@@ -209,10 +212,10 @@ public class ChatActivity extends AppCompatActivity {
 
     private void resolveTeacher(String teacherId, String courseName) {
 
-        if (loadedTeacherIds.contains(teacherId)){
+        if (loadedUserIds.contains(teacherId)){
             return;
         }
-        loadedTeacherIds.add(teacherId);
+        loadedUserIds.add(teacherId);
         teachersRef.child(teacherId)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -231,9 +234,9 @@ public class ChatActivity extends AppCompatActivity {
 
                                         ChatUser chatUser = new ChatUser(userId, name, profileImage,courseName,"TEACHER");
                                         chatUserList.add(chatUser);
-                                        applyFilter();
                                         listenForUnreadCounts(chatUser);
                                         listenForChatMeta(chatUser);
+                                        applyFilter();
 //                                        adapter.notifyDataSetChanged();
                                         progressBar.setVisibility(GONE);
                                         recyclerView.setVisibility(VISIBLE);
@@ -278,9 +281,10 @@ public class ChatActivity extends AppCompatActivity {
                                             );
 
                                     chatUserList.add(0, admin);
-                                    applyFilter();
+
                                     listenForUnreadCounts(admin);
                                     listenForChatMeta(admin);
+                                    applyFilter();
 //                                    adapter.notifyDataSetChanged();
                                 }
 
