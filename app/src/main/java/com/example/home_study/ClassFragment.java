@@ -24,6 +24,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 
@@ -35,7 +36,7 @@ import java.util.List;
  * Use the {@link ClassFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ClassFragment extends Fragment {
+public class ClassFragment extends Fragment implements SubjectAdapter.OnSubjectClickListener{
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -51,6 +52,8 @@ public class ClassFragment extends Fragment {
 
     private DatabaseReference studentsRef;
     private DatabaseReference coursesRef;
+
+    private String studentID;
 
 
     public ClassFragment() {
@@ -88,7 +91,7 @@ public class ClassFragment extends Fragment {
 
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         adapter = new SubjectAdapter(subjectList, subject -> {
-            Toast.makeText(getContext(), "THE CARD IS SELECTED", Toast.LENGTH_SHORT).show();
+            onSubjectClick(subject);
         });
         recyclerView.setAdapter(adapter);
 
@@ -114,6 +117,7 @@ public class ClassFragment extends Fragment {
                         for (DataSnapshot s : snapshot.getChildren()) {
                             String grade = s.child("grade").getValue(String.class);
                             String section = s.child("section").getValue(String.class);
+                            studentID = s.getKey();
                             loadCoursesForStudent(grade, section);
                             break;
                         }
@@ -157,5 +161,14 @@ public class ClassFragment extends Fragment {
     }
 
 
+    @Override
+    public void onSubjectClick(Subject subject) {
+        String courseTd = subject.getCourseId();
+        String subjectName = subject.getName();
 
+
+        SubjectPointBottomSheet sheet = SubjectPointBottomSheet.newInstance(courseTd, subjectName, studentID);
+
+        sheet.show(getParentFragmentManager(),"subject_points");
+    }
 }

@@ -40,6 +40,7 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
         Subject subject = subjectList.get(position);
 
         holder.tvSubjectName.setText(subject.getName());
+//        holder.tvTeacherName.setText(subject.);
         holder.tvGradeSection.setText(
                 "Grade " + subject.getGrade() + subject.getSection()
         );
@@ -58,12 +59,13 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
 
     static class SubjectViewHolder extends RecyclerView.ViewHolder {
 
-        TextView tvSubjectName, tvGradeSection;
+        TextView tvSubjectName, tvGradeSection,tvTeacherName;
 
         public SubjectViewHolder(@NonNull View itemView) {
             super(itemView);
             tvSubjectName = itemView.findViewById(R.id.subjectName);
             tvGradeSection = itemView.findViewById(R.id.tvGradeSection);
+
         }
     }
 }
