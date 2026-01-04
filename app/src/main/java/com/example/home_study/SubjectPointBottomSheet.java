@@ -35,9 +35,25 @@ public class SubjectPointBottomSheet extends BottomSheetDialogFragment {
     private static final String ARG_COURSE_ID = "courseId";
     private static final String ARG_SUBJECT = "subject";
     private static final String ARG_STUDENT_ID = "studentID";
-    private TextView tvTeacher, tvSubjectInfo, tvPercent;
+    private TextView tvTeacher, tvSubjectInfo, tvPercent, tvMotivation, noAssessment;
     private CircleImageView teacherProfileImage;
+    private ObjectAnimator skeletonAnimator;
 
+    private void startSkeleton(View skeleton){
+
+        skeletonAnimator = ObjectAnimator.ofFloat(skeleton,"alpha", 0.4f, 1f);
+        skeletonAnimator.setDuration(700);
+        skeletonAnimator.setRepeatCount(ObjectAnimator.INFINITE);
+        skeletonAnimator.setRepeatMode(ObjectAnimator.REVERSE);
+        skeletonAnimator.start();
+
+    }
+
+    private void stopSkeleton(){
+        if (skeletonAnimator != null){
+            skeletonAnimator.cancel();
+        }
+    }
     public static SubjectPointBottomSheet newInstance(String courseId, String subject, String studentId) {
         SubjectPointBottomSheet sheet = new SubjectPointBottomSheet();
         Bundle b = new Bundle();
@@ -72,14 +88,16 @@ public class SubjectPointBottomSheet extends BottomSheetDialogFragment {
     }
 
     @Override
-    public View onCreateView(
-            @NonNull LayoutInflater inflater,
-            ViewGroup container,
-            Bundle savedInstanceState
-    ) {
-        View v = inflater.inflate(
-                R.layout.bottomsheet_subject_points, container, false
-        );
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.bottomsheet_subject_points, container, false);
+
+        View skeleton = v.findViewById(R.id.skeletonContainer);
+        View content = v.findViewById(R.id.contentContainer);
+
+        content.setVisibility(View.INVISIBLE);
+        skeleton.setVisibility(View.VISIBLE);
+
+        startSkeleton(skeleton);
         v.setAlpha(0f);
         v.animate()
                 .alpha(1f)
@@ -91,6 +109,9 @@ public class SubjectPointBottomSheet extends BottomSheetDialogFragment {
         tvSubjectInfo = v.findViewById(R.id.tvSubjectInfo);
         tvPercent = v.findViewById(R.id.tvPercentage);
         teacherProfileImage = v.findViewById(R.id.teacherProfileImage);
+        tvMotivation = v.findViewById(R.id.tvMotivational);
+        noAssessment = v.findViewById(R.id.noAssessment);
+
         RecyclerView rv = v.findViewById(R.id.rvAssessments);
         CircularProgressIndicator circular = v.findViewById(R.id.circularBar);
 
@@ -137,6 +158,26 @@ public class SubjectPointBottomSheet extends BottomSheetDialogFragment {
                 .child(studentId);
 
         ref.get().addOnSuccessListener(snap -> {
+            stopSkeleton();
+            skeleton.animate()
+                    .alpha(0f)
+                    .setDuration(300)
+                    .withEndAction(()->{
+                        content.setVisibility(View.VISIBLE);
+                        skeleton.setVisibility(View.GONE);
+                        if (assessments.isEmpty()){
+                            rv.setVisibility(View.GONE);
+                            noAssessment.setVisibility(View.VISIBLE);
+
+                            tvPercent.setText("--");
+                            tvMotivation.setText("No assessment yet. your journey starts soon.");
+                            circular.setProgress(0);
+                        }else {
+                            rv.setVisibility(View.VISIBLE);
+                            noAssessment.setVisibility(View.GONE);
+                        }
+                    }).start();
+
             if (!snap.exists()) return;
 
 
@@ -165,12 +206,15 @@ public class SubjectPointBottomSheet extends BottomSheetDialogFragment {
 
             adapter.notifyDataSetChanged();
 
+
+
+
             // 3️⃣ Circular percentage
             if (totalMax > 0) {
                 int percent = (int) ((totalScore * 100f) / totalMax);
 
                 tvPercent.setText(percent + "%");
-
+                setMotivation(tvMotivation, percent);
                 circular.setProgress(0);
                 ObjectAnimator.ofInt(circular, "progress", percent)
                         .setDuration(700)
@@ -231,4 +275,25 @@ public class SubjectPointBottomSheet extends BottomSheetDialogFragment {
             }
         });
     }
+
+    private void setMotivation(TextView tv, int percent) {
+        String msg;
+
+        if (percent >= 90) {
+            msg = "Outstanding work. This is excellence in motion.";
+        } else if (percent >= 75) {
+            msg = "Great job. Keep the momentum going.";
+        } else if (percent >= 60) {
+            msg = "Good effort. A little more focus will push you higher.";
+        } else if (percent >= 45) {
+            msg = "You’re capable of more. Let’s sharpen the basics.";
+        } else {
+            msg = "This doesn’t define you. Progress starts with persistence.";
+        }
+
+        tv.setText(msg);
+        tv.setAlpha(0f);
+        tv.animate().alpha(1f).setDuration(400).start();
+    }
+
 }

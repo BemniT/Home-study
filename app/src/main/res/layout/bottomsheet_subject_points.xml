@@ -1,26 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@drawable/bg_bottomsheet_round"
-    android:fillViewport="true">
+
+    >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/contentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        android:background="@drawable/bg_bottomsheet_round"
+        android:fillViewport="true"
+        >
 
 
-    <View
-        android:id="@+id/dragHandle"
-        android:layout_width="40dp"
-        android:layout_height="5dp"
-        android:background="@color/black_low"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
+        <View
+            android:id="@+id/dragHandle"
+            android:layout_width="40dp"
+            android:layout_height="5dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+
 
 
     <de.hdodenhof.circleimageview.CircleImageView
@@ -35,7 +40,7 @@
         />
     <TextView
         android:id="@+id/tvTeacherName"
-        android:text="Teacher Name"
+
         android:textStyle="bold"
         android:textSize="16sp"
         android:layout_marginTop="15dp"
@@ -80,6 +85,8 @@
             app:trackCornerRadius="12dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             />
 
         <TextView
@@ -113,5 +120,158 @@
         android:paddingBottom="24dp"
 />
 
+        <TextView
+            android:id="@+id/noAssessment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No assessment yet"
+            android:textColor="@color/black_low"
+            android:layout_marginTop="40dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:textAlignment="center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="gone"
+            />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:id="@+id/tvMotivational"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="keep up the good work!"
+        android:textColor="@color/black"
+        android:layout_marginTop="40dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:textAlignment="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <!-- SKELETON OVERLAY-->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/skeletonContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        android:background="@drawable/bg_bottomsheet_round">
+
+        <View
+            android:id="@+id/skeletonDragHandle"
+            android:layout_width="40dp"
+            android:layout_height="5dp"
+            android:background="@color/black_low"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+
+
+        <View
+            android:id="@+id/skeletonteacherProfileImage"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:src="@drawable/profile_image"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_skeleton_circle"
+            app:layout_constraintTop_toBottomOf="@id/skeletonDragHandle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/skeletonTeacherName"
+            />
+        <View
+            android:id="@+id/skeletonTeacherName"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginTop="15dp"
+            android:layout_width="120dp"
+            android:layout_height="14dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/skeletonteacherProfileImage"
+            android:layout_marginStart="5dp"
+            android:background="@drawable/bg_skeleton"
+            />
+
+        <View
+            android:id="@+id/skeletonSubjectInfo"
+            android:textSize="13sp"
+            android:textColor="#456"
+            android:layout_width="100dp"
+            android:layout_height="12dp"
+            app:layout_constraintTop_toBottomOf="@id/skeletonTeacherName"
+            app:layout_constraintStart_toEndOf="@id/skeletonteacherProfileImage"
+            android:layout_marginLeft="5dp"
+            android:background="@drawable/bg_skeleton"
+            android:layout_marginTop="8dp"
+            />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/skeletoncircularProContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/skeletonSubjectInfo"
+            android:layout_marginTop="20dp"
+            >
+
+
+            <View
+                android:id="@+id/skeletoncircularBar"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_gravity="center"
+                android:layout_marginVertical="16dp"
+                android:background="@drawable/bg_skeleton_circle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                />
+
+            <View
+                android:id="@+id/skeletonPercentage"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:gravity="center"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+
+                />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <View
+            android:id="@+id/skeletonAssessments"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:nestedScrollingEnabled="false"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_skeleton"
+            app:layout_constraintTop_toBottomOf="@id/skeletoncircularProContainer"
+            android:paddingBottom="24dp"
+            />
+
+        <View
+            android:id="@+id/skeletonstatusMessage"
+            android:layout_width="120dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="40dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:background="@drawable/bg_skeleton"
+
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</FrameLayout>
