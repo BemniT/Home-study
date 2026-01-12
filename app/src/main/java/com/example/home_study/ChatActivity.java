@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,8 +31,10 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ChatActivity extends AppCompatActivity {
@@ -40,15 +43,19 @@ public class ChatActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private ChatListAdapter adapter;
     private ImageView imageBack;
-    private TextView all,admin,teacher;
+    private TextView all, admin, teacher;
     private List<ChatUser> chatUserList = new ArrayList<>();
-    List<ChatUser> allChats = new ArrayList<>();
-    List<ChatUser> visibleChats = new ArrayList<>();
 
     private final Set<String> loadedUserIds = new HashSet<>();
     private ChatCategory selectedCategory = ChatCategory.ALL;
 
     private DatabaseReference studentRef, coursesRef, assignmentRef, teachersRef, usersRef;
+
+    // track chat listeners so we attach once per Chats/{chatId}
+    private final Set<String> chatListeningIds = new HashSet<>();
+    private final Map<String, ValueEventListener> chatListeners = new HashMap<>();
+    private final Map<String, DatabaseReference> chatRefs = new HashMap<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,39 +67,40 @@ public class ChatActivity extends AppCompatActivity {
             return insets;
         });
 
-        recyclerView = (RecyclerView) findViewById(R.id.userRecyclerView);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        imageBack = (ImageView) findViewById(R.id.imageBack);
-        imageBack.setOnClickListener(v->{
-            finish();
-        });
+        recyclerView = findViewById(R.id.userRecyclerView);
+        progressBar = findViewById(R.id.progressBar);
+        imageBack = findViewById(R.id.imageBack);
+        imageBack.setOnClickListener(v -> finish());
 
         all = findViewById(R.id.allCard);
-        admin=  findViewById(R.id.adminCard);
+        admin = findViewById(R.id.adminCard);
         teacher = findViewById(R.id.teachersCard);
 
         all.setOnClickListener(v -> {
             selectedCategory = ChatCategory.ALL;
-            selectedPill(all,admin,teacher);
+            selectedPill(all, admin, teacher);
             applyFilter();
         });
         admin.setOnClickListener(v -> {
             selectedCategory = ChatCategory.ADMIN;
-            selectedPill(admin,all,teacher);
-
+            selectedPill(admin, all, teacher);
             applyFilter();
         });
         teacher.setOnClickListener(v -> {
             selectedCategory = ChatCategory.TEACHER;
-            selectedPill(teacher,all,admin);
-
+            selectedPill(teacher, all, admin);
             applyFilter();
         });
 
-
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ChatListAdapter(visibleChats);
+        adapter = new ChatListAdapter(new ArrayList<>());
         recyclerView.setAdapter(adapter);
+        DefaultItemAnimator animator = new DefaultItemAnimator();
+        animator.setAddDuration(220);
+        animator.setChangeDuration(200);
+        animator.setMoveDuration(220);
+        animator.setRemoveDuration(180);
+        recyclerView.setItemAnimator(animator);
 
         studentRef = FirebaseDatabase.getInstance().getReference("Students");
         coursesRef = FirebaseDatabase.getInstance().getReference("Courses");
@@ -102,19 +110,17 @@ public class ChatActivity extends AppCompatActivity {
 
         loadAdmins();
         loadStudentTeachers();
-
     }
 
-    public enum ChatCategory{
+    public enum ChatCategory {
         ALL,
         ADMIN,
         TEACHER
     }
 
     private void applyFilter() {
-
+        // always build a new list instance to submit to adapter (avoids same-reference optimization)
         List<ChatUser> filtered = new ArrayList<>();
-
         for (ChatUser u : chatUserList) {
             if (selectedCategory == ChatCategory.ALL) {
                 filtered.add(u);
@@ -124,9 +130,10 @@ public class ChatActivity extends AppCompatActivity {
                 filtered.add(u);
             }
         }
-
-        adapter.submitList(filtered);
+        // submit a brand new list instance (adapter will copy too)
+        adapter.submitList(new ArrayList<>(filtered));
     }
+
     private void loadStudentTeachers() {
         String userId = Continuity.userId;
 
@@ -135,19 +142,18 @@ public class ChatActivity extends AppCompatActivity {
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot studentSnap) {
-                        if (!studentSnap.exists()){
-                            Log.e("chatActivity", "No student record fount ");
+                        if (!studentSnap.exists()) {
+                            Log.e("chatActivity", "No student record found ");
                             return;
                         }
 
-                        for (DataSnapshot snapshot : studentSnap.getChildren())
-                        {
+                        for (DataSnapshot snapshot : studentSnap.getChildren()) {
                             String grade = snapshot.child("grade").getValue(String.class);
                             String section = snapshot.child("section").getValue(String.class);
 
                             Log.d("chat_debug", "Student grade= " + grade + ", student section= " + section);
 
-                            if (grade == null || section == null){
+                            if (grade == null || section == null) {
                                 Log.d("chat_debug", "grade and section is null");
                             }
 
@@ -158,23 +164,20 @@ public class ChatActivity extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-
                     }
                 });
     }
 
     private void loadCoursesForStudent(String grade, String section) {
-
         coursesRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot courseSnap) {
-                for (DataSnapshot c : courseSnap.getChildren()){
+                for (DataSnapshot c : courseSnap.getChildren()) {
                     String courseGrade = c.child("grade").getValue(String.class);
                     String courseSection = c.child("section").getValue(String.class);
 
-                    Log.d("chat_debug","checking course -> grade= " + courseGrade + ", section= " + courseSection);
-                    if ( grade.equals(courseGrade) && section.equals(courseSection))
-                    {
+                    Log.d("chat_debug", "checking course -> grade= " + courseGrade + ", section= " + courseSection);
+                    if (grade != null && section != null && grade.equals(courseGrade) && section.equals(courseSection)) {
                         String courseId = c.getKey();
                         String courseName = c.child("name").getValue(String.class);
                         loadTeachersForCourse(courseId, courseName);
@@ -184,20 +187,17 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
             }
         });
     }
 
     private void loadTeachersForCourse(String courseId, String courseName) {
-
         assignmentRef.orderByChild("courseId")
                 .equalTo(courseId)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot assignShot) {
-                        for (DataSnapshot a : assignShot.getChildren()){
-
+                        for (DataSnapshot a : assignShot.getChildren()) {
                             String teacherId = a.child("teacherId").getValue(String.class);
                             resolveTeacher(teacherId, courseName);
                         }
@@ -205,66 +205,76 @@ public class ChatActivity extends AppCompatActivity {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-
                     }
                 });
     }
 
     private void resolveTeacher(String teacherId, String courseName) {
-
-        if (loadedUserIds.contains(teacherId)){
+        if (teacherId == null) return;
+        if (loadedUserIds.contains(teacherId)) {
             return;
         }
         loadedUserIds.add(teacherId);
+
         teachersRef.child(teacherId)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot teacherSnap) {
+                        if (!teacherSnap.exists()) return;
 
                         String userId = teacherSnap.child("userId").getValue(String.class);
+                        if (userId == null) return;
 
                         usersRef.child(userId)
                                 .addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot userSnap) {
-
                                         if (!userSnap.exists()) return;
                                         String name = userSnap.child("name").getValue(String.class);
                                         String profileImage = userSnap.child("profileImage").getValue(String.class);
 
-                                        ChatUser chatUser = new ChatUser(userId, name, profileImage,courseName,"TEACHER");
+                                        // Prevent duplicated chat users with same userId
+                                        boolean already = false;
+                                        for (ChatUser cu : chatUserList) {
+                                            if (userId.equals(cu.getUserId())) {
+                                                already = true;
+                                                break;
+                                            }
+                                        }
+                                        if (already) return;
+
+                                        ChatUser chatUser = new ChatUser(userId, name, profileImage, courseName, "TEACHER");
                                         chatUserList.add(chatUser);
-                                        listenForUnreadCounts(chatUser);
-                                        listenForChatMeta(chatUser);
+
+                                        // Attach single chat listener per Chats/{chatId}
+                                        listenForChatNode(chatUser);
+
                                         applyFilter();
-//                                        adapter.notifyDataSetChanged();
                                         progressBar.setVisibility(GONE);
                                         recyclerView.setVisibility(VISIBLE);
                                     }
 
                                     @Override
                                     public void onCancelled(@NonNull DatabaseError error) {
-
                                     }
                                 });
                     }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-
                     }
-
                 });
     }
 
-    private void loadAdmins(){
+    private void loadAdmins() {
         DatabaseReference adminRef = FirebaseDatabase.getInstance().getReference("School_Admins");
 
         adminRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot adminSnap : snapshot.getChildren()){
+                for (DataSnapshot adminSnap : snapshot.getChildren()) {
                     String userId = adminSnap.child("userId").getValue(String.class);
+                    if (userId == null) continue;
 
                     usersRef.child(userId)
                             .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -272,25 +282,33 @@ public class ChatActivity extends AppCompatActivity {
                                 public void onDataChange(@NonNull DataSnapshot userShot) {
                                     if (!userShot.exists()) return;
 
+                                    // Prevent duplicated chat users with same userId
+                                    boolean already = false;
+                                    for (ChatUser cu : chatUserList) {
+                                        if (userId.equals(cu.getUserId())) {
+                                            already = true;
+                                            break;
+                                        }
+                                    }
+                                    if (already) return;
+
                                     ChatUser admin = new ChatUser(
                                             userId,
                                             userShot.child("name").getValue(String.class),
                                             userShot.child("profileImage").getValue(String.class),
                                             "Director",
                                             "ADMIN"
-                                            );
+                                    );
 
+                                    // put admins at the top but only if not present
                                     chatUserList.add(0, admin);
 
-                                    listenForUnreadCounts(admin);
-                                    listenForChatMeta(admin);
+                                    listenForChatNode(admin);
                                     applyFilter();
-//                                    adapter.notifyDataSetChanged();
                                 }
 
                                 @Override
                                 public void onCancelled(@NonNull DatabaseError error) {
-
                                 }
                             });
                 }
@@ -298,86 +316,161 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
             }
         });
     }
 
-    private void listenForUnreadCounts(ChatUser chatUser)
-    {
-        String chatId = generateChatId(chatUser.getUserId(), Continuity.userId);
+    /**
+     * Listen to Chats/{chatId} root. This reads:
+     * - lastMessage (text,senderId,seen,timeStamp)
+     * - unread (map of userId -> count) — used for badges (efficient)
+     *
+     * We attach one listener per chatId (tracked) to avoid duplicates on scroll.
+     * When the chat node changes we create a new ChatUser instance and replace it in the list
+     * so DiffUtil detects the change immediately (fixes "must scroll to refresh" problem).
+     */
+    private void listenForChatNode(ChatUser existingUser) {
+        if (existingUser == null || existingUser.getUserId() == null) return;
 
-        DatabaseReference unreadRef = FirebaseDatabase.getInstance().getReference("ChatMeta")
-                .child(chatId)
-                .child("unread")
-                .child(Continuity.userId);
+        String chatId = generateChatId(existingUser.getUserId(), Continuity.userId);
+        if (chatListeningIds.contains(chatId)) return;
 
-        unreadRef.addValueEventListener(new ValueEventListener() {
+        chatListeningIds.add(chatId);
+
+        DatabaseReference chatRef = FirebaseDatabase.getInstance()
+                .getReference("Chats")
+                .child(chatId);
+
+        ValueEventListener listener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                int count = snapshot.exists() ? snapshot.getValue(Integer.class) : 0;
-                chatUser.setUnreadCount(count);
-//                adapter.notifyDataSetChanged();
-                applyFilter();
-                updatePillBadges();
+                // Build preview fields from snapshot
+                String text = null;
+                String senderId = null;
+                boolean seen = false;
+                long time = 0L;
+                int unread = 0;
+
+                if (snapshot.exists()) {
+                    DataSnapshot last = snapshot.child("lastMessage");
+                    if (last.exists()) {
+                        if (last.hasChild("text")) text = last.child("text").getValue(String.class);
+                        else if (last.hasChild("message")) text = last.child("message").getValue(String.class);
+                        else text = last.getValue(String.class);
+
+                        senderId = last.child("senderId").getValue(String.class);
+
+                        Object seenObj = last.child("seen").getValue();
+                        if (seenObj instanceof Boolean) seen = (Boolean) seenObj;
+                        else if (seenObj instanceof Long) seen = ((Long) seenObj) != 0L;
+                        else if (seenObj instanceof Integer) seen = ((Integer) seenObj) != 0;
+
+                        Long t = last.child("timeStamp").getValue(Long.class);
+                        if (t == null) {
+                            Integer ti = last.child("timeStamp").getValue(Integer.class);
+                            if (ti != null) t = ti.longValue();
+                            else {
+                                Long t2 = last.child("timestamp").getValue(Long.class);
+                                if (t2 != null) t = t2;
+                            }
+                        }
+                        if (t != null) {
+                            if (t < 1_000_000_000_000L) t = t * 1000L;
+                            time = t;
+                        }
+                    }
+
+                    // read unread map if present (preferred)
+                    DataSnapshot unreadNode = snapshot.child("unread").child(Continuity.userId);
+                    if (unreadNode.exists()) {
+                        Long l = unreadNode.getValue(Long.class);
+                        if (l == null) {
+                            Integer i = unreadNode.getValue(Integer.class);
+                            if (i != null) l = i.longValue();
+                        }
+                        if (l != null) unread = l.intValue();
+                    } else {
+                        // fallback counting (should be rare if unread map present)
+                        DataSnapshot messagesNode = snapshot.child("messages");
+                        if (messagesNode.exists()) {
+                            int count = 0;
+                            for (DataSnapshot m : messagesNode.getChildren()) {
+                                String receiverId = m.child("receiverId").getValue(String.class);
+                                Object seenObj = m.child("seen").getValue();
+                                boolean mSeen = false;
+                                if (seenObj instanceof Boolean) mSeen = (Boolean) seenObj;
+                                else if (seenObj instanceof Long) mSeen = ((Long) seenObj) != 0L;
+                                else if (seenObj instanceof Integer) mSeen = ((Integer) seenObj) != 0;
+
+                                if (receiverId != null && receiverId.equals(Continuity.userId) && !mSeen) {
+                                    count++;
+                                }
+                            }
+                            unread = count;
+                        }
+                    }
+                }
+
+                // Find index in current chatUserList by userId
+                int idx = -1;
+                String targetUserId = existingUser.getUserId();
+                for (int i = 0; i < chatUserList.size(); i++) {
+                    ChatUser cu = chatUserList.get(i);
+                    if (cu.getUserId() != null && cu.getUserId().equals(targetUserId)) {
+                        idx = i;
+                        break;
+                    }
+                }
+
+                if (idx >= 0) {
+                    ChatUser old = chatUserList.get(idx);
+                    // create a new ChatUser instance preserving non-preview fields
+                    ChatUser updated = new ChatUser(
+                            old.getUserId(),
+                            old.getName(),
+                            old.getProfileImage(),
+                            old.getSubstitle(),
+                            old.getRole()
+                    );
+                    updated.setLastMessage(text);
+                    updated.setLastMessageSenderId(senderId);
+                    updated.setLastMessageSeen(seen);
+                    updated.setLastMessageTime(time);
+                    updated.setUnreadCount(unread);
+
+                    // create a new list copy and replace the item inside it
+                    List<ChatUser> newList = new ArrayList<>(chatUserList);
+                    newList.set(idx, updated);
+
+                    // replace reference atomically so subsequent reads see the new list
+                    chatUserList = newList;
+
+                    // sort & submit (sortAndApply will create yet another new list and submit)
+                    sortAndApply();
+                    updatePillBadges();
+                }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
             }
-        });
+        };
+
+        chatRef.addValueEventListener(listener);
+        chatListeners.put(chatId, listener);
+        chatRefs.put(chatId, chatRef);
     }
 
     private String generateChatId(String a, String b) {
+        if (a == null || b == null) return a + "_" + b;
         if (a.compareTo(b) < 0) return a + "_" + b;
         return b + "_" + a;
     }
 
-    private void listenForChatMeta(ChatUser user){
-        String chatId = generateChatId(user.getUserId(), Continuity.userId);
-
-        DatabaseReference metaRef = FirebaseDatabase.getInstance()
-                .getReference("ChatMeta")
-                .child(chatId);
-
-        metaRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (!snapshot.exists()) return;
-
-                DataSnapshot last = snapshot.child("lastMessage");
-
-                user.setLastMessage(last.child("text").getValue(String.class));
-                user.setLastMessageSenderId(last.child("senderId").getValue(String.class));
-                user.setLastMessageSeen(Boolean.TRUE.equals(last.child("seen").getValue(Boolean.class)));
-
-
-                Long time = last.child("timestamp").getValue(Long.class);
-                user.setLastMessageTime(time != null ? time:0L);
-
-                int unread = snapshot.child("unread")
-                        .child(Continuity.userId).getValue(Integer.class) != null
-                        ? snapshot.child("unread").child(Continuity.userId).getValue(Integer.class) :0;
-
-                user.setUnreadCount(unread);
-
-                sortAndApply();
-                updatePillBadges();
-//                adapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
-
-    private int getUnreadForRole(String role){
+    private int getUnreadForRole(String role) {
         int total = 0;
-        for (ChatUser u : chatUserList){
-            if (role == null || role.equals(u.getRole())){
+        for (ChatUser u : chatUserList) {
+            if (role == null || role.equals(u.getRole())) {
                 total += u.getUnreadCount();
             }
         }
@@ -385,10 +478,6 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void updatePillBadges() {
-        TextView all = findViewById(R.id.allCard);
-        TextView admin = findViewById(R.id.adminCard);
-        TextView teacher = findViewById(R.id.teachersCard);
-
         int allUnread = getUnreadForRole(null);
         int adminUnread = getUnreadForRole("ADMIN");
         int teacherUnread = getUnreadForRole("TEACHER");
@@ -396,24 +485,44 @@ public class ChatActivity extends AppCompatActivity {
         all.setText(allUnread > 0 ? "All (" + allUnread + ")" : "All");
         admin.setText(adminUnread > 0 ? "Admins (" + adminUnread + ")" : "Admins");
         teacher.setText(teacherUnread > 0 ? "Teachers (" + teacherUnread + ")" : "Teachers");
-
     }
+
     private void sortAndApply() {
+        // create a new sorted list instance and assign it to chatUserList
         List<ChatUser> sorted = new ArrayList<>(chatUserList);
         Collections.sort(sorted, (a, b) ->
                 Long.compare(b.getLastMessageTime(), a.getLastMessageTime())
         );
+        // replace the reference with the new list instance (important)
         chatUserList = sorted;
+        // applyFilter will submit a fresh list to the adapter
         applyFilter();
     }
-    private void selectedPill(View selected, View... others){
+
+    private void selectedPill(View selected, View... others) {
         selected.setBackgroundResource(R.drawable.pill_selected);
         selected.animate().scaleX(1.05f).scaleY(1.05f).setDuration(120).start();
 
-        for (View v: others ){
+        for (View v : others) {
             v.setBackgroundResource(R.drawable.pill_unselected);
             v.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // detach all chat listeners
+        for (Map.Entry<String, ValueEventListener> e : chatListeners.entrySet()) {
+            String chatId = e.getKey();
+            ValueEventListener listener = e.getValue();
+            DatabaseReference ref = chatRefs.get(chatId);
+            if (ref != null && listener != null) {
+                ref.removeEventListener(listener);
+            }
+        }
+        chatListeners.clear();
+        chatRefs.clear();
+        chatListeningIds.clear();
     }
 }

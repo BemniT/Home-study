@@ -1,267 +1,512 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/profile_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ProfileActivity">
+    android:background="@color/white"
+    tools:context=".ProfileActivity"
+    >
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/app_bar_layout"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:fitsSystemWindows="true"
-        >
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar_setting"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-
-            />
-    </com.google.android.material.appbar.AppBarLayout>
-    <ScrollView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:scrollbars="none"
-        android:overScrollMode="always"
         >
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            >
+            android:id="@+id/profileImageWrapper"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="35dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-            <com.canhub.cropper.CropImageView
-                android:id="@+id/cropImageView"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="20dp"
-                android:layout_weight="1"
-                android:src="@drawable/profile"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                />
 
-            <FrameLayout
-                android:id="@+id/profileContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="20dp"
+            <androidx.cardview.widget.CardView
+                android:id="@+id/profileImageContainer"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                app:cardCornerRadius="75dp"
+                app:cardPreventCornerOverlap="false"
+                android:forceHasOverlappingRendering="true"
+
                 >
 
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/profilePic"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/profile"
-                    app:civ_circle_background_color="@color/black_low"
-                    />
-
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/editProfile"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:layout_gravity="bottom|end"
-                    android:src="@drawable/edit"
-                    app:civ_border_color="@color/primary_secondary"
-                    app:civ_border_width="1.4dp"
-                    android:backgroundTint="@color/white"
-                    app:civ_circle_background_color="@color/black_low_low"
-                    />
-
-
-
-            </FrameLayout>
-
-            <LinearLayout
-                android:id="@+id/infoContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="10dp"
-                app:layout_constraintTop_toBottomOf="@id/profileContainer"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintBottom_toTopOf="@id/linearLayout"
-                >
-
-                <TextView
-                    android:id="@+id/userName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Student Name"
-                    android:layout_gravity="center"
-                    android:textSize="14sp"
-                    />
-
-                <TextView
-                    android:id="@+id/userEmail"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Useremail@gmail.com"
-                    android:layout_gravity="center"
-                    android:textSize="12sp"
-                    />
-            </LinearLayout>
-
-
-
-            <LinearLayout
-                android:id="@+id/linearLayout"
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_margin="25dp"
-                app:layout_constraintTop_toBottomOf="@id/infoContainer"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                android:orientation="horizontal"
-                android:background="@color/primary_secondary"
-                android:padding="10dp"
-                >
-
-                <ImageView
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/book"
-                    />
-
-
-                <!--            class rank linear layout-->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:layout_weight="1"
-                    android:padding="10dp"
-                    >
-                    <TextView
-                        android:id="@+id/classRankTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="Class Rank"
-                        android:textSize="14sp"
-                        android:textColor="@color/white"
-                        />
-
-                    <TextView
-                        android:id="@+id/classRank"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="5dp"
-                        android:text="N/A"
-                        android:textSize="24sp"
-                        android:textColor="@color/white"
-                        />
-
-                </LinearLayout>
-
-                <ImageView
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginBottom="5dp"
-                    android:background="@color/white"
-                    />
-
-                <ImageView
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/book"
-                    />
-
-                <!--            class average linear layout-->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:layout_weight="1"
-                    android:padding="10dp"
-                    >
-
-                    <TextView
-                        android:id="@+id/classAverageTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="Average Pt"
-                        android:textSize="14sp"
-                        android:textColor="@color/white"
-                        />
-
-                    <TextView
-                        android:id="@+id/classAverage"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginTop="5dp"
-                        android:text="98%"
-                        android:textSize="24sp"
-                        android:textColor="@color/white"/>
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardContainer"
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    app:layout_constraintTop_toBottomOf="@id/linearLayout"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    android:layout_marginLeft="24dp"
-                    android:layout_marginRight="24dp"
-                    android:layout_marginTop="10dp"
-                    app:cardCornerRadius="12dp"
-                    android:layout_weight="1"
-                    app:cardElevation="1dp"
-                    >
-                    <TextView
-                        android:id="@+id/classPointTxt"
+                    android:layout_height="match_parent">
+
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/profileImage"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:text="Class point"
-                        android:textSize="14sp"
-                        android:padding="5dp"
-                        android:layout_gravity="center"
-                        android:gravity="center"
-                        android:background="@color/LightBlue2"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/math"
+                        app:civ_border_width="2dp"
+                        app:civ_border_color="@color/LightBlue"
 
                         />
-                </androidx.cardview.widget.CardView>
 
+                    <com.google.android.material.progressindicator.CircularProgressIndicator
+                        android:id="@+id/uploadProgress"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_gravity="center"
+                        app:trackThickness="6dp"
+                        app:indicatorColor="@color/primary_secondary"
+                        app:indicatorSize="48dp"
+                        app:trackColor="@color/LightBlue"
+                        android:indeterminate="false"
+                        android:max="200"
+                        android:visibility="gone"
+                        />
 
+                </FrameLayout>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/subjectList"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/cardContainer"
-                android:layout_marginTop="10dp"
-                android:scrollbars="none"
-                android:clipToPadding="false"
+            </androidx.cardview.widget.CardView>
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/changeProfileBtn"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/camera_vector"
+                android:backgroundTint="@color/primary_secondary"
+                app:civ_border_overlay="true"
+                android:forceHasOverlappingRendering="true"
+                app:layout_constraintBottom_toBottomOf="@id/profileImageContainer"
+                app:layout_constraintEnd_toEndOf="@id/profileImageContainer"
+                android:layout_margin="4dp"
+                android:elevation="12dp"
+                android:outlineSpotShadowColor="@color/white"
                 />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <ImageView
+        android:id="@+id/profileBackArrow"
+        android:layout_width="30dp"
+        android:layout_height="28dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_margin="12dp"
+        android:layout_marginEnd="10dp"
+        android:src="@drawable/back"
+        android:layout_marginBottom="8dp"
+        />
+
+
+    <TextView
+        android:id="@+id/personalInfoTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Personal Info"
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        android:fontFamily="@font/risque_regular"
+        app:layout_constraintTop_toBottomOf="@id/profileImageWrapper"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_margin="12dp"
+        />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/personalInfoContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/personalInfoTxt"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="4dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:outlineSpotShadowColor="@color/LightBlue"
+        >
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/personalInfoTxt"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+            android:columnCount="2"
+            android:padding="8dp"
+            android:rowCount="4"
+            android:background="@drawable/cricle2"
+            >
+
+            <TextView
+                android:id="@+id/usernameTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Username"
+                android:padding="8dp"
+                android:textSize="14dp"
+                android:layout_columnWeight="1"
+                />
+
+            <TextView
+                android:id="@+id/username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Username"
+                android:padding="8dp"
+                android:textSize="14dp"
+                android:layout_columnWeight="1"
+                android:gravity="end"
+                />
+
+            <TextView
+                android:id="@+id/fullNameTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Full name"
+                android:padding="8dp"
+                android:textSize="14dp"
+                android:layout_columnWeight="1"
+                />
+
+            <TextView
+                android:id="@+id/fullName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Epherem Tesema"
+                android:padding="8dp"
+                android:textSize="14dp"
+                android:layout_columnWeight="1"
+                android:gravity="end"
+                />
+
+            <TextView
+                android:id="@+id/EmailTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Email"
+                android:padding="8dp"
+                android:textSize="14dp"
+                android:layout_columnWeight="1"
+                />
+
+            <TextView
+                android:id="@+id/email"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Epherem@gmail.com"
+                android:padding="8dp"
+                android:textSize="14dp"
+                android:layout_columnWeight="1"
+                android:gravity="end"
+                />
+
+            <TextView
+                android:id="@+id/ageTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Age"
+                android:padding="8dp"
+                android:textSize="14sp"
+                android:layout_columnWeight="1"
+                />
+
+            <TextView
+                android:id="@+id/userAge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="16"
+                android:padding="8dp"
+                android:textSize="14sp"
+                android:layout_columnWeight="1"
+                android:gravity="end"
+                />
+
+            <TextView
+                android:id="@+id/sexTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Gender"
+                android:padding="8dp"
+                android:textSize="14sp"
+                android:layout_columnWeight="1"
+                />
+
+            <TextView
+                android:id="@+id/sex"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Male"
+                android:padding="8dp"
+                android:textSize="14sp"
+                android:layout_columnWeight="1"
+                android:gravity="end"
+                />
+            <TextView
+                android:id="@+id/phoneTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Phone No"
+                android:padding="8dp"
+                android:textSize="14sp"
+                android:layout_columnWeight="1"
+                />
+
+            <TextView
+                android:id="@+id/phoneNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+251 90 723 2324"
+                android:padding="8dp"
+                android:textSize="14sp"
+                android:layout_columnWeight="1"
+                android:gravity="end"
+                />
+        </GridLayout>
+
+    </androidx.cardview.widget.CardView>
 
 
 
-    </ScrollView>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:id="@+id/academicsTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Academics"
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        android:fontFamily="@font/risque_regular"
+        app:layout_constraintTop_toBottomOf="@id/personalInfoContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_margin="8dp"
+        />
+
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/academicsInfoContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/academicsTxt"
+        app:layout_constraintStart_toStartOf="parent"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="4dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="4dp"
+        android:outlineAmbientShadowColor="@color/primary_secondary"
+        android:outlineSpotShadowColor="@color/LightBlue"
+
+        >
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/cricle2"
+            android:columnCount="2"
+            android:padding="8dp"
+            android:rowCount="4"
+            >
+            <TextView
+                android:id="@+id/gradeTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Grade"
+                android:padding="8dp"
+                android:textSize="14sp"
+                android:layout_columnWeight="1"
+                />
+
+            <TextView
+                android:id="@+id/grade"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nine(9)"
+                android:padding="8dp"
+                android:textSize="14sp"
+                android:layout_columnWeight="1"
+                android:gravity="end"
+                />
+
+            <TextView
+                android:id="@+id/sectionTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Section"
+                android:padding="8dp"
+                android:textSize="14sp"
+                android:layout_columnWeight="1"
+                />
+
+            <TextView
+                android:id="@+id/section"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="A"
+                android:padding="8dp"
+                android:textSize="14sp"
+                android:layout_columnWeight="1"
+                android:gravity="end"
+                />
+
+
+        </GridLayout>
+    </androidx.cardview.widget.CardView>
+
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/editProfile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/academicsInfoContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:cardCornerRadius="20dp"
+        android:elevation="4dp"
+        android:outlineAmbientShadowColor="@color/primary_secondary"
+        android:outlineSpotShadowColor="@color/LightBlue"
+
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:padding="12dp"
+
+            tools:ignore="UseCompoundDrawables"
+            android:background="@drawable/cricle2"
+            >
+
+
+            <ImageView
+                android:id="@+id/editProfileIcon"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:contentDescription="TODO"
+                android:src="@drawable/edit"
+                android:layout_marginStart="12dp"
+                android:layout_gravity="center"
+                />
+
+            <TextView
+                android:id="@+id/editProfileTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_gravity="center"
+                android:text="Edit Profile"
+                app:layout_constraintStart_toEndOf="@id/passwordIcon"
+                app:layout_constraintTop_toBottomOf="@id/academicsInfoContainer"
+                />
+
+        </LinearLayout>
+
+
+    </androidx.cardview.widget.CardView>
+
+
+<!--    <androidx.cardview.widget.CardView-->
+<!--    android:id="@+id/changePassword"-->
+<!--    android:layout_width="match_parent"-->
+<!--    android:layout_height="wrap_content"-->
+<!--    app:layout_constraintTop_toBottomOf="@+id/editProfile"-->
+<!--    app:layout_constraintStart_toStartOf="parent"-->
+<!--    android:layout_margin="4dp"-->
+<!--    app:cardCornerRadius="20dp"-->
+<!--    >-->
+
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:orientation="horizontal"-->
+<!--        android:padding="12dp"-->
+<!--        >-->
+
+
+<!--        <ImageView-->
+<!--            android:id="@+id/passwordIcon"-->
+<!--            android:layout_width="28dp"-->
+<!--            android:layout_height="28dp"-->
+<!--            android:src="@drawable/edit"-->
+<!--            android:layout_marginStart="12dp"-->
+<!--            android:layout_gravity="center"-->
+<!--            />-->
+
+<!--        <TextView-->
+<!--            android:id="@+id/changePasswordTxt"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginStart="12dp"-->
+<!--            android:layout_gravity="center"-->
+<!--            android:text="Change password"-->
+<!--            app:layout_constraintStart_toEndOf="@id/passwordIcon"-->
+<!--            app:layout_constraintTop_toBottomOf="@id/academicsInfoContainer"-->
+<!--            />-->
+
+<!--    </LinearLayout>-->
+
+
+<!--</androidx.cardview.widget.CardView>-->
+
+
+
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/logoutBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/editProfile"
+        app:layout_constraintStart_toStartOf="parent"
+        app:cardCornerRadius="20dp"
+        app:layout_goneMarginTop="4dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="4dp"
+        android:elevation="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:outlineAmbientShadowColor="@color/primary_secondary"
+        android:outlineSpotShadowColor="@color/LightBlue"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:background="@drawable/cricle2"
+            >
+
+
+            <ImageView
+                android:id="@+id/passwordIcon"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/password"
+                android:layout_marginStart="12dp"
+                android:layout_gravity="center"
+                />
+
+            <TextView
+                android:id="@+id/changePasswordTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_gravity="center"
+                android:text="Logout"
+                app:layout_constraintStart_toEndOf="@id/passwordIcon"
+                app:layout_constraintTop_toBottomOf="@id/academicsInfoContainer"
+                />
+
+        </LinearLayout>
+
+
+    </androidx.cardview.widget.CardView>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

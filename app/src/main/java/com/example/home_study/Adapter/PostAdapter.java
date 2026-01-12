@@ -1,5 +1,6 @@
 package com.example.home_study.Adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.home_study.Model.AdminInfo;
 import com.example.home_study.Model.Post;
 import com.example.home_study.Prevalent.Continuity;
 import com.example.home_study.R;
@@ -35,6 +37,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
     private List<Post> postList;
 
+    private  final HashMap<String, AdminInfo> adminCache = new HashMap<>();
+
     public PostAdapter(List<Post> postList) {
         this.postList = postList;
     }
@@ -52,143 +56,198 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         String userId = Continuity.userId;
         String postID = post.getPostId();
 
-
+        bindAdminInfo(post, holder);
 // To locate the admin of the school from the user node
-            DatabaseReference adminUserRef = FirebaseDatabase.getInstance().getReference()
-                    .child("Users");
-            DatabaseReference adminRef = FirebaseDatabase.getInstance().getReference()
-                            .child("School_Admins")
-                    .child(post.getAdminId());
-            adminRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (!snapshot.exists()) return;
-                    String adminUserId = snapshot.child("userId").getValue(String.class);
 
-                    if (adminUserId != null){
-                        adminUserRef.child(adminUserId)
-                                .addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                         if (!snapshot.exists()) return;
 
-                                         String adminName = snapshot.child("name").getValue(String.class);
-                                        String adminProfileImage = snapshot.child("profileImage").getValue(String.class);
+        DatabaseReference seenRef = FirebaseDatabase.getInstance()
+                .getReference("Posts")
+                .child(post.getPostId())
+                .child("seenBy")
+                .child(Continuity.userId);
+        seenRef.setValue(true);
 
-                                        holder.author.setText(adminName);
-                                        Picasso.get().load(adminProfileImage).placeholder(R.drawable.profile)
-                                                .into(holder.authorProfile);
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
-                    }
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-
-            //to save the liked post on the respective user on there user node
-            DatabaseReference userLikesRef = FirebaseDatabase.getInstance().getReference()
-                    .child("Users")
-                    .child(userId)
-                    .child("likedPosts")
-                    .child(post.getPostId());
 
             //to save the number of likes of that post
             DatabaseReference postLikeCountRef = FirebaseDatabase.getInstance().getReference()
                     .child("Posts")
                     .child(postID)
                     .child("likeCount");
+
             //on the respective post to save the user Id
-            DatabaseReference postLikedRef = FirebaseDatabase.getInstance().getReference().child("Posts")
-                    .child(post.getPostId())
+            DatabaseReference postLikedRef = FirebaseDatabase.getInstance().getReference("Posts")
+                    .child(postID)
                     .child("likes")
                     .child(userId);
 
-        userLikesRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()){
-                    holder.postLikeIcon.setImageResource(R.drawable.likefill);
-                }else{
-                    holder.postLikeIcon.setImageResource(R.drawable.like);
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
-        });
-
-            postLikeCountRef.addValueEventListener(new ValueEventListener() {
+            postLikeCountRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     Integer count = snapshot.getValue(Integer.class);
-                    holder.likeCount.setText((count == null ? 0 : count)+ " Likes");
+                    if (count == null) count = 0;
+
+                    post.setLikeCount(count);
+                    holder.likeCount.setText(count + " Likes");
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
+
                 }
             });
 
-            //Check if hte user liked ot not
+            postLikedRef.addListenerForSingleValueEvent(new ValueEventListener() {
+              @Override
+              public void onDataChange(@NonNull DataSnapshot snapshot) {
+                  boolean liked = snapshot.exists();
+                  post.setLikedByMe(liked);
 
+                  holder.postLikeIcon.setImageResource(
+                          liked ? R.drawable.likefill : R.drawable.like
+                  );
 
-            //Liking and disliking logic
-            holder.postLikeIcon.setOnClickListener(new View.OnClickListener() {
+                  holder.likeCount.setText(post.getLikeCount() + " Likes");
+              }
+
+              @Override
+              public void onCancelled(@NonNull DatabaseError error) {
+
+              }
+          });
+
+        holder.postLikeIcon.setOnClickListener(v -> {
+            v.setEnabled(false);
+
+            boolean newLikedState = !post.isLikedByMe();
+            int delta = newLikedState ? 1 : -1;
+
+            post.setLikedByMe(newLikedState);
+            holder.postLikeIcon.setImageResource(
+                    newLikedState ? R.drawable.likefill : R.drawable.like
+            );
+
+            DatabaseReference postRef = FirebaseDatabase.getInstance()
+                    .getReference("Posts")
+                    .child(postID);
+
+            DatabaseReference postLikeRef = postRef
+                    .child("likes")
+                    .child(userId);
+
+            DatabaseReference userLikeRef = FirebaseDatabase.getInstance()
+                    .getReference("Users")
+                    .child(userId)
+                    .child("likedPosts")
+                    .child(postID);
+
+            postRef.child("likeCount").runTransaction(new Transaction.Handler() {
+                @NonNull
                 @Override
-                public void onClick(View v) {
+                public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                    Integer current = currentData.getValue(Integer.class);
+                    if (current == null) current = 0;
+                    currentData.setValue(Math.max(0, current + delta));
+                    return Transaction.success(currentData);
+                }
 
-// Like and dislike logic the add and erase the user Id from the post likes node and post ID from the users node
-                    userLikesRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            boolean hasLiked = snapshot.exists();
+                @Override
+                public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot snapshot) {
+                    v.setEnabled(true);
 
-                            if (hasLiked){
-                                //unlike
-                                holder.postLikeIcon.setImageResource(R.drawable.like);
-                                userLikesRef.removeValue();
-                                postLikedRef.removeValue();
-                                updateLikeCount(postLikeCountRef,-1);
-                            }else{
-                                holder.postLikeIcon.setImageResource(R.drawable.likefill);
-                                userLikesRef.setValue(true);
-                                postLikedRef.setValue(true);
-                                updateLikeCount(postLikeCountRef, 1);
-                            }
+                    if (committed && snapshot != null) {
+                        Integer updated = snapshot.getValue(Integer.class);
+                        if (updated != null) {
+                            post.setLikeCount(updated);
+                            holder.likeCount.setText(updated + " Likes");
                         }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-        }
-                    });
+                    }
                 }
             });
 
+            if (newLikedState) {
+                postLikeRef.setValue(true);
+                userLikeRef.setValue(true);
+            } else {
+                postLikeRef.removeValue();
+                userLikeRef.removeValue();
+            }
+        });
+
+
+        if (post.getPostUrl() == null || post.getPostUrl().isEmpty()){
+            Picasso.get().load(R.drawable.math).fit().centerCrop().placeholder(R.drawable.examfill).error(R.drawable.examfill).into(holder.postImage);
+        } else {
+            Picasso.get().load(post.getPostUrl()).fit().centerCrop().placeholder(R.drawable.examfill).error(R.drawable.examfill).into(holder.postImage);
+        }
         holder.postDate.setText(post.getTime());
         holder.postMessage.setText(post.getMessage());
-        Picasso.get().load(post.getPostUrl()).placeholder(R.drawable.examfill).into(holder.postImage);
-//        holder.likeCount.setText(post.getLikeCount() + " Likes");
-
-        holder.postComment.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Toast.makeText(v.getContext(), "Comment Unavailable", Toast.LENGTH_SHORT).show();
-                }
-            });
 
         }
 
 
+    private void bindAdminInfo(Post post, PostViewHolder holder) {
+        String adminId = post.getAdminId();
+
+        // 1. Cached → use immediately
+        if (adminCache.containsKey(adminId)) {
+            AdminInfo info = adminCache.get(adminId);
+            holder.author.setText(info.name);
+            Picasso.get()
+                    .load(info.profileImage)
+                    .placeholder(R.drawable.profile)
+                    .into(holder.authorProfile);
+            return;
+        }
+
+        // 2. Not cached → fetch once
+        DatabaseReference adminRef = FirebaseDatabase.getInstance()
+                .getReference("School_Admins")
+                .child(adminId);
+
+        adminRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot adminSnap) {
+                if (!adminSnap.exists()) return;
+
+                String userId = adminSnap.child("userId").getValue(String.class);
+                if (userId == null) return;
+
+                FirebaseDatabase.getInstance()
+                        .getReference("Users")
+                        .child(userId)
+                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot userSnap) {
+                                if (!userSnap.exists()) return;
+
+                                String name = userSnap.child("name").getValue(String.class);
+                                String image = userSnap.child("profileImage").getValue(String.class);
+                                Log.e("profileIMG", name);
+                                AdminInfo info = new AdminInfo(name, image);
+                                adminCache.put(adminId, info);
+
+                                int adapterPosition = holder.getAdapterPosition();
+                                if (adapterPosition == RecyclerView.NO_POSITION) return;
+
+                                Post boundPost = postList.get(adapterPosition);
+                                if (!boundPost.getAdminId().equals(adminId)) return;
+
+                                holder.author.setText(name);
+                                Picasso.get()
+                                        .load(image)
+                                        .placeholder(R.drawable.profile)
+                                        .into(holder.authorProfile);
+
+
+                            }
+
+                            @Override public void onCancelled(@NonNull DatabaseError error) {}
+                        });
+            }
+
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
 
 
     @Override
@@ -200,9 +259,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
         private TextView author, postDate, postMessage, likeCount, noPost;
 
-        private ImageView postImage, postLikeIcon, postComment;
+        private ImageView postImage, postLikeIcon;
 
         private CircleImageView authorProfile;
+//        boolean isLiked; int likeCountValue;
         public PostViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -213,7 +273,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             postMessage = itemView.findViewById(R.id.postMessage);
             likeCount = itemView.findViewById(R.id.postLikeCount);
             postLikeIcon = itemView.findViewById(R.id.likeIcon);
-            postComment = itemView.findViewById(R.id.postComment);
+//            postComment = itemView.findViewById(R.id.postComment);
             postImage = itemView.findViewById(R.id.postImage);
 
 

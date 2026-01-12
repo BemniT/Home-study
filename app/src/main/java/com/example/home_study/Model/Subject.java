@@ -6,14 +6,20 @@ public class Subject {
     private String name;
     private String grade;
     private String section;
+    private int iconRes;
 
     public Subject() {}
 
-    public Subject(String courseId, String name, String grade, String section) {
+    public Subject(String courseId, String name, String grade, String section, int iconRes) {
         this.courseId = courseId;
         this.name = name;
         this.grade = grade;
         this.section = section;
+        this.iconRes = iconRes;
+    }
+
+    public int getIconRes() {
+        return iconRes;
     }
 
     public String getCourseId() {

@@ -29,6 +29,34 @@ public class Message {
 
     }
 
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
+    }
+
+    public void setReceiverId(String receiverId) {
+        this.receiverId = receiverId;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public void setTimeStamp(long timeStamp) {
+        this.timeStamp = timeStamp;
+    }
+
+    public void setSeen(boolean seen) {
+        this.seen = seen;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public void setEdited(boolean edited) {
+        this.edited = edited;
+    }
+
     public String getMessageId() {
         return messageId;
     }

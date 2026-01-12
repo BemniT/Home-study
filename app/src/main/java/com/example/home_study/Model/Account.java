@@ -1,48 +1,76 @@
 package com.example.home_study.Model;
 public class Account
 {
-    private String userId ,username, name, password, imageUrl, role, age, gender;
+    private String userId ,username, name, password, profileImage, role, gender, email, phone
+            ,grade, section;
+
+    private int age;
     private boolean isActive;
 
     public Account()
     {
     }
 
-    public Account(String userId, String username, String imageUrl, String password, String role, boolean isActive, String name, String gender) {
+    public Account(String userId, String username, String profileImage, String password,
+                   String role, boolean isActive, String name, String gender,
+                   String email,String phone, String grade, String section, int age) {
         this.userId = userId;
         this.username = username;
-        this.imageUrl = imageUrl;
+        this.profileImage = profileImage;
         this.password = password;
         this.role = role;
         this.gender = gender;
         this.isActive = isActive;
         this.name = name;
-    }
-
-    public String getAge() {
-        return age;
-    }
-
-    public void setAge(String age) {
+        this.email = email;
+        this.phone = phone;
+        this.grade = grade;
+        this.section = section;
         this.age = age;
     }
 
-    public String getGender() {
-        return gender;
+    public void setAge(int age) {
+        this.age = age;
     }
 
-    public void setGender(String gender) {
-        this.gender = gender;
+    public String getGrade() {
+        return grade;
     }
 
-
-
-    public String getName() {
-        return name;
+    public void setGrade(String grade) {
+        this.grade = grade;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getSection() {
+        return section;
+    }
+
+    public void setSection(String section) {
+        this.section = section;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
     public String getUserId() {
@@ -61,6 +89,14 @@ public class Account
         this.username = username;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getPassword() {
         return password;
     }
@@ -69,12 +105,12 @@ public class Account
         this.password = password;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public String getProfileImage() {
+        return profileImage;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
     }
 
     public String getRole() {
@@ -85,11 +121,15 @@ public class Account
         this.role = role;
     }
 
-    public boolean getIsActive() {
-        return isActive;
+    public String getGender() {
+        return gender;
     }
 
-    public void setIsActive(boolean isActive) {
-        this.isActive = isActive;
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public int getAge() {
+        return age;
     }
 }

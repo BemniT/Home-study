@@ -28,6 +28,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -94,6 +95,10 @@ public class HomeFragment extends Fragment {
         FetchPost();
         postAdapter = new PostAdapter(postList);
         recyclerView.setAdapter(postAdapter);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setItemViewCacheSize(20);
+        recyclerView.setDrawingCacheEnabled(true);
+        recyclerView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
         return view;
 
     }
@@ -119,7 +124,7 @@ public class HomeFragment extends Fragment {
                     }
 
                 }
-
+                Collections.reverse(postList);
                 postAdapter.notifyDataSetChanged();
             }
             @Override

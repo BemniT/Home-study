@@ -1,13 +1,15 @@
 package com.example.home_study;
 
-import static java.security.AccessController.getContext;
+import static org.bouncycastle.asn1.x509.ReasonFlags.unused;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,244 +23,253 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.home_study.Adapter.ExamContentAdapter;
-import com.example.home_study.Model.ExamContent;
-import com.example.home_study.Model.UserHelper;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.home_study.Prevalent.Continuity;
 import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DatabaseReference;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.StorageTask;
 import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    private UserHelper userHelper;
-    private String  myUri;
-    private Uri uriContent;
-    private StorageTask uploadTask;
+    // UI
+    private ImageView  backArrow;
+    private CircleImageView profileImage, changeProfileBtn;
+    private TextView username, fullName, email, phoneNumber;
+    private TextView grade, section;
+    private CircularProgressIndicator uploadProgressBar;
 
-    private StorageReference profilePictureRef;
+    // Firebase
+    private StorageReference profileImageRef;
+    private Uri croppedImageUri;
 
-    private ImageView profilePic, editBtn;
-    private TextView userName, userEmail, attendance, classPoint ;
-
-    private RecyclerView listRecycler;
-    private List course;
-    private boolean isClassPointSelected = true;
-    private ExamContentAdapter examContentAdapter;
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        populateUserData();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_profile);
+        findViewById(R.id.profile_main)
+                .startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_slide_up));
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.profile_main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        profilePictureRef = FirebaseStorage.getInstance().getReference().child("Profile Pictures");
-        profilePic = findViewById(R.id.profilePic);
-        editBtn = findViewById(R.id.editProfile);
-        userName = findViewById(R.id.userName);
-        userEmail = findViewById(R.id.userEmail);
-        listRecycler = findViewById(R.id.subjectList);
-//        attendance = findViewById(R.id.attendance);
-        classPoint = findViewById(R.id.classPointTxt);
-
-        course = new ArrayList();
-        examContentAdapter = new ExamContentAdapter(course,this::onExamContentSelected , this);
-
-        listRecycler.setLayoutManager(new LinearLayoutManager(this));
-        listRecycler.setHasFixedSize(true);
-        listRecycler.setAdapter(examContentAdapter);
-        loadCourse();
+        initViews();
+        initFirebase();
+        populateUserData();
+        initClickListeners();
+    }
 
 
 
+    // -------------------- INIT --------------------
+
+    private void initViews() {
+        profileImage = findViewById(R.id.profileImage);
+        changeProfileBtn = findViewById(R.id.changeProfileBtn);
+        backArrow = findViewById(R.id.profileBackArrow);
+        uploadProgressBar = findViewById(R.id.uploadProgress);
+
+        username = findViewById(R.id.username);
+        fullName = findViewById(R.id.fullName);
+        email = findViewById(R.id.email);
+        phoneNumber = findViewById(R.id.phoneNumber);
+
+        grade = findViewById(R.id.grade);
+        section = findViewById(R.id.section);
+    }
+
+    private void initFirebase() {
+        profileImageRef = FirebaseStorage.getInstance()
+                .getReference()
+                .child("Profile Pictures");
+    }
+
+    // -------------------- DATA --------------------
+
+    public void populateUserData() {
+        if (Continuity.currentOnlineUser == null) return;
+
+        username.setText(Continuity.currentOnlineUser.getUsername());
+        fullName.setText(Continuity.currentOnlineUser.getName());
+        email.setText(Continuity.currentOnlineUser.getEmail());
+        phoneNumber.setText(Continuity.currentOnlineUser.getPhone());
 
 
-//            if (!isClassPointSelected){
-//                attendance.setBackgroundColor(ContextCompat.getColor(this,R.color.white));
-//                classPoint.setBackgroundColor(ContextCompat.getColor(this, R.color.black_low_low));
-//                isClassPointSelected = true;
-                loadCourse();
-//            }
+        Glide.with(this)
+                .load(Continuity.currentOnlineUser.getProfileImage())
+                .placeholder(R.drawable.profile_image)
+                .into(profileImage);
+        loadStudentData();
 
+    }
 
-//        attendance.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (isClassPointSelected){
-//                    attendance.setBackgroundColor(ContextCompat.getColor(ProfileActivity.this,R.color.black_low_low));
-//                    classPoint.setBackgroundColor(ContextCompat.getColor(ProfileActivity.this, R.color.white));
-//                    isClassPointSelected = false;
-////                    loadCourseAttendance();
-//                }
-//            }
-//        });
+    // -------------------- CLICKS --------------------
 
+    private void initClickListeners() {
 
+        backArrow.setOnClickListener(v -> finish());
 
+        changeProfileBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(
+                    Intent.ACTION_PICK,
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            );
+            imagePickerLauncher.launch(intent);
+        });
 
+        findViewById(R.id.editProfile).setOnClickListener(v ->
 
-//        Glide.with(getContext()).load(Continuity.currentOnlineUser.getimageUrl())
-//                .into(profilePic);
-//        userName.setText(Continuity.currentOnlineUser.getName());
-//        userEmail.setText(Continuity.currentOnlineUser.getEmail());
+                new EditProfileBottomSheet().show(getSupportFragmentManager(), "EditProfile")
+        );
 
-        editBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                photoLibraryLauncher.launch(intent);
-            }
+        findViewById(R.id.logoutBtn).setOnClickListener(v -> {
+//            Continuity.logout(this);
+            finish();
         });
     }
 
-    private final ActivityResultLauncher<Intent> cropActivityLauncher =
+    // -------------------- IMAGE PICK & CROP --------------------
+
+    private final ActivityResultLauncher<Intent> imagePickerLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                    Uri resultUri = UCrop.getOutput(result.getData());
-                    if (resultUri != null) {
-                        uriContent = resultUri;  // Store cropped image URI
-                        profilePic.setImageURI(resultUri);  // Directly set the cropped image
-                        Glide.with(this)
-                                .load(resultUri)
-                                .placeholder(R.drawable.profile)
-                                .skipMemoryCache(true)
-                                .into(profilePic);
-                        uploadImage();  // Upload image to Firebase
-                    } else {
-                        Toast.makeText(this, "Crop failed. Try again!", Toast.LENGTH_SHORT).show();
-                    }
-                } else if (result.getResultCode() == UCrop.RESULT_ERROR) {
-                    Throwable error = UCrop.getError(result.getData());
-                    Toast.makeText(this, "Crop Error: " + (error != null ? error.getMessage() : "Unknown error"), Toast.LENGTH_SHORT).show();
+                    Uri sourceUri = result.getData().getData();
+                    if (sourceUri != null) startCrop(sourceUri);
                 }
             });
 
 
-    private void onExamContentSelected(ExamContent examContent) {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-        Intent intent;
-        if (isClassPointSelected) {
-            intent = new Intent(ProfileActivity.this, EditProfileActivity.class);
-            Toast.makeText(this, "this is class point", Toast.LENGTH_SHORT).show();
-
-        } else {
-            intent = new Intent(ProfileActivity.this, EditProfileActivity.class);
-            Toast.makeText(this, "this is attendance", Toast.LENGTH_SHORT).show();
+        if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
+            croppedImageUri = UCrop.getOutput(data);
+            if (croppedImageUri != null) {
+                profileImage.setImageURI(croppedImageUri);
+                uploadProfileImage();
+            }
         }
-        intent.putExtra("course_name", examContent.getContentSubject());
-        startActivity(intent);
     }
 
-    private void loadCourse()
-    {
-        course.clear();
-        course.add(new ExamContent("English", "Score", R.drawable.english));
-        course.add(new ExamContent("Mathematics", "Score", R.drawable.math));
-        course.add(new ExamContent("Physics", "Score", R.drawable.physics));
-        course.add(new ExamContent("Biology", "Score", R.drawable.biology));
-        course.add(new ExamContent("Chemistry", "Score", R.drawable.chemistry));
-        course.add(new ExamContent("Geography", "Score", R.drawable.geography));
-        course.add(new ExamContent("History", "Score", R.drawable.history));
-        examContentAdapter.notifyDataSetChanged();
-
-    }
-
-    private final ActivityResultLauncher<Intent> photoLibraryLauncher =
-            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                    Uri selectedImageUri = result.getData().getData();
-                    if (selectedImageUri != null) {
-                        startCropActivity(selectedImageUri);
-                    }
-                }
-            });
-
-    private void startCropActivity(Uri sourceUri) {
-        Uri destinationUri = Uri.fromFile(new File(this.getCacheDir(), System.currentTimeMillis() + "_cropped.jpg"));
+    private void startCrop(Uri sourceUri) {
+        Uri destinationUri = Uri.fromFile(
+                new File(getCacheDir(), System.currentTimeMillis() + "_crop.jpg")
+        );
 
         UCrop.Options options = new UCrop.Options();
         options.setToolbarColor(ContextCompat.getColor(this, R.color.black_low_low));
         options.setStatusBarColor(ContextCompat.getColor(this, R.color.primary_secondary));
         options.setActiveControlsWidgetColor(ContextCompat.getColor(this, R.color.primary_secondary));
-        options.setToolbarTitle("Crop Image");
 
-        Intent intent = UCrop.of(sourceUri, destinationUri)
+        UCrop.of(sourceUri, destinationUri)
                 .withAspectRatio(1, 1)
                 .withMaxResultSize(512, 512)
                 .withOptions(options)
-                .getIntent(this);
-
-        cropActivityLauncher.launch(intent);
+                .start(this);
     }
 
-    private void uploadImage() {
-        if (uriContent != null) {  // Ensure that uriContent is not null before uploading
-            final StorageReference fileRef = profilePictureRef
-                    .child(Continuity.currentOnlineUser.getUsername() + ".jpg");
 
-            uploadTask = fileRef.putFile(uriContent);
+    // -------------------- UPLOAD --------------------
 
-            uploadTask.continueWithTask(new Continuation<Task<Uri>, Task<Uri>>() {
-                @Override
-                public Task<Uri> then(@NonNull Task<Task<Uri>> task) throws Exception {
+    private void uploadProfileImage() {
+        if (croppedImageUri == null) return;
+
+        uploadProgressBar.setVisibility(View.VISIBLE);
+        StorageReference fileRef = profileImageRef
+                .child(Continuity.currentOnlineUser.getUserId() + ".jpg");
+
+        fileRef.putFile(croppedImageUri)
+                .addOnProgressListener(snapshot -> {
+
+                        uploadProgressBar.setVisibility(View.VISIBLE);
+                        long bytesTransfered = snapshot.getBytesTransferred();
+                        long totalBytes = snapshot.getTotalByteCount();
+
+                        int progress = (int) ((200.0 * bytesTransfered) / totalBytes);
+                        uploadProgressBar.setProgress(progress);
+                })
+                .continueWithTask(task -> {
                     if (!task.isSuccessful()) {
-                        throw task.getException();
+                        throw  task.getException();
                     }
-                    return fileRef.getDownloadUrl();  // Get the download URL after uploading
-                }
-            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                @Override
-                public void onComplete(@NonNull Task<Uri> task) {
-                    if (task.isSuccessful()) {
-                        Uri downloadUri = task.getResult();
-                        myUri = downloadUri.toString();
+                      return  fileRef.getDownloadUrl();
+                }).addOnSuccessListener(task -> {
 
-                        final DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Users");
 
-                        HashMap<String, Object> userData = new HashMap<>();
-                        userData.put("imageUrl", myUri);
+                    String imageUrl = task.toString();
 
-                        ref.child(Continuity.currentOnlineUser.getUsername()).updateChildren(userData)
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            Toast.makeText(ProfileActivity.this, "Profile Updated", Toast.LENGTH_SHORT).show();
-                                            Continuity.currentOnlineUser.setImageUrl(myUri);
-                                        } else {
-                                            Toast.makeText(ProfileActivity.this, "Error occurred, try again", Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-                                });
-                    } else {
-                        Toast.makeText(ProfileActivity.this, "Error uploading image", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-        } else {
-            Toast.makeText(this, "Image is not selected", Toast.LENGTH_SHORT).show();
-        }
+                    HashMap<String, Object> update = new HashMap<>();
+                    update.put("profileImage", imageUrl);
+
+                    FirebaseDatabase.getInstance()
+                            .getReference("Users")
+                            .child(Continuity.currentOnlineUser.getUserId())
+                            .updateChildren(update)
+                            .addOnSuccessListener(unused -> {
+                                Continuity.currentOnlineUser.setProfileImage(imageUrl);
+
+                                uploadProgressBar.setVisibility(View.GONE);
+
+                                Glide.with(ProfileActivity.this)
+                                                .load(imageUrl)
+                                                        .skipMemoryCache(true)
+                                                                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                                                        .into(profileImage);
+                                Toast.makeText(this, "Profile updated", Toast.LENGTH_SHORT).show();
+                            });
+                }).addOnFailureListener(e -> {
+                   uploadProgressBar.setVisibility(View.GONE);
+
+                   Snackbar.make(profileImage, "Upload failed", Snackbar.LENGTH_INDEFINITE)
+                           .setAction("Retry", v -> uploadProfileImage())
+                           .show();
+                });
+
     }
 
+    private void loadStudentData() {
+        FirebaseDatabase.getInstance()
+                .getReference("Students")
+                .orderByChild("userId")
+                .equalTo(Continuity.currentOnlineUser.getUserId())
+                .get()
+                .addOnSuccessListener(snapshot -> {
+
+                    if (!snapshot.exists()){
+                        grade.setText("--");
+                        section.setText("--");
+                        return;
+                    }
+                    for (DataSnapshot ds : snapshot.getChildren()) {
+                        grade.setText(String.valueOf(ds.child("grade").getValue()));
+                        section.setText(String.valueOf(ds.child("section").getValue()));
+
+                        Log.e("grade",String.valueOf(ds.child("grade").getValue()));
+                        Log.e("grade",String.valueOf(ds.child("section").getValue()));
+                        break;
+                    }
+                });
+    }
 }

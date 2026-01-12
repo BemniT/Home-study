@@ -59,6 +59,8 @@ dependencies {
 
     implementation("com.intuit.sdp:sdp-android:1.0.6")
     implementation("com.intuit.ssp:ssp-android:1.0.6")
+    implementation("com.facebook.shimmer:shimmer:0.5.0")
+
 
     implementation("io.github.pilgr:paperdb:2.7.2")
     implementation("de.hdodenhof:circleimageview:3.1.0")

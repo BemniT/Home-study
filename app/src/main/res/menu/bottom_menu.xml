@@ -17,7 +17,8 @@
     <item
         android:id="@+id/exam"
         android:title=""
-        android:icon="@drawable/exam"/>
+        android:icon="@drawable/exam"
+        />
 
     <item
         android:id="@+id/profile"

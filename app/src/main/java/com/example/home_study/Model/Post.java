@@ -12,6 +12,9 @@ public class Post {
     private int likeCount;
 //    private int comments;
 
+    private boolean likedByMe;
+    private long timestamp;
+
     public Post() {
     }
 
@@ -23,6 +26,22 @@ public class Post {
         this.message = message;
         this.likeCount = likeCount;
 //        this.comments = comments;
+    }
+
+    public boolean isLikedByMe() {
+        return likedByMe;
+    }
+
+    public void setLikedByMe(boolean likedByMe) {
+        this.likedByMe = likedByMe;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 
     public int getLikeCount() {

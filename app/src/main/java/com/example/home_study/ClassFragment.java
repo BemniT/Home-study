@@ -13,13 +13,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.home_study.Adapter.ChatBotAdapter;
+import com.example.home_study.Adapter.SkeletonSubjectAdapter;
 import com.example.home_study.Adapter.SubjectAdapter;
 import com.example.home_study.Model.BotMessage;
 import com.example.home_study.Model.Subject;
 import com.example.home_study.Prevalent.Continuity;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -46,7 +49,10 @@ public class ClassFragment extends Fragment implements SubjectAdapter.OnSubjectC
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-    private RecyclerView recyclerView;
+    private TextView title, subTitle;
+    private View emptyStateLayout;
+    private ShimmerFrameLayout shimmerClass;
+    private RecyclerView recyclerView, skeletonRecycler;
     private SubjectAdapter adapter;
     private List<Subject> subjectList = new ArrayList<>();
 
@@ -54,6 +60,7 @@ public class ClassFragment extends Fragment implements SubjectAdapter.OnSubjectC
     private DatabaseReference coursesRef;
 
     private String studentID;
+
 
 
     public ClassFragment() {
@@ -87,13 +94,29 @@ public class ClassFragment extends Fragment implements SubjectAdapter.OnSubjectC
 
         View view = inflater.inflate(R.layout.fragment_class, container, false);
 
-        recyclerView = view.findViewById(R.id.subjectRecyclerView);
 
-        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
-        adapter = new SubjectAdapter(subjectList, subject -> {
-            onSubjectClick(subject);
-        });
+        recyclerView = view.findViewById(R.id.subjectRecyclerView);
+        skeletonRecycler = view.findViewById(R.id.skeletonRecycler);
+        shimmerClass = view.findViewById(R.id.shimmerClass);
+        shimmerClass.startShimmer();
+
+        GridLayoutManager subjectGrid = new GridLayoutManager(getContext(), 2);
+        GridLayoutManager skeletonGrid = new GridLayoutManager(getContext(), 2);
+        recyclerView.setLayoutManager(subjectGrid);
+        skeletonRecycler.setLayoutManager(skeletonGrid);
+
+        skeletonRecycler.setAdapter(new SkeletonSubjectAdapter(6));
+        skeletonRecycler.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.GONE);
+
+        adapter = new SubjectAdapter(subjectList, this);
         recyclerView.setAdapter(adapter);
+        recyclerView.setHasFixedSize(true);
+
+        title = view.findViewById(R.id.titleText);
+        subTitle = view.findViewById(R.id.subTitleText);
+        emptyStateLayout = view.findViewById(R.id.emptyStateLayout);
+
 
         studentsRef = FirebaseDatabase.getInstance().getReference("Students");
         coursesRef = FirebaseDatabase.getInstance().getReference("Courses");
@@ -138,6 +161,7 @@ public class ClassFragment extends Fragment implements SubjectAdapter.OnSubjectC
 
                 for (DataSnapshot c : snapshot.getChildren()) {
 
+
                     String courseGrade = c.child("grade").getValue(String.class);
                     String courseSection = c.child("section").getValue(String.class);
 
@@ -147,18 +171,35 @@ public class ClassFragment extends Fragment implements SubjectAdapter.OnSubjectC
                         String name = c.child("name").getValue(String.class);
 
                         subjectList.add(
-                                new Subject(courseId, name, courseGrade, courseSection)
+                                new Subject(courseId, name, courseGrade, courseSection,0)
                         );
+
+
                     }
                 }
 
                 adapter.notifyDataSetChanged();
+                shimmerClass.stopShimmer();
+                shimmerClass.setVisibility(View.GONE);
+                title.setVisibility(View.VISIBLE);
+                subTitle.setVisibility(View.VISIBLE);
+                skeletonRecycler.setVisibility(View.GONE);
+
+                if (subjectList.isEmpty()) {
+                    recyclerView.setVisibility(View.GONE);
+                    emptyStateLayout.setVisibility(View.VISIBLE);
+                } else {
+                    emptyStateLayout.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
+
+
 
 
     @Override

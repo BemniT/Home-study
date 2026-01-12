@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/bg_bottomsheet_round"
+    >
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <LinearLayout
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:text="Edit Profile"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            style="@style/TextAppearance.Material3.BodyLarge"
+            android:layout_marginBottom="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            />
+
+        <!-- Email -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Email"
+            android:layout_marginTop="8dp"
+            />
+        <EditText
+            android:id="@+id/etEmail"
+            android:inputType="textEmailAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+
+            android:backgroundTint="@color/primary_secondary"
+            />
+
+        <!-- Username -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+
+            android:text="Username"/>
+        <EditText
+            android:id="@+id/etUsername"
+            android:layout_width="match_parent"
+            android:backgroundTint="@color/primary_secondary"
+            android:textSize="10sp"
+            android:layout_height="wrap_content"/>
+
+        <!-- Current Password -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            style="@style/TextAppearance.Material3.BodyLarge"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:text="Change Password"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Current Password"/>
+        <EditText
+            android:id="@+id/etCurrentPassword"
+            android:inputType="textPassword"
+            android:layout_width="match_parent"
+            android:hint="*******"
+            android:backgroundTint="@color/primary_secondary"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            />
+
+        <!-- New Password -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="New Password"/>
+        <EditText
+            android:id="@+id/etNewPassword"
+            android:inputType="textPassword"
+            android:layout_width="match_parent"
+            android:backgroundTint="@color/primary_secondary"
+            android:textSize="10sp"
+            android:layout_height="wrap_content"/>
+        <!-- Confirm Password -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Confirm Password"/>
+        <EditText
+            android:id="@+id/etConfirmPassword"
+            android:inputType="textPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/primary_secondary"
+            android:textSize="10sp"
+
+            />
+
+        <Button
+            android:id="@+id/btnSave"
+            android:text="Save Changes"
+            android:background="@drawable/button_background"
+            android:layout_marginTop="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 
 import com.example.home_study.Adapter.BookAdapter;
 import com.example.home_study.Model.Book;
-import com.example.home_study.Prevalent.Continuity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,7 +89,7 @@ public class BookFragment extends Fragment {
         bookList.add(new Book("Physics", "Grade 9", R.drawable.physics));
         bookList.add(new Book("Biology", "Grade 9", R.drawable.biology));
         bookList.add(new Book("Chemistry", "Grade 9", R.drawable.chemistry));
-        bookList.add(new Book("Geography", "Grade 9", R.drawable.geography));
+        bookList.add(new Book("Geography", "Grade 9", R.drawable.history));
         bookList.add(new Book("History", "Grade 9", R.drawable.history));
 
     }

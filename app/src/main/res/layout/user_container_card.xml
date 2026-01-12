@@ -9,7 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:cardCornerRadius="20dp"
-        app:cardElevation="0dp"
+        app:cardElevation="10dp"
+        android:outlineSpotShadowColor="@color/LightBlue"
         android:background="@drawable/cricle2"
 
         >

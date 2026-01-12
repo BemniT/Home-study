@@ -15,7 +15,9 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.example.home_study.Model.Account;
+import com.example.home_study.Prevalent.Continuity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -48,8 +50,7 @@ public class HomeActivity extends AppCompatActivity {
 
         chat = (ImageView) findViewById(R.id.chat);
         profileTop =  findViewById(R.id.profile);
-//        String profileImage = getIntent().getStringExtra("profileImage");
-//        Picasso.get().load(profileImage).placeholder(R.drawable.profile_image).into(profileTop);
+        Picasso.get().load(Continuity.currentOnlineUser.getProfileImage()).placeholder(R.drawable.profile_image).into(profileTop);
 //        Log.d("image",profileImage);
         profileTop.setOnClickListener(new View.OnClickListener() {
             @Override
