@@ -24,8 +24,8 @@
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/imageProfile"
-                android:layout_width="@dimen/_35sdp"
-                android:layout_height="@dimen/_35sdp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:scaleType="centerCrop"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -46,13 +46,13 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_8sdp"
-                android:layout_marginEnd="@dimen/_50sdp"
+                android:layout_marginEnd="16dp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textColor="@color/black"
                 android:textSize="@dimen/_13ssp"
                 app:layout_constraintBottom_toTopOf="@id/viewSupporter"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/seenIcon"
                 app:layout_constraintStart_toEndOf="@id/imageProfile"
                 />
 
@@ -60,16 +60,17 @@
                 android:id="@+id/lastMessage"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/_50sdp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginTop="2dp"
                 android:layout_marginStart="@dimen/_8sdp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textColor="@color/black_low"
-                android:text="Subject"
-                android:textSize="@dimen/_12ssp"
+                android:text="@string/subject"
+                android:textSize="14sp"
                 app:layout_constraintStart_toEndOf="@id/imageProfile"
                 app:layout_constraintTop_toBottomOf="@id/viewSupporter"
-                app:layout_constraintEnd_toEndOf="@id/lastMessageTime"
+                app:layout_constraintEnd_toStartOf="@id/badgeReceivedMessage"
                 />
 
 
@@ -78,11 +79,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/_4sdp"
-                android:layout_marginEnd="@dimen/_40sdp"
+                android:layout_marginEnd="12dp"
                 android:maxLines="1"
                 android:textColor="@color/black_low"
-                android:textSize="@dimen/_12ssp"
-                app:layout_constraintStart_toEndOf="@id/userName"
+                android:textSize="11sp"
+                app:layout_constraintStart_toEndOf="@id/seenIcon"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
 
@@ -93,13 +94,12 @@
                 android:id="@+id/seenIcon"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:layout_marginEnd="@dimen/_30sdp"
+                android:layout_marginEnd="4dp"
                 android:layout_marginTop="@dimen/_1sdp"
                 android:backgroundTint="@color/primary_secondary"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/lastMessageTime"
-                app:layout_constraintBottom_toBottomOf="parent"
-
+                app:layout_constraintEnd_toStartOf="@+id/lastMessageTime"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@id/userName"
 
                 />
 

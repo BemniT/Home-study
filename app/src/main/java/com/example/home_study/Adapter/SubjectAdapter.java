@@ -1,5 +1,6 @@
 package com.example.home_study.Adapter;
 
+import android.graphics.Bitmap;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +10,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.home_study.Model.Subject;
 import com.example.home_study.R;
 import com.squareup.picasso.Picasso;
@@ -17,7 +17,6 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectViewHolder> {
-
 
     public interface OnSubjectClickListener {
         void onSubjectClick(Subject subject);
@@ -30,17 +29,11 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
     public SubjectAdapter(List<Subject> subjectList, OnSubjectClickListener listener) {
         this.subjectList = subjectList;
         this.listener = listener;
+    }
 
-//        subjectIconMap.put("math".hashCode(),R.drawable.math);
-//        subjectIconMap.put("biology".hashCode(),R.drawable.biology);
-//        subjectIconMap.put("chemistry".hashCode(),R.drawable.chemistry);
-//        subjectIconMap.put("physics".hashCode(),R.drawable.physics);
-//        subjectIconMap.put("english".hashCode(),R.drawable.english);
-//        subjectIconMap.put("geography".hashCode(),R.drawable.geography);
-//        subjectIconMap.put("history".hashCode(),R.drawable.history);
-//        subjectIconMap.put("civics".hashCode(),R.drawable.civics);
-//        subjectIconMap.put("ict".hashCode(),R.drawable.ict);
-
+    public void setSubjects(List<Subject> newList) {
+        this.subjectList = newList != null ? newList : subjectList;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -56,11 +49,29 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
         Subject subject = subjectList.get(position);
 
         holder.tvSubjectName.setText(subject.getName());
-        holder.tvGradeSection.setText(
-                "Grade " + subject.getGrade() + subject.getSection()
-        );
+        holder.tvGradeSection.setText("Grade " + subject.getGrade() + subject.getSection());
 
-        holder.imgSubject.setImageResource(getSubjectIcon(subject.getName()));
+        // Load the icon safely with Picasso and resize to avoid decoding huge bitmaps.
+        int resId = getSubjectIcon(subject.getName());
+
+        // cancel any pending request for this view (important for recycled views)
+        Picasso.get().cancelRequest(holder.imgSubject);
+        holder.imgSubject.setImageDrawable(null);
+
+        // compute a target px size based on density (adjust 72dp to suit your design)
+        final int targetDp = 72;
+        final float density = holder.imgSubject.getResources().getDisplayMetrics().density;
+        final int targetPx = Math.round(targetDp * density);
+
+        Picasso.get()
+                .load(resId)
+                .placeholder(R.drawable.examfill) // create a small placeholder drawable
+                .resize(targetPx, targetPx)   // downsample to view size during decode
+                .centerCrop()
+                .config(Bitmap.Config.RGB_565) // reduce memory usage
+                .onlyScaleDown()
+                .into(holder.imgSubject);
+
         holder.itemView.setOnClickListener(v -> {
             v.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP);
             if (listener != null) listener.onSubjectClick(subject);
@@ -69,16 +80,12 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
 
     @Override
     public int getItemCount() {
-        return subjectList.size();
+        return subjectList != null ? subjectList.size() : 0;
     }
-    private int getSubjectIcon(String name) {
-        String key = name.toLowerCase();
-        for (int i = 0; i < subjectIconMap.size(); i++) {
-            if (key.contains(String.valueOf(subjectIconMap.keyAt(i)).replaceAll("\\D",""))) {
-                return subjectIconMap.valueAt(i);
-            }
-        }
 
+    private int getSubjectIcon(String name) {
+        String key = name != null ? name.toLowerCase() : "";
+        // Fallback mapping
         if (key.contains("math")) return R.drawable.math;
         if (key.contains("biology")) return R.drawable.biology;
         if (key.contains("chemistry")) return R.drawable.chemistry;
@@ -88,13 +95,10 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
         if (key.contains("history")) return R.drawable.history;
         if (key.contains("civics")) return R.drawable.civics;
         if (key.contains("ict")) return R.drawable.ict;
-
         return R.drawable.math;
     }
 
-
     static class SubjectViewHolder extends RecyclerView.ViewHolder {
-
         TextView tvSubjectName, tvGradeSection;
         ImageView imgSubject;
 
@@ -103,9 +107,6 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
             tvSubjectName = itemView.findViewById(R.id.subjectName);
             tvGradeSection = itemView.findViewById(R.id.tvGradeSection);
             imgSubject = itemView.findViewById(R.id.subjectImage);
-
         }
     }
 }
-
-

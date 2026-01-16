@@ -6,20 +6,16 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.home_study.Adapter.ChatBotAdapter;
 import com.example.home_study.Adapter.SkeletonSubjectAdapter;
 import com.example.home_study.Adapter.SubjectAdapter;
-import com.example.home_study.Model.BotMessage;
 import com.example.home_study.Model.Subject;
 import com.example.home_study.Prevalent.Continuity;
 import com.facebook.shimmer.ShimmerFrameLayout;
@@ -27,28 +23,23 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link ClassFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Shows a grid of subjects for the student's grade & section.
  */
-public class ClassFragment extends Fragment implements SubjectAdapter.OnSubjectClickListener{
+public class ClassFragment extends Fragment implements SubjectAdapter.OnSubjectClickListener {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
     private TextView title, subTitle;
     private View emptyStateLayout;
     private ShimmerFrameLayout shimmerClass;
@@ -60,8 +51,6 @@ public class ClassFragment extends Fragment implements SubjectAdapter.OnSubjectC
     private DatabaseReference coursesRef;
 
     private String studentID;
-
-
 
     public ClassFragment() {
         // Required empty public constructor
@@ -83,10 +72,7 @@ public class ClassFragment extends Fragment implements SubjectAdapter.OnSubjectC
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
-
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -94,29 +80,47 @@ public class ClassFragment extends Fragment implements SubjectAdapter.OnSubjectC
 
         View view = inflater.inflate(R.layout.fragment_class, container, false);
 
-
         recyclerView = view.findViewById(R.id.subjectRecyclerView);
         skeletonRecycler = view.findViewById(R.id.skeletonRecycler);
         shimmerClass = view.findViewById(R.id.shimmerClass);
         shimmerClass.startShimmer();
 
-        GridLayoutManager subjectGrid = new GridLayoutManager(getContext(), 2);
-        GridLayoutManager skeletonGrid = new GridLayoutManager(getContext(), 2);
+        // Grid layout with 2 columns
+        GridLayoutManager subjectGrid = new GridLayoutManager(requireContext(), 2);
+        GridLayoutManager skeletonGrid = new GridLayoutManager(requireContext(), 2);
+
+        // Prefetch a few items to reduce jank when scrolling in a grid
+        subjectGrid.setInitialPrefetchItemCount(4);
+        skeletonGrid.setInitialPrefetchItemCount(4);
+
         recyclerView.setLayoutManager(subjectGrid);
         skeletonRecycler.setLayoutManager(skeletonGrid);
 
+        // Skeleton placeholder while loading
         skeletonRecycler.setAdapter(new SkeletonSubjectAdapter(6));
         skeletonRecycler.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.GONE);
 
         adapter = new SubjectAdapter(subjectList, this);
         recyclerView.setAdapter(adapter);
+
+        // Performance tuning for RecyclerView
         recyclerView.setHasFixedSize(true);
+        recyclerView.setItemViewCacheSize(8); // cache a few offscreen views
+        recyclerView.setNestedScrollingEnabled(false);
+
+        // RecycledViewPool: allow more cached views for viewType 0 (adjust as needed)
+        RecyclerView.RecycledViewPool pool = recyclerView.getRecycledViewPool();
+        pool.setMaxRecycledViews(0, 20);
+
+        // Use a lighter item animator (disable change animations to prevent extra invalidations)
+        DefaultItemAnimator animator = new DefaultItemAnimator();
+        animator.setSupportsChangeAnimations(false);
+        recyclerView.setItemAnimator(animator);
 
         title = view.findViewById(R.id.titleText);
         subTitle = view.findViewById(R.id.subTitleText);
         emptyStateLayout = view.findViewById(R.id.emptyStateLayout);
-
 
         studentsRef = FirebaseDatabase.getInstance().getReference("Students");
         coursesRef = FirebaseDatabase.getInstance().getReference("Courses");
@@ -125,7 +129,6 @@ public class ClassFragment extends Fragment implements SubjectAdapter.OnSubjectC
 
         return view;
     }
-
 
     private void loadStudentGradeAndSection() {
         String userId = Continuity.userId;
@@ -151,34 +154,31 @@ public class ClassFragment extends Fragment implements SubjectAdapter.OnSubjectC
                 });
     }
 
-
     private void loadCoursesForStudent(String grade, String section) {
-
+        // Load courses once
         coursesRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                subjectList.clear();
+                // Replace the list with a fresh instance to avoid adapter side-reference issues
+                List<Subject> newList = new ArrayList<>();
 
                 for (DataSnapshot c : snapshot.getChildren()) {
-
-
                     String courseGrade = c.child("grade").getValue(String.class);
                     String courseSection = c.child("section").getValue(String.class);
 
-                    if (grade.equals(courseGrade) && section.equals(courseSection)) {
-
+                    if (grade != null && section != null && grade.equals(courseGrade) && section.equals(courseSection)) {
                         String courseId = c.getKey();
                         String name = c.child("name").getValue(String.class);
 
-                        subjectList.add(
-                                new Subject(courseId, name, courseGrade, courseSection,0)
-                        );
-
-
+                        newList.add(new Subject(courseId, name, courseGrade, courseSection, 0));
                     }
                 }
 
-                adapter.notifyDataSetChanged();
+                // assign and notify
+                subjectList = newList;
+                adapter.setSubjects(subjectList);
+
+                // stop shimmer and show content
                 shimmerClass.stopShimmer();
                 shimmerClass.setVisibility(View.GONE);
                 title.setVisibility(View.VISIBLE);
@@ -199,17 +199,12 @@ public class ClassFragment extends Fragment implements SubjectAdapter.OnSubjectC
         });
     }
 
-
-
-
     @Override
     public void onSubjectClick(Subject subject) {
         String courseTd = subject.getCourseId();
         String subjectName = subject.getName();
 
-
         SubjectPointBottomSheet sheet = SubjectPointBottomSheet.newInstance(courseTd, subjectName, studentID);
-
-        sheet.show(getParentFragmentManager(),"subject_points");
+        sheet.show(getParentFragmentManager(), "subject_points");
     }
 }

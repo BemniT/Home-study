@@ -1,512 +1,586 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/profile_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context=".ProfileActivity"
-    >
+    android:scrollbars="none"
+    android:overScrollMode="never"
+    android:padding="12dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         >
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/profileImageWrapper"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="35dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
 
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/profileImageContainer"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                app:cardCornerRadius="75dp"
-                app:cardPreventCornerOverlap="false"
-                android:forceHasOverlappingRendering="true"
-
-                >
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <de.hdodenhof.circleimageview.CircleImageView
-                        android:id="@+id/profileImage"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/math"
-                        app:civ_border_width="2dp"
-                        app:civ_border_color="@color/LightBlue"
-
-                        />
-
-                    <com.google.android.material.progressindicator.CircularProgressIndicator
-                        android:id="@+id/uploadProgress"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:layout_gravity="center"
-                        app:trackThickness="6dp"
-                        app:indicatorColor="@color/primary_secondary"
-                        app:indicatorSize="48dp"
-                        app:trackColor="@color/LightBlue"
-                        android:indeterminate="false"
-                        android:max="200"
-                        android:visibility="gone"
-                        />
-
-                </FrameLayout>
-
-            </androidx.cardview.widget.CardView>
-
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/changeProfileBtn"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/camera_vector"
-                android:backgroundTint="@color/primary_secondary"
-                app:civ_border_overlay="true"
-                android:forceHasOverlappingRendering="true"
-                app:layout_constraintBottom_toBottomOf="@id/profileImageContainer"
-                app:layout_constraintEnd_toEndOf="@id/profileImageContainer"
-                android:layout_margin="4dp"
-                android:elevation="12dp"
-                android:outlineSpotShadowColor="@color/white"
-                />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
+    <!-- BACK / NAV -->
     <ImageView
         android:id="@+id/profileBackArrow"
-        android:layout_width="30dp"
-        android:layout_height="28dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:contentDescription="back"
+        android:src="@drawable/back"
+        android:padding="6dp"
+        android:backgroundTint="@android:color/transparent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_margin="12dp"
-        android:layout_marginEnd="10dp"
-        android:src="@drawable/back"
-        android:layout_marginBottom="8dp"
-        />
+       />
 
-
-    <TextView
-        android:id="@+id/personalInfoTxt"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Personal Info"
-        android:textSize="18sp"
-        android:textColor="@color/black"
-        android:fontFamily="@font/risque_regular"
-        app:layout_constraintTop_toBottomOf="@id/profileImageWrapper"
+    <!-- Avatar container (centered) -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/profileImageContainer"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        app:cardCornerRadius="180dp"
+        app:cardElevation="8dp"
+        app:cardPreventCornerOverlap="false"
+        android:padding="2dp"
+        android:layout_marginTop="8dp"
+        android:outlineAmbientShadowColor="@color/LightBlue2"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_margin="12dp"
-        />
+        app:layout_constraintEnd_toEndOf="parent">
 
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="4dp"
+            >
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/profileImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/profile_image"
+                app:civ_border_width="2dp"
+                app:civ_border_color="@color/white" />
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/uploadProgress"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                app:indicatorSize="56dp"
+                app:trackThickness="6dp"
+                app:indicatorColor="@color/primary_secondary"
+                app:trackColor="@color/LightBlue"/>
+        </FrameLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- small camera button overlapping avatar (bottom-right) -->
+    <ImageView
+        android:id="@+id/changeProfileBtn"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@drawable/camera"
+        android:elevation="12dp"
+        android:backgroundTint="@color/primary_secondary"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintTop_toBottomOf="@id/profileImageContainer"
+        app:layout_constraintEnd_toEndOf="@id/profileImageContainer"
+        android:translationY="-36dp"/>
+
+    <!-- Full name -->
+    <TextView
+        android:id="@+id/fullName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Full name"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/profileImageContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:gravity="center"/>
+
+    <!-- Username -->
+    <TextView
+        android:id="@+id/username"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="username"
+        android:textSize="14sp"
+        android:textColor="@color/black_low"
+        app:layout_constraintTop_toBottomOf="@id/fullName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:gravity="center"
+  />
+
+    <!-- small stats row (equal-width cards) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/statsRow"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        app:layout_constraintTop_toBottomOf="@id/username"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        >
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/statCard1"
+            android:layout_width="0dp"
+            android:layout_height="84dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/statCard2"
+            android:layout_marginEnd="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/scoreLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Progress"
+                    android:textSize="12sp"
+                    android:textColor="@color/black_low"/>
+
+                <TextView
+                    android:id="@+id/scoreValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="82%"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary_secondary"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/statCard2"
+            android:layout_width="0dp"
+            android:layout_height="84dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:layout_constraintStart_toEndOf="@id/statCard1"
+            app:layout_constraintEnd_toStartOf="@id/statCard3"
+            app:layout_constraintWidth_percent="0.33"
+            android:layout_marginEnd="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/gradeTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Grade"
+                    android:textSize="12sp"
+                    android:textColor="@color/black_low"/>
+
+                <TextView
+                    android:id="@+id/gradeValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="9"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/statCard3"
+            android:layout_width="0dp"
+            android:layout_height="84dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:layout_constraintStart_toEndOf="@id/statCard2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_percent="0.33"
+            tools:ignore="MissingConstraints">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/sectionTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Section"
+                    android:textSize="12sp"
+                    android:textColor="@color/black_low"/>
+
+                <TextView
+                    android:id="@+id/sectionValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="A"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Personal Info card -->
     <androidx.cardview.widget.CardView
         android:id="@+id/personalInfoContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/personalInfoTxt"
+        app:cardElevation="1dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/statsRow"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="4dp"
-        android:layout_marginTop="6dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
+        android:background="@drawable/cricle2"
         android:outlineSpotShadowColor="@color/LightBlue"
         >
 
-        <GridLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/personalInfoTxt"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-            android:columnCount="2"
-            android:padding="8dp"
-            android:rowCount="4"
+            android:layout_height="match_parent"
+            android:padding="16dp"
             android:background="@drawable/cricle2"
             >
 
             <TextView
-                android:id="@+id/usernameTxt"
+                android:id="@+id/personalInfoTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Personal Info"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- username row -->
+            <TextView
+                android:id="@+id/usernameTxt"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="6dp"
+                android:layout_marginEnd="8dp"
                 android:text="Username"
-                android:padding="8dp"
-                android:textSize="14dp"
-                android:layout_columnWeight="1"
-                />
+                android:textColor="@color/black_low"
+                app:layout_constraintEnd_toStartOf="@id/username"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/personalInfoTitle" />
 
             <TextView
                 android:id="@+id/username"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Username"
-                android:padding="8dp"
-                android:textSize="14dp"
-                android:layout_columnWeight="1"
+                android:layout_margin="6dp"
                 android:gravity="end"
-                />
+                android:text="username"
+                android:textColor="@color/black"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/usernameTxt"
+                app:layout_constraintTop_toBottomOf="@id/personalInfoTitle" />
 
+            <!-- full name -->
             <TextView
                 android:id="@+id/fullNameTxt"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_margin="6dp"
+                android:layout_marginEnd="8dp"
                 android:text="Full name"
-                android:padding="8dp"
-                android:textSize="14dp"
-                android:layout_columnWeight="1"
-                />
+                android:textColor="@color/black_low"
+                app:layout_constraintEnd_toStartOf="@id/fullName"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/username" />
 
             <TextView
                 android:id="@+id/fullName"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Epherem Tesema"
-                android:padding="8dp"
-                android:textSize="14dp"
-                android:layout_columnWeight="1"
+                android:layout_margin="6dp"
                 android:gravity="end"
-                />
+                android:text="Full name"
+                android:textColor="@color/black"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/fullNameTxt"
+                app:layout_constraintTop_toBottomOf="@id/username" />
 
+            <!-- email -->
             <TextView
                 android:id="@+id/EmailTxt"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_margin="6dp"
+                android:layout_marginEnd="8dp"
                 android:text="Email"
-                android:padding="8dp"
-                android:textSize="14dp"
-                android:layout_columnWeight="1"
-                />
+                android:textColor="@color/black_low"
+                app:layout_constraintEnd_toStartOf="@id/email"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/fullName" />
 
             <TextView
                 android:id="@+id/email"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Epherem@gmail.com"
-                android:padding="8dp"
-                android:textSize="14dp"
-                android:layout_columnWeight="1"
+                android:layout_margin="6dp"
                 android:gravity="end"
-                />
+                android:text="email@example.com"
+                android:textColor="@color/black"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/EmailTxt"
+                app:layout_constraintTop_toBottomOf="@id/fullName" />
 
-            <TextView
-                android:id="@+id/ageTxt"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Age"
-                android:padding="8dp"
-                android:textSize="14sp"
-                android:layout_columnWeight="1"
-                />
-
-            <TextView
-                android:id="@+id/userAge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="16"
-                android:padding="8dp"
-                android:textSize="14sp"
-                android:layout_columnWeight="1"
-                android:gravity="end"
-                />
-
-            <TextView
-                android:id="@+id/sexTxt"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Gender"
-                android:padding="8dp"
-                android:textSize="14sp"
-                android:layout_columnWeight="1"
-                />
-
-            <TextView
-                android:id="@+id/sex"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Male"
-                android:padding="8dp"
-                android:textSize="14sp"
-                android:layout_columnWeight="1"
-                android:gravity="end"
-                />
+            <!-- phone -->
             <TextView
                 android:id="@+id/phoneTxt"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_margin="6dp"
+                android:layout_marginEnd="8dp"
                 android:text="Phone No"
-                android:padding="8dp"
-                android:textSize="14sp"
-                android:layout_columnWeight="1"
-                />
+                android:textColor="@color/black_low"
+                app:layout_constraintEnd_toStartOf="@id/phoneNumber"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/email" />
 
             <TextView
                 android:id="@+id/phoneNumber"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="+251 90 723 2324"
-                android:padding="8dp"
-                android:textSize="14sp"
-                android:layout_columnWeight="1"
+                android:layout_margin="6dp"
                 android:gravity="end"
-                />
-        </GridLayout>
+                android:text="+251 90 000 0000"
+                android:textColor="@color/black"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/phoneTxt"
+                app:layout_constraintTop_toBottomOf="@id/email" />
 
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
+    <!-- Academics card (redundant if you used stats above, kept for compatibility) -->
+<!--    <androidx.cardview.widget.CardView-->
+<!--        android:id="@+id/academicsInfoContainer"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        app:cardCornerRadius="14dp"-->
+<!--        app:cardElevation="1dp"-->
+<!--        android:padding="12dp"-->
+<!--        app:layout_constraintTop_toBottomOf="@id/personalInfoContainer"-->
+<!--        android:layout_marginTop="8dp"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        android:outlineSpotShadowColor="@color/LightBlue">-->
 
+<!--        <androidx.constraintlayout.widget.ConstraintLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:padding="16dp"-->
+<!--            android:background="@drawable/cricle2"-->
+<!--            >-->
 
+<!--            <TextView-->
+<!--                android:id="@+id/academicsTitle"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Academics"-->
+<!--                android:textStyle="bold"-->
+<!--                android:textSize="16sp"-->
+<!--                android:textColor="@color/black"-->
+<!--                app:layout_constraintTop_toTopOf="parent"-->
+<!--                app:layout_constraintStart_toStartOf="parent"/>-->
 
-    <TextView
-        android:id="@+id/academicsTxt"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Academics"
-        android:textSize="18sp"
-        android:textColor="@color/black"
-        android:fontFamily="@font/risque_regular"
-        app:layout_constraintTop_toBottomOf="@id/personalInfoContainer"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_margin="8dp"
-        />
+<!--            <TextView-->
+<!--                android:id="@+id/grade"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Nine(9)"-->
+<!--                android:textColor="@color/black"-->
+<!--                app:layout_constraintTop_toBottomOf="@id/academicsTitle"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                android:layout_margin="6dp"/>-->
 
+<!--            <TextView-->
+<!--                android:id="@+id/section"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="A"-->
+<!--                android:textColor="@color/black"-->
+<!--                app:layout_constraintTop_toBottomOf="@id/academicsTitle"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                android:layout_margin="6dp"-->
+<!--                />-->
 
+<!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
+<!--    </androidx.cardview.widget.CardView>-->
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/academicsInfoContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/academicsTxt"
-        app:layout_constraintStart_toStartOf="parent"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="4dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="4dp"
-        android:outlineAmbientShadowColor="@color/primary_secondary"
-        android:outlineSpotShadowColor="@color/LightBlue"
-
-        >
-
-        <GridLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/cricle2"
-            android:columnCount="2"
-            android:padding="8dp"
-            android:rowCount="4"
-            >
-            <TextView
-                android:id="@+id/gradeTxt"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Grade"
-                android:padding="8dp"
-                android:textSize="14sp"
-                android:layout_columnWeight="1"
-                />
-
-            <TextView
-                android:id="@+id/grade"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Nine(9)"
-                android:padding="8dp"
-                android:textSize="14sp"
-                android:layout_columnWeight="1"
-                android:gravity="end"
-                />
-
-            <TextView
-                android:id="@+id/sectionTxt"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Section"
-                android:padding="8dp"
-                android:textSize="14sp"
-                android:layout_columnWeight="1"
-                />
-
-            <TextView
-                android:id="@+id/section"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="A"
-                android:padding="8dp"
-                android:textSize="14sp"
-                android:layout_columnWeight="1"
-                android:gravity="end"
-                />
-
-
-        </GridLayout>
-    </androidx.cardview.widget.CardView>
-
-
-
+    <!-- Edit profile action -->
     <androidx.cardview.widget.CardView
         android:id="@+id/editProfile"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/academicsInfoContainer"
-        app:layout_constraintStart_toStartOf="parent"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="3dp"
+        android:padding="12dp"
         android:layout_marginTop="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        app:cardCornerRadius="20dp"
-        android:elevation="4dp"
-        android:outlineAmbientShadowColor="@color/primary_secondary"
+        app:layout_constraintTop_toBottomOf="@id/personalInfoContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         android:outlineSpotShadowColor="@color/LightBlue"
-
+        android:background="@drawable/cricle2"
         >
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:gravity="center_vertical"
             android:padding="12dp"
-
-            tools:ignore="UseCompoundDrawables"
             android:background="@drawable/cricle2"
             >
 
-
             <ImageView
                 android:id="@+id/editProfileIcon"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:contentDescription="TODO"
-                android:src="@drawable/edit"
-                android:layout_marginStart="12dp"
-                android:layout_gravity="center"
-                />
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/edit" />
 
             <TextView
                 android:id="@+id/editProfileTxt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:layout_gravity="center"
-                android:text="Edit Profile"
-                app:layout_constraintStart_toEndOf="@id/passwordIcon"
-                app:layout_constraintTop_toBottomOf="@id/academicsInfoContainer"
-                />
-
+                android:text="Edit Profile" />
         </LinearLayout>
-
-
     </androidx.cardview.widget.CardView>
 
-
-<!--    <androidx.cardview.widget.CardView-->
-<!--    android:id="@+id/changePassword"-->
-<!--    android:layout_width="match_parent"-->
-<!--    android:layout_height="wrap_content"-->
-<!--    app:layout_constraintTop_toBottomOf="@+id/editProfile"-->
-<!--    app:layout_constraintStart_toStartOf="parent"-->
-<!--    android:layout_margin="4dp"-->
-<!--    app:cardCornerRadius="20dp"-->
-<!--    >-->
-
-<!--    <LinearLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:orientation="horizontal"-->
-<!--        android:padding="12dp"-->
-<!--        >-->
-
-
-<!--        <ImageView-->
-<!--            android:id="@+id/passwordIcon"-->
-<!--            android:layout_width="28dp"-->
-<!--            android:layout_height="28dp"-->
-<!--            android:src="@drawable/edit"-->
-<!--            android:layout_marginStart="12dp"-->
-<!--            android:layout_gravity="center"-->
-<!--            />-->
-
-<!--        <TextView-->
-<!--            android:id="@+id/changePasswordTxt"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginStart="12dp"-->
-<!--            android:layout_gravity="center"-->
-<!--            android:text="Change password"-->
-<!--            app:layout_constraintStart_toEndOf="@id/passwordIcon"-->
-<!--            app:layout_constraintTop_toBottomOf="@id/academicsInfoContainer"-->
-<!--            />-->
-
-<!--    </LinearLayout>-->
-
-
-<!--</androidx.cardview.widget.CardView>-->
-
-
-
-
-
+    <!-- Term and privacy -->
     <androidx.cardview.widget.CardView
-        android:id="@+id/logoutBtn"
-        android:layout_width="match_parent"
+        android:id="@+id/termAndPrivacy"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="3dp"
+        android:padding="12dp"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/editProfile"
+        app:layout_constraintTop_toBottomOf="@id/editProfile"
         app:layout_constraintStart_toStartOf="parent"
-        app:cardCornerRadius="20dp"
-        app:layout_goneMarginTop="4dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="4dp"
-        android:elevation="4dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:outlineAmbientShadowColor="@color/primary_secondary"
+        app:layout_constraintEnd_toEndOf="parent"
         android:outlineSpotShadowColor="@color/LightBlue"
         >
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:gravity="center_vertical"
             android:padding="12dp"
             android:background="@drawable/cricle2"
             >
 
-
             <ImageView
-                android:id="@+id/passwordIcon"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:src="@drawable/password"
-                android:layout_marginStart="12dp"
-                android:layout_gravity="center"
-                />
+                android:id="@+id/termIcon"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/terms" />
 
             <TextView
-                android:id="@+id/changePasswordTxt"
+                android:id="@+id/termAndPrivacyTxt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:layout_gravity="center"
-                android:text="Logout"
-                app:layout_constraintStart_toEndOf="@id/passwordIcon"
-                app:layout_constraintTop_toBottomOf="@id/academicsInfoContainer"
-                />
-
+                android:text="Term and privacy" />
         </LinearLayout>
-
-
     </androidx.cardview.widget.CardView>
 
+    <androidx.cardview.widget.CardView
+        android:id="@+id/shareBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="3dp"
+        android:padding="12dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/termAndPrivacy"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:outlineSpotShadowColor="@color/LightBlue"
+        >
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="12dp"
+            android:background="@drawable/cricle2"
+            >
+
+            <ImageView
+                android:id="@+id/shareIcon"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/share" />
+
+            <TextView
+                android:id="@+id/shareTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="Share" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Logout -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/logoutBtn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="3dp"
+        android:padding="12dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/shareBtn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:outlineSpotShadowColor="@color/LightBlue"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="12dp"
+            android:background="@drawable/cricle2"
+            >
+
+            <ImageView
+                android:id="@+id/logoutIcon"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:src="@drawable/logout"
+
+                />
+
+            <TextView
+                android:id="@+id/logoutTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="Logout" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </ScrollView>

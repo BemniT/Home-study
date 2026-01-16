@@ -1,36 +1,26 @@
 package com.example.home_study;
 
-import static org.bouncycastle.asn1.x509.ReasonFlags.unused;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.View;
-import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.home_study.Prevalent.Continuity;
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -45,10 +35,10 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class ProfileActivity extends AppCompatActivity {
 
     // UI
-    private ImageView  backArrow;
-    private CircleImageView profileImage, changeProfileBtn;
+    private ImageView backArrow, changeProfileBtn;
+    private CircleImageView profileImage;
     private TextView username, fullName, email, phoneNumber;
-    private TextView grade, section;
+    private TextView gradeValue, sectionValue;
     private CircularProgressIndicator uploadProgressBar;
 
     // Firebase
@@ -56,33 +46,31 @@ public class ProfileActivity extends AppCompatActivity {
     private Uri croppedImageUri;
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        populateUserData();
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_profile);
-        findViewById(R.id.profile_main)
-                .startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_slide_up));
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.profile_main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
         initViews();
         initFirebase();
         populateUserData();
         initClickListeners();
+
+        // entrance animations for content -- subtle and performant
+        profileImage.setScaleX(0.92f);
+        profileImage.setScaleY(0.92f);
+        profileImage.setAlpha(0f);
+        profileImage.animate().scaleX(1f).scaleY(1f).alpha(1f)
+                .setDuration(420).setInterpolator(new DecelerateInterpolator()).start();
+
+        // slight stagger for info
+        ViewCompat.animate(findViewById(R.id.personalInfoContainer))
+                .translationY(18f).alpha(0f)
+                .setDuration(0).start();
+        findViewById(R.id.personalInfoContainer).postDelayed(() ->
+                        ViewCompat.animate(findViewById(R.id.personalInfoContainer))
+                                .translationY(0f).alpha(1f).setDuration(420).setInterpolator(new DecelerateInterpolator()).start()
+                , 140);
     }
-
-
-
-    // -------------------- INIT --------------------
 
     private void initViews() {
         profileImage = findViewById(R.id.profileImage);
@@ -95,8 +83,8 @@ public class ProfileActivity extends AppCompatActivity {
         email = findViewById(R.id.email);
         phoneNumber = findViewById(R.id.phoneNumber);
 
-        grade = findViewById(R.id.grade);
-        section = findViewById(R.id.section);
+        gradeValue = findViewById(R.id.gradeValue);
+        sectionValue = findViewById(R.id.sectionValue);
     }
 
     private void initFirebase() {
@@ -105,46 +93,51 @@ public class ProfileActivity extends AppCompatActivity {
                 .child("Profile Pictures");
     }
 
-    // -------------------- DATA --------------------
+    @Override
+    protected void onResume() {
+        super.onResume();
+        populateUserData();
+    }
 
     public void populateUserData() {
         if (Continuity.currentOnlineUser == null) return;
 
-        username.setText(Continuity.currentOnlineUser.getUsername());
-        fullName.setText(Continuity.currentOnlineUser.getName());
-        email.setText(Continuity.currentOnlineUser.getEmail());
-        phoneNumber.setText(Continuity.currentOnlineUser.getPhone());
+        username.setText("@" + safe(Continuity.currentOnlineUser.getUsername()));
+        fullName.setText(safe(Continuity.currentOnlineUser.getName()));
+        email.setText(safe(Continuity.currentOnlineUser.getEmail()));
+        phoneNumber.setText(safe(Continuity.currentOnlineUser.getPhone()));
 
-
+        // Glide cross-fade for avatar (fast and efficient)
         Glide.with(this)
                 .load(Continuity.currentOnlineUser.getProfileImage())
                 .placeholder(R.drawable.profile_image)
+                .error(R.drawable.profile_image)
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                .circleCrop()
                 .into(profileImage);
-        loadStudentData();
 
+        // load student-specific details from Realtime DB
+        loadStudentData();
     }
 
-    // -------------------- CLICKS --------------------
-
     private void initClickListeners() {
-
         backArrow.setOnClickListener(v -> finish());
 
         changeProfileBtn.setOnClickListener(v -> {
-            Intent intent = new Intent(
-                    Intent.ACTION_PICK,
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-            );
+            // small tactile animation
+            changeProfileBtn.animate().scaleX(0.92f).scaleY(0.92f).setDuration(120)
+                    .withEndAction(() -> changeProfileBtn.animate().scaleX(1f).scaleY(1f).setDuration(120)).start();
+
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             imagePickerLauncher.launch(intent);
         });
 
         findViewById(R.id.editProfile).setOnClickListener(v ->
-
-                new EditProfileBottomSheet().show(getSupportFragmentManager(), "EditProfile")
-        );
+                new EditProfileBottomSheet().show(getSupportFragmentManager(), "EditProfile"));
 
         findViewById(R.id.logoutBtn).setOnClickListener(v -> {
-//            Continuity.logout(this);
+            // replace with actual logout flow; for now finish
+            Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show();
             finish();
         });
     }
@@ -159,11 +152,10 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             });
 
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // UCrop uses startActivityForResult API; keep this override for compatibility
         super.onActivityResult(requestCode, resultCode, data);
-
         if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
             croppedImageUri = UCrop.getOutput(data);
             if (croppedImageUri != null) {
@@ -174,22 +166,13 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void startCrop(Uri sourceUri) {
-        Uri destinationUri = Uri.fromFile(
-                new File(getCacheDir(), System.currentTimeMillis() + "_crop.jpg")
-        );
-
+        Uri destinationUri = Uri.fromFile(new File(getCacheDir(), System.currentTimeMillis() + "_crop.jpg"));
         UCrop.Options options = new UCrop.Options();
-        options.setToolbarColor(ContextCompat.getColor(this, R.color.black_low_low));
-        options.setStatusBarColor(ContextCompat.getColor(this, R.color.primary_secondary));
-        options.setActiveControlsWidgetColor(ContextCompat.getColor(this, R.color.primary_secondary));
-
-        UCrop.of(sourceUri, destinationUri)
-                .withAspectRatio(1, 1)
-                .withMaxResultSize(512, 512)
-                .withOptions(options)
-                .start(this);
+        options.setToolbarColor(getColorSafe(R.color.primary_secondary));
+        options.setStatusBarColor(getColorSafe(R.color.primary_secondary));
+        options.setActiveControlsWidgetColor(getColorSafe(R.color.primary_secondary));
+        UCrop.of(sourceUri, destinationUri).withAspectRatio(1, 1).withMaxResultSize(512, 512).withOptions(options).start(this);
     }
-
 
     // -------------------- UPLOAD --------------------
 
@@ -197,79 +180,66 @@ public class ProfileActivity extends AppCompatActivity {
         if (croppedImageUri == null) return;
 
         uploadProgressBar.setVisibility(View.VISIBLE);
-        StorageReference fileRef = profileImageRef
-                .child(Continuity.currentOnlineUser.getUserId() + ".jpg");
+        StorageReference fileRef = profileImageRef.child(Continuity.currentOnlineUser.getUserId() + ".jpg");
 
         fileRef.putFile(croppedImageUri)
                 .addOnProgressListener(snapshot -> {
-
-                        uploadProgressBar.setVisibility(View.VISIBLE);
-                        long bytesTransfered = snapshot.getBytesTransferred();
-                        long totalBytes = snapshot.getTotalByteCount();
-
-                        int progress = (int) ((200.0 * bytesTransfered) / totalBytes);
-                        uploadProgressBar.setProgress(progress);
+                    uploadProgressBar.setVisibility(View.VISIBLE);
+                    long bytesTransfered = snapshot.getBytesTransferred();
+                    long totalBytes = snapshot.getTotalByteCount();
+                    int progress = (int) ((200.0 * bytesTransfered) / totalBytes);
+                    uploadProgressBar.setProgress(progress);
                 })
                 .continueWithTask(task -> {
-                    if (!task.isSuccessful()) {
-                        throw  task.getException();
-                    }
-                      return  fileRef.getDownloadUrl();
-                }).addOnSuccessListener(task -> {
-
-
-                    String imageUrl = task.toString();
-
+                    if (!task.isSuccessful()) throw task.getException();
+                    return fileRef.getDownloadUrl();
+                }).addOnSuccessListener(uri -> {
+                    String imageUrl = uri.toString();
                     HashMap<String, Object> update = new HashMap<>();
                     update.put("profileImage", imageUrl);
-
-                    FirebaseDatabase.getInstance()
-                            .getReference("Users")
+                    FirebaseDatabase.getInstance().getReference("Users")
                             .child(Continuity.currentOnlineUser.getUserId())
                             .updateChildren(update)
                             .addOnSuccessListener(unused -> {
                                 Continuity.currentOnlineUser.setProfileImage(imageUrl);
-
                                 uploadProgressBar.setVisibility(View.GONE);
-
-                                Glide.with(ProfileActivity.this)
-                                                .load(imageUrl)
-                                                        .skipMemoryCache(true)
-                                                                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                                                                        .into(profileImage);
+                                Glide.with(ProfileActivity.this).load(imageUrl)
+                                        .skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE)
+                                        .circleCrop().into(profileImage);
                                 Toast.makeText(this, "Profile updated", Toast.LENGTH_SHORT).show();
                             });
                 }).addOnFailureListener(e -> {
-                   uploadProgressBar.setVisibility(View.GONE);
-
-                   Snackbar.make(profileImage, "Upload failed", Snackbar.LENGTH_INDEFINITE)
-                           .setAction("Retry", v -> uploadProfileImage())
-                           .show();
+                    uploadProgressBar.setVisibility(View.GONE);
+                    Toast.makeText(this, "Upload failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
-
     }
 
     private void loadStudentData() {
-        FirebaseDatabase.getInstance()
-                .getReference("Students")
+        FirebaseDatabase.getInstance().getReference("Students")
                 .orderByChild("userId")
                 .equalTo(Continuity.currentOnlineUser.getUserId())
                 .get()
                 .addOnSuccessListener(snapshot -> {
-
-                    if (!snapshot.exists()){
-                        grade.setText("--");
-                        section.setText("--");
+                    if (!snapshot.exists()) {
+                        gradeValue.setText("--");
+                        sectionValue.setText("--");
                         return;
                     }
                     for (DataSnapshot ds : snapshot.getChildren()) {
-                        grade.setText(String.valueOf(ds.child("grade").getValue()));
-                        section.setText(String.valueOf(ds.child("section").getValue()));
-
-                        Log.e("grade",String.valueOf(ds.child("grade").getValue()));
-                        Log.e("grade",String.valueOf(ds.child("section").getValue()));
+                        Object g = ds.child("grade").getValue();
+                        Object s = ds.child("section").getValue();
+                        gradeValue.setText(g != null ? String.valueOf(g) : "--");
+                        sectionValue.setText(s != null ? String.valueOf(s) : "--");
                         break;
                     }
+                })
+                .addOnFailureListener(e -> {
+                    gradeValue.setText("--");
+                    sectionValue.setText("--");
                 });
     }
+
+    // small helpers
+    private String safe(String s) { return s == null ? "" : s; }
+    private int getColorSafe(int id) { return ContextCompat.getColor(this, id); }
 }

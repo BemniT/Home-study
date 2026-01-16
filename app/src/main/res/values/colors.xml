@@ -13,6 +13,24 @@
     <color name="LightBlue2">#D3E0FD</color>
     <color name="selected_option">#BC007AFB</color>
     <color name="unselected_option">#FFFFFF</color>
+    <color name="red_badge">#E53935</color>
+    <!-- Duolingo-like feedback colors -->
+    <color name="duo_green">#60C657</color>        <!-- soft green fill -->
+    <color name="duo_green_dark">#2E7D32</color>   <!-- darker green for stroke/text -->
+    <color name="duo_red_soft">#FF6B6B</color>     <!-- soft red fill -->
+    <color name="duo_red_dark">#C62828</color>     <!-- darker red for stroke/text -->
 
+    <!-- Duolingo-like feedback (soft fill + dim outline) -->
+    <color name="duo_green_fill">#E8F5E9</color>      <!-- very light green fill -->
+    <color name="duo_green_outline">#60C657</color>   <!-- medium green outline -->
+    <color name="duo_green_text">#2E7D32</color>      <!-- darker green for text -->
+
+    <color name="duo_red_fill">#FFEDED</color>        <!-- very light red fill -->
+    <color name="duo_red_outline">#E53935</color>     <!-- medium red outline -->
+    <color name="duo_red_text">#C62828</color>        <!-- darker red for text -->
+
+    <!-- keep existing neutral option colors -->
+    <color name="option_border">#E6E9EE</color>
+    <color name="option_bg">#FFFFFF</color>
 
 </resources>

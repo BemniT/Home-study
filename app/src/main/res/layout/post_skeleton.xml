@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lightweight skeleton resembling post_card -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:background="@android:color/transparent">
+
+    <!-- header row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <View
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_skeleton_circle"
+            />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1">
+
+            <View
+                android:layout_width="100dp"
+                android:layout_height="12dp"
+                android:background="@drawable/bg_skeleton_circle" />
+
+            <View
+                android:layout_width="70dp"
+                android:layout_height="10dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_skeleton_circle" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- message lines -->
+    <View
+        android:layout_width="210dp"
+        android:layout_height="12dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_skeleton_circle" />
+
+    <View
+        android:layout_width="180dp"
+        android:layout_height="12dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_skeleton_circle" />
+
+    <!-- image placeholder -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_skeleton_card" />
+
+    <!-- action row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="12dp">
+
+        <View android:layout_width="28dp" android:layout_height="28dp" android:background="@drawable/bg_skeleton_circle" />
+        <View android:layout_width="60dp" android:layout_height="10dp" android:layout_marginStart="8dp" android:background="@drawable/bg_skeleton_card"/>
+    </LinearLayout>
+
+</LinearLayout>

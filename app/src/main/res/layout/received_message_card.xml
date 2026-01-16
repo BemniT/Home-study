@@ -7,33 +7,28 @@
     android:layout_marginTop="@dimen/_8sdp"
     android:padding="@dimen/_4sdp">
 
-    <androidx.cardview.widget.CardView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:cardCornerRadius="10dp"
-        android:clipChildren="true"
-        android:padding="10dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
 
-        >
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:minWidth="70dp"
-            android:background="@drawable/bg_skeleton"
+            android:padding="6dp"
+
+            android:background="@drawable/bg_received_message"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+
             >
 
             <TextView
                 android:id="@+id/textMessage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingStart="@dimen/_12sdp"
                 android:paddingTop="@dimen/_8sdp"
                 android:paddingEnd="@dimen/_12sdp"
-                android:paddingBottom="@dimen/_8sdp"
+
                 android:layout_marginStart="@dimen/_8sdp"
                 app:layout_constraintWidth_max="wrap"
                 android:textColor="@color/black"
@@ -60,7 +55,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/black"
-                    android:textSize="@dimen/_8ssp"
+                    android:textSize="10sp"
                     android:text="9:10 AM"
                     android:layout_marginEnd="@dimen/_4sdp"
                     android:layout_gravity="center"
@@ -87,5 +82,4 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-    </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

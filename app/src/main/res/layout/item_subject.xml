@@ -42,7 +42,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Grade 9A"
-                    android:textSize="14sp"
+                    android:textSize="11sp"
                     android:textColor="#777777" />
 
 

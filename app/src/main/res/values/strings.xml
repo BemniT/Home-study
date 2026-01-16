@@ -3,7 +3,7 @@
     <string name="login">Login</string>
     <string name="password">Password</string>
     <string name="user_name">Username</string>
-    <string name="letStart">Welcom Back</string>
+    <string name="letStart">Welcome Back</string>
     <string name="secondLetStart">Login your existing Gojo Study</string>
     <string name="home">Home</string>
     <string name="exam">Exam</string>
@@ -17,4 +17,11 @@
     <string name="grade">Grade</string>
     <string name="book_icon">Book Icon</string>
     <string name="message">Messages</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="enter_confirm_password">Enter confirm password</string>
+    <string name="enter_new_password">Enter new password</string>
+    <string name="new_password">New Password</string>
+    <string name="edit_info">Edit Info</string>
+    <string name="subject">Subject</string>
+    <string name="type_a_message">Type a message...</string>
 </resources>
