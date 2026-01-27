@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/LightBlue2"/> <!-- Circle color (red in this case) -->
+    <solid android:color="@color/primary"/> <!-- Circle color (red in this case) -->
     <size
         android:width="30dp"
         android:height="10dp"/> <!-- Circle size (100x100) -->

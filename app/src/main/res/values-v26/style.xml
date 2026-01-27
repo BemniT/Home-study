@@ -11,4 +11,16 @@
         <item name="android:layout_marginHorizontal">6dp</item>
                 <item name="android:background">@color/white</item>
     </style>
+
+
+        <style name="Widget.App.Chip.Outlined" parent="Widget.MaterialComponents.Chip.Action">
+            <item name="chipBackgroundColor">@color/white</item>
+            <item name="chipStrokeColor">@color/grey200</item>
+            <item name="chipStrokeWidth">1dp</item>
+            <item name="android:textColor">@color/black</item>
+            <item name="chipMinHeight">36dp</item>
+            <item name="chipCornerRadius">18dp</item>
+            <item name="chipIconTint">@color/primary</item>
+        </style>
+
 </resources>

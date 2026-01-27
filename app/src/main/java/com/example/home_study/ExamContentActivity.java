@@ -1,12 +1,14 @@
 package com.example.home_study;
 
+import android.animation.IntEvaluator;
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.DecelerateInterpolator;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,80 +21,65 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.home_study.Adapter.ExamContentAdapter;
 import com.example.home_study.Model.ExamContent;
 import com.example.home_study.Prevalent.Continuity;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import android.animation.ObjectAnimator;
-import android.animation.IntEvaluator;
-import com.google.android.material.progressindicator.CircularProgressIndicator;
-// ... other imports
-
-
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Loads chapters for a course and shows exam availability. Clickable items open ExamCenterActivity.
+ * ExamContentActivity — loads chapters for a course and shows exam availability.
  *
- * Expects intent extras:
- *  - "courseId" (preferred): the database key / course id stored on Courses
- *  - "examBookTitle" (optional): human-friendly subject title used as fallback/static demo
+ * Changes made:
+ * - Show a centered illustration + text when there are no chapters (emptyStateContainer).
+ * - Keep greeting rotation running but use creative, personalized messages when no chapters.
+ * - Do not overwrite greeting with a plain "no chapters" message; greeting remains a friendly set.
  */
 public class ExamContentActivity extends AppCompatActivity implements ExamContentAdapter.OnExamContentClickListener {
 
+    private static final String TAG = "ExamContentActivity";
+    private static final int REQUEST_OPEN_EXAM = 1234;
+
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
-    private TextView headerTitle, emptyState;
+    private TextView headerTitle;
+    private TextView emptyStateText;
+    private View emptyStateContainer;
+    private ImageView emptyStateImage;
     private ExamContentAdapter contentAdapter;
-    private List<ExamContent> examContentList = new ArrayList<>();
+    private final List<ExamContent> examContentList = new ArrayList<>();
 
-    private TextView welcomeText;         // binds to R.id.welcomeText in your header
+    // header / greeting
+    private TextView welcomeText, subWelcome;
     private Handler greetingHandler;
     private Runnable greetingRunnable;
-    private List<String> greetingTemplates = new ArrayList<>();
+    private final List<String> greetingTemplates = new ArrayList<>();
     private int currentGreetingIndex = 0;
-    private String studentName = "Student"; // fallback
-    private final long GREETING_INTERVAL_MS = 20000; // change interval if you like
+    private String studentName = "Student";
+    private final long GREETING_INTERVAL_MS = 12000;
     private final long FADE_DURATION_MS = 300;
-    private DatabaseReference chaptersRef;
+
+    // Firebase refs
+    private DatabaseReference coursesRef;
     private DatabaseReference examsRef;
     private DatabaseReference resultsRef;
+
+    // UI performance indicator (subject-level performance)
     private CircularProgressIndicator headerProgress;
     private TextView headerPercent;
-    private DatabaseReference coursesRef;  // Updated: Now queries Courses directly for curriculumId
 
-    private String courseId;          // database courseId (preferred)
-    private String examBookTitle;     // fallback human title
-    private String curriculumId;      // derived from Courses
+    // inputs
+    private String courseId;
+    private String examBookTitle;
 
-    // track user answers keyed by questionId
+    // derived
+    private String curriculumId; // e.g. biology_9
+    private String curriculumSubject; // e.g. "biology"
+    private String curriculumGrade;   // e.g. "9"
 
-
-// Firebase results ref (you already have resultsRef, reuse it)
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        stopGreetingRotation();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        stopGreetingRotation();
-    }
-
-    private void stopGreetingRotation() {
-        if (greetingHandler != null && greetingRunnable != null) {
-            greetingHandler.removeCallbacks(greetingRunnable);
-        }
-    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,114 +88,169 @@ public class ExamContentActivity extends AppCompatActivity implements ExamConten
         recyclerView = findViewById(R.id.examContentRecycler);
         progressBar = findViewById(R.id.contentProgress);
         headerTitle = findViewById(R.id.littleTitle);
-        emptyState = findViewById(R.id.emptyStateText);
+        emptyStateText = findViewById(R.id.emptyStateText);
+        emptyStateContainer = findViewById(R.id.emptyStateContainer);
+        emptyStateImage = findViewById(R.id.emptyStateImage);
         headerProgress = findViewById(R.id.headerProgress);
         headerPercent = findViewById(R.id.headerPercent);
         welcomeText = findViewById(R.id.welcomeText);
+        subWelcome = findViewById(R.id.subWelcome);
 
-        studentName = Continuity.currentOnlineUser.getName();
-
-        if (studentName.isEmpty()){
-            studentName.equals("Student");
-        }else {
-            prepareGreetingTemplatesAndStart();
-        }
+        studentName = Continuity.currentOnlineUser != null ? Continuity.currentOnlineUser.getName() : "Student";
+        if (studentName == null || studentName.trim().isEmpty()) studentName = "Student";
 
         // Intent extras
         Intent intent = getIntent();
-        courseId = intent.getStringExtra("courseId");
-        examBookTitle = intent.getStringExtra("examBookTitle");
+        courseId = intent != null ? intent.getStringExtra("courseId") : null;
+        examBookTitle = intent != null ? intent.getStringExtra("examBookTitle") : null;
+        if (examBookTitle == null && courseId != null) examBookTitle = courseId;
 
-        if (examBookTitle == null && courseId != null) {
-            // You may derive a friendly title from courseId if desired
-            examBookTitle = courseId;
-        }
         headerTitle.setText(examBookTitle != null ? examBookTitle : "Chapters");
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         contentAdapter = new ExamContentAdapter(examContentList, this);
         recyclerView.setAdapter(contentAdapter);
 
-        // Firebase refs
-        coursesRef = FirebaseDatabase.getInstance().getReference("Courses");  // Updated: Direct query to Courses
+        coursesRef = FirebaseDatabase.getInstance().getReference("Courses");
         examsRef = FirebaseDatabase.getInstance().getReference("Exams");
         resultsRef = FirebaseDatabase.getInstance().getReference("ExamResults");
+
+        // Start with neutral greeting list; we'll switch to chapter or empty messages once we know state
+        prepareGreetingTemplatesAndStart(false);
 
         // start loading
         loadChapters();
     }
 
-    private void loadChapters() {
-        progressBar.setVisibility(View.VISIBLE);
-        emptyState.setVisibility(View.GONE);
-
-        if (courseId != null && !courseId.isEmpty()) {
-            // Updated: Query Courses directly for curriculumId (no more CourseChapters)
-            coursesRef.child(courseId).get().addOnSuccessListener(snapshot -> {
-                if (snapshot.exists()) {
-                    curriculumId = snapshot.child("curriculumId").getValue(String.class);
-                    if (curriculumId != null) {
-                        loadChaptersFromCurriculum(curriculumId);
-                        loadSubjectPerformance(curriculumId);
-
-                    } else {
-                        showEmpty();
-                    }
-                } else {
-                    showEmpty();
-                }
-            }).addOnFailureListener(e -> {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(ExamContentActivity.this, "Failed to load course info", Toast.LENGTH_SHORT).show();
-            });
-        } else {
-            // No courseId: fallback to static or by title. Here we fallback to static demo list as before.
-            loadStaticChapters(examBookTitle);
-            progressBar.setVisibility(View.GONE);
-            contentAdapter.notifyDataSetChanged();
-            if (examContentList.isEmpty()) showEmpty();
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_OPEN_EXAM && resultCode == RESULT_OK) {
+            // refresh to show updated scores
+            loadChapters();
         }
     }
 
-    private void loadChaptersFromCurriculum(String curriculumId) {
-        DatabaseReference subjectChaptersRef = FirebaseDatabase.getInstance().getReference("SubjectChapters").child(curriculumId);
-        subjectChaptersRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                examContentList.clear();
+    private void loadChapters() {
+        progressBar.setVisibility(View.VISIBLE);
+        emptyStateContainer.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.GONE);
+        examContentList.clear();
+        contentAdapter.notifyDataSetChanged();
+
+        if (courseId != null && !courseId.trim().isEmpty()) {
+            coursesRef.child(courseId).get().addOnSuccessListener(snapshot -> {
                 if (!snapshot.exists()) {
-                    showEmpty();
+                    Log.w(TAG, "Courses/" + courseId + " not found");
+                    showNoChaptersState("Course not found");
                     return;
                 }
-                List<DataSnapshot> chapters = new ArrayList<>();
-                for (DataSnapshot s : snapshot.getChildren()) chapters.add(s);
 
-                // Sort by order
-                chapters.sort((a, b) -> {
-                    Long orderA = a.child("order").getValue(Long.class);
-                    Long orderB = b.child("order").getValue(Long.class);
-                    return Long.compare(orderA != null ? orderA : 0, orderB != null ? orderB : 0);
-                });
+                // extract grade and subject
+                String grade = null;
+                String subject = null;
 
-                for (DataSnapshot chapterSnap : chapters) {
-                    buildExamContentFromChapter(chapterSnap, curriculumId);
+                if (snapshot.child("grade").exists()) {
+                    grade = snapshot.child("grade").getValue(String.class);
+                } else if (snapshot.child("gradeLevel").exists()) {
+                    grade = snapshot.child("gradeLevel").getValue(String.class);
                 }
+
+                if (snapshot.child("subject").exists()) {
+                    subject = snapshot.child("subject").getValue(String.class);
+                } else if (snapshot.child("name").exists()) {
+                    subject = snapshot.child("name").getValue(String.class);
+                }
+
+                if (grade == null || subject == null) {
+                    String storedCurr = snapshot.child("curriculumId").getValue(String.class);
+                    if (storedCurr != null && !storedCurr.isEmpty()) {
+                        curriculumId = storedCurr;
+                        int idx = curriculumId.lastIndexOf("_");
+                        if (idx > 0) {
+                            curriculumSubject = curriculumId.substring(0, idx);
+                            curriculumGrade = curriculumId.substring(idx + 1);
+                        }
+                    }
+                } else {
+                    curriculumGrade = grade.trim();
+                    curriculumSubject = subject.trim().toLowerCase();
+                    curriculumId = curriculumSubject + "_" + curriculumGrade;
+                }
+
+                if (curriculumGrade == null || curriculumSubject == null) {
+                    Log.w(TAG, "Could not derive curriculum for course " + courseId);
+                    showNoChaptersState("Course metadata incomplete");
+                    return;
+                }
+
+                loadChaptersFromCurriculum(curriculumGrade, curriculumSubject);
+                loadSubjectPerformance(curriculumId);
+            }).addOnFailureListener(e -> {
+                Log.e(TAG, "Failed reading course " + courseId, e);
+                showNoChaptersState("Failed to load course info");
+            });
+        } else {
+            showNoChaptersState("No course specified");
+        }
+    }
+
+    private void loadChaptersFromCurriculum(String grade, String subject) {
+        if (grade == null || subject == null) {
+            showNoChaptersState("Invalid curriculum path");
+            return;
+        }
+
+        String gradeNode = "grade_" + grade;
+        DatabaseReference chaptersRef = FirebaseDatabase.getInstance()
+                .getReference("Curriculum")
+                .child(gradeNode)
+                .child(subject)
+                .child("chapters");
+
+        chaptersRef.get().addOnSuccessListener(snapshot -> {
+            if (!snapshot.exists()) {
+                progressBar.setVisibility(View.GONE);
+                Log.i(TAG, "No chapters found at Curriculum/" + gradeNode + "/" + subject + "/chapters");
+                showNoChaptersState("No chapters yet");
+                return;
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(ExamContentActivity.this, "Failed to load chapters", Toast.LENGTH_SHORT).show();
+            List<DataSnapshot> chapters = new ArrayList<>();
+            for (DataSnapshot s : snapshot.getChildren()) chapters.add(s);
+
+            chapters.sort((a, b) -> {
+                Long oa = a.child("order").getValue(Long.class);
+                Long ob = b.child("order").getValue(Long.class);
+                oa = oa != null ? oa : 0L;
+                ob = ob != null ? ob : 0L;
+                return Long.compare(oa, ob);
+            });
+
+            final AtomicInteger remaining = new AtomicInteger(chapters.size());
+            examContentList.clear();
+            contentAdapter.notifyDataSetChanged();
+
+            for (DataSnapshot chapterSnap : chapters) {
+                buildExamContentFromChapter(chapterSnap, remaining);
             }
+        }).addOnFailureListener(e -> {
+            progressBar.setVisibility(View.GONE);
+            Log.e(TAG, "Failed reading curriculum chapters", e);
+            showNoChaptersState("Failed to load chapters");
         });
     }
 
-    // ... (rest of the file remains the same)
+    private void buildExamContentFromChapter(DataSnapshot chapterSnap, AtomicInteger remaining) {
+        if (chapterSnap == null || !chapterSnap.exists()) {
+            if (remaining.decrementAndGet() == 0) finalizeChaptersLoading();
+            return;
+        }
 
-    private void buildExamContentFromChapter(DataSnapshot chapterSnap, String curriculumId) {
-        if (!chapterSnap.exists()) return;
+        final String chapterId = chapterSnap.child("id").getValue(String.class) != null
+                ? chapterSnap.child("id").getValue(String.class)
+                : chapterSnap.getKey();
 
-        final String chapterId = chapterSnap.getKey();
         final String title = chapterSnap.child("title").getValue(String.class);
         final boolean hasExam = chapterSnap.child("hasExam").getValue(Boolean.class) != null
                 ? chapterSnap.child("hasExam").getValue(Boolean.class)
@@ -216,31 +258,20 @@ public class ExamContentActivity extends AppCompatActivity implements ExamConten
 
         final ExamContent item = new ExamContent(chapterId, title != null ? title : chapterId, hasExam);
 
-        // read exam meta from Exams/{curriculumId}_{chapterId}
-        final String examKey = curriculumId + "_" + chapterId;
-        Log.d("ExamContentActivity", "Looking up examKey=" + examKey);
+        if (curriculumId == null || chapterId == null) {
+            examContentList.add(item);
+            contentAdapter.notifyItemInserted(examContentList.size() - 1);
+            if (remaining.decrementAndGet() == 0) finalizeChaptersLoading();
+            return;
+        }
 
-        examsRef.child(examKey).get().addOnSuccessListener(examSnap -> {
-            Log.d("ExamContentActivity", "examSnap.exists=" + examSnap.exists() + " value=" + examSnap.getValue());
+        DatabaseReference examMetaRef = examsRef.child(curriculumId).child(chapterId);
+        examMetaRef.get().addOnSuccessListener(examSnap -> {
             if (examSnap.exists()) {
-                // duration
                 Long duration = examSnap.child("durationMinutes").getValue(Long.class);
-
-                // totalQuestions: try common variants in case of typos
-                Long totalQ = examSnap.child("totalQuestion").getValue(Long.class);
-                if (totalQ == null) totalQ = examSnap.child("totalQuestion").getValue(Long.class);
-
+                Long totalQ = examSnap.child("totalQuestions").getValue(Long.class);
                 Long pass = examSnap.child("passScore").getValue(Long.class);
 
-                String chapterImage = examSnap.child("chapterImage").getValue(String.class);
-                if (chapterImage == null) {
-                    // optionally fallback to chapter node image if you store it there:
-                    chapterImage = chapterSnap.child("image").getValue(String.class);
-                }
-                if (chapterImage != null) {
-                    item.setChapterImage(chapterImage);
-                }
-                // published: handle Boolean, String ("true"/"false"), or number (1/0)
                 Boolean published = examSnap.child("published").getValue(Boolean.class);
                 if (published == null) {
                     String pubStr = examSnap.child("published").getValue(String.class);
@@ -250,12 +281,7 @@ public class ExamContentActivity extends AppCompatActivity implements ExamConten
                     Long pubNum = examSnap.child("published").getValue(Long.class);
                     if (pubNum != null) published = pubNum != 0;
                 }
-
-                // If still null, default to false but log so you can fix DB
-                if (published == null) {
-                    published = false;
-                    Log.w("ExamContentActivity", "published field missing or unrecognized type for " + examKey);
-                }
+                if (published == null) published = false;
 
                 item.setHasExam(true);
                 item.setExamPublished(published);
@@ -263,16 +289,14 @@ public class ExamContentActivity extends AppCompatActivity implements ExamConten
                 item.setTotalQuestions(totalQ != null ? totalQ.intValue() : 0);
                 item.setPassScore(pass != null ? pass.intValue() : 0);
             } else {
-                // exam node missing — fall back to chapter's hasExam flag
                 item.setHasExam(hasExam);
                 item.setExamPublished(false);
-                Log.d("ExamContentActivity", "No exam node for " + examKey + " (falling back to chapter.hasExam=" + hasExam + ")");
             }
 
-            // Read user result ExamResults/{userId}/{examKey}
             String uid = Continuity.userId;
-            if (uid != null) {
-                resultsRef.child(uid).child(examKey).get().addOnSuccessListener(resultSnap -> {
+            final String resultKey = curriculumId + "_" + chapterId;
+            if (uid != null && !uid.isEmpty()) {
+                resultsRef.child(uid).child(resultKey).get().addOnSuccessListener(resultSnap -> {
                     if (resultSnap.exists()) {
                         Integer score = resultSnap.child("score").getValue(Integer.class);
                         Integer total = resultSnap.child("total").getValue(Integer.class);
@@ -287,59 +311,45 @@ public class ExamContentActivity extends AppCompatActivity implements ExamConten
                     }
                     examContentList.add(item);
                     contentAdapter.notifyItemInserted(examContentList.size() - 1);
-                    progressBar.setVisibility(View.GONE);
-                    emptyState.setVisibility(examContentList.isEmpty() ? View.VISIBLE : View.GONE);
+
+                    if (remaining.decrementAndGet() == 0) finalizeChaptersLoading();
                 }).addOnFailureListener(e -> {
                     examContentList.add(item);
                     contentAdapter.notifyItemInserted(examContentList.size() - 1);
-                    progressBar.setVisibility(View.GONE);
-                    emptyState.setVisibility(examContentList.isEmpty() ? View.VISIBLE : View.GONE);
+                    if (remaining.decrementAndGet() == 0) finalizeChaptersLoading();
                 });
             } else {
                 examContentList.add(item);
                 contentAdapter.notifyItemInserted(examContentList.size() - 1);
-                progressBar.setVisibility(View.GONE);
-                emptyState.setVisibility(examContentList.isEmpty() ? View.VISIBLE : View.GONE);
+                if (remaining.decrementAndGet() == 0) finalizeChaptersLoading();
             }
         }).addOnFailureListener(e -> {
-            Log.e("ExamContentActivity", "Failed reading Exams/" + examKey, e);
+            Log.w(TAG, "Failed reading Exams/" + curriculumId + "/" + chapterId + " : " + e.getMessage());
             item.setHasExam(hasExam);
             item.setExamPublished(false);
             examContentList.add(item);
             contentAdapter.notifyItemInserted(examContentList.size() - 1);
-            progressBar.setVisibility(View.GONE);
-            emptyState.setVisibility(examContentList.isEmpty() ? View.VISIBLE : View.GONE);
+            if (remaining.decrementAndGet() == 0) finalizeChaptersLoading();
         });
     }
-    // ... (rest of the file remains the same)
-    private void showEmpty() {
+
+    private void finalizeChaptersLoading() {
         progressBar.setVisibility(View.GONE);
-        examContentList.clear();
-        contentAdapter.notifyDataSetChanged();
-        emptyState.setVisibility(View.VISIBLE);
-    }
 
-    /**
-     * Fallback static list (keeps compatibility with your previous static demo behavior)
-     */
-    private void loadStaticChapters(String bookTitle) {
-        examContentList.clear();
-        if (bookTitle == null) return;
-        if (bookTitle.equalsIgnoreCase("Biology")) {
-            examContentList.add(new ExamContent("chapter_01", "Introduction to Biology", true));
-            examContentList.add(new ExamContent("chapter_02", "Cell Structure and Function", true));
-            examContentList.add(new ExamContent("chapter_03", "Genetics", true));
-        } else if (bookTitle.equalsIgnoreCase("Physics")) {
-            examContentList.add(new ExamContent("chapter_p1", "Introduction to Physics", true));
-            examContentList.add(new ExamContent("chapter_p2", "Motion and Forces", true));
-            examContentList.add(new ExamContent("chapter_p3", "Energy and Work", true));
+        if (examContentList.isEmpty()) {
+            showNoChaptersState("No chapters available after metadata checks");
+            return;
         }
+
+        // chapters present
+        emptyStateContainer.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.VISIBLE);
+        contentAdapter.notifyDataSetChanged();
+
+        // start normal rotating greetings
+        prepareGreetingTemplatesAndStart(true);
     }
 
-    /**
-     * Called by adapter when user taps a chapter.
-     * Opens ExamCenterActivity if exam is available/published.
-     */
     @Override
     public void onExamContentSelected(ExamContent content) {
         if (!content.hasExam()) {
@@ -351,20 +361,15 @@ public class ExamContentActivity extends AppCompatActivity implements ExamConten
             return;
         }
 
-        // pass useful extras to ExamCenterActivity
         Intent intent = new Intent(this, ExamCenterActivity.class);
         intent.putExtra("examKey", curriculumId + "_" + content.getChapterId());
         intent.putExtra("chapterTitle", content.getTitle());
         intent.putExtra("durationMinutes", content.getDurationMinutes());
         intent.putExtra("totalQuestions", content.getTotalQuestions());
         intent.putExtra("passScore", content.getPassScore());
-        startActivity(intent);
+        startActivityForResult(intent, REQUEST_OPEN_EXAM);
     }
 
-    /**
-     * Load performance for the given curriculum (only exam results whose examKey starts with curriculumId + "_")
-     * Summation uses result nodes that include both 'score' and 'total' (or 'totalQuestions').
-     */
     private void loadSubjectPerformance(String curriculumId) {
         if (curriculumId == null || curriculumId.trim().isEmpty()) {
             updateHeaderProgress(0);
@@ -387,9 +392,9 @@ public class ExamContentActivity extends AppCompatActivity implements ExamConten
             }
 
             for (DataSnapshot examSnap : snapshot.getChildren()) {
-                String examKey = examSnap.getKey(); // e.g. biology_10_chapter_01
+                String examKey = examSnap.getKey();
                 if (examKey == null) continue;
-                if (!examKey.startsWith(curriculumId + "_")) continue; // only current curriculum
+                if (!examKey.startsWith(curriculumId + "_")) continue;
 
                 Integer score = examSnap.child("score").getValue(Integer.class);
                 Integer total = examSnap.child("total").getValue(Integer.class);
@@ -401,10 +406,6 @@ public class ExamContentActivity extends AppCompatActivity implements ExamConten
                 if (score != null && total != null && total > 0) {
                     sumScore += score;
                     sumTotal += total;
-                } else if (score != null && (total == null || total == 0)) {
-                    // If no total available, try to query Exams/{examKey}/totalQuestions (optional, async).
-                    // For simplicity we skip these entries here; they won't contribute to sumTotal.
-                    // Alternatively, you can fetch exam metadata to get totalQuestions.
                 }
             }
 
@@ -417,18 +418,14 @@ public class ExamContentActivity extends AppCompatActivity implements ExamConten
             }
             updateHeaderProgress(percent);
         }).addOnFailureListener(e -> {
-            Log.w("ExamContentActivity", "Failed reading user results for performance", e);
+            Log.w(TAG, "Failed reading user results for performance", e);
             updateHeaderProgress(0);
         });
     }
 
-    /** Animate and update the CircularProgressIndicator and the percent label */
     private void updateHeaderProgress(int percent) {
         if (headerProgress == null || headerPercent == null) return;
-
         headerPercent.setText(percent + "%");
-
-        // animate progress from current value to target
         int start = headerProgress.getProgress();
         ObjectAnimator anim = ObjectAnimator.ofInt(headerProgress, "progress", start, percent);
         anim.setDuration(600);
@@ -436,57 +433,89 @@ public class ExamContentActivity extends AppCompatActivity implements ExamConten
         anim.start();
     }
 
-    private void prepareGreetingTemplatesAndStart() {
-        // Example templates — change wording as you like.
-        greetingTemplates.clear();
-        greetingTemplates.add("Hey " + studentName + " 👋");
-        greetingTemplates.add("Ready to explore " + (examBookTitle != null ? examBookTitle : "your subject") + ", " + studentName + "?");
-        greetingTemplates.add("Keep it up, " + studentName + " — you're doing great!");
-        greetingTemplates.add("Let's sharpen those skills, " + studentName + "!");
-        // shuffle order if you want randomness:
-        // Collections.shuffle(greetingTemplates);
+    private void showNoChaptersState(String reason) {
+        Log.i(TAG, "Empty chapters state: " + reason);
+        progressBar.setVisibility(View.GONE);
+        examContentList.clear();
+        contentAdapter.notifyDataSetChanged();
 
-        // initialize handler and runnable
-        if (greetingHandler == null) greetingHandler = new Handler(Looper.getMainLooper());
-        currentGreetingIndex = 0;
+        // show illustration + message
+        emptyStateContainer.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.GONE);
 
-        // show first greeting immediately (no animation)
-        if (welcomeText != null && !greetingTemplates.isEmpty()) {
-            welcomeText.setText(greetingTemplates.get(0));
+        // set a friendly illustration message (kept separate from rotating greetings)
+        if (emptyStateText != null) {
+            emptyStateText.setText("No chapters yet — new lessons are on the way! Check back soon.");
         }
 
-        // define runnable
+        // use creative personalized greeting messages (but don't show plain 'no chapters' as a bland header)
+        prepareGreetingTemplatesAndStart(false);
+
+        updateHeaderProgress(0);
+    }
+
+    private void stopGreetingRotation() {
+        if (greetingHandler != null && greetingRunnable != null) {
+            greetingHandler.removeCallbacks(greetingRunnable);
+        }
+    }
+
+    /**
+     * prepareGreetingTemplatesAndStart(true) -> normal rotating greetings
+     * prepareGreetingTemplatesAndStart(false) -> friendly personalized greetings when no chapters
+     */
+    private void prepareGreetingTemplatesAndStart(boolean hasChapters) {
+        stopGreetingRotation();
+        greetingTemplates.clear();
+
+        if (hasChapters) {
+            greetingTemplates.add("Hello " + studentName + " 👋 Here are the chapters");
+            greetingTemplates.add("Ready to explore " + (examBookTitle != null ? examBookTitle : "your subject") + ", " + studentName + "?");
+            greetingTemplates.add("Keep it up, " + studentName + " — you're doing great!");
+            greetingTemplates.add("Let's sharpen those skills, " + studentName + "!");
+            subWelcome.setVisibility(View.VISIBLE);
+        } else {
+            // friendly, creative messages for empty state (still greeting-like)
+            greetingTemplates.add("Hey " + studentName + " 👋 — we're preparing lessons for you. Check back soon!");
+            greetingTemplates.add("No chapters available yet. Want to suggest a topic to your teacher?");
+            greetingTemplates.add("Good things take time. New chapters for " + (examBookTitle != null ? examBookTitle : "your subject") + " will arrive soon.");
+            subWelcome.setVisibility(View.GONE);
+
+        }
+
+        if (greetingHandler == null) greetingHandler = new Handler(Looper.getMainLooper());
+        currentGreetingIndex = 0;
+        if (welcomeText != null && !greetingTemplates.isEmpty()) welcomeText.setText(greetingTemplates.get(0));
+
         greetingRunnable = new Runnable() {
             @Override
             public void run() {
                 if (welcomeText == null || greetingTemplates.isEmpty()) return;
-
-                // next index
                 currentGreetingIndex = (currentGreetingIndex + 1) % greetingTemplates.size();
                 String nextText = greetingTemplates.get(currentGreetingIndex);
-
-                // animate: fade out -> change -> fade in
-                welcomeText.animate()
-                        .alpha(0f)
-                        .setDuration(FADE_DURATION_MS)
-                        .setInterpolator(new DecelerateInterpolator())
-                        .withEndAction(() -> {
-                            welcomeText.setText(nextText);
-                            welcomeText.animate()
-                                    .alpha(1f)
-                                    .setDuration(FADE_DURATION_MS)
-                                    .setInterpolator(new DecelerateInterpolator())
-                                    .start();
-                        })
-                        .start();
-
-                // schedule next
+                welcomeText.animate().alpha(0f).setDuration(FADE_DURATION_MS).withEndAction(() -> {
+                    welcomeText.setText(nextText);
+                    welcomeText.animate().alpha(1f).setDuration(FADE_DURATION_MS).start();
+                }).start();
                 greetingHandler.postDelayed(this, GREETING_INTERVAL_MS);
             }
         };
 
-        // start repeating after interval
         greetingHandler.removeCallbacks(greetingRunnable);
         greetingHandler.postDelayed(greetingRunnable, GREETING_INTERVAL_MS);
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopGreetingRotation();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopGreetingRotation();
+    }
+
+    // Keep the rest of your existing methods (loadChaptersFromCurriculum, buildExamContentFromChapter, parse helpers, etc.)
 }

@@ -3,6 +3,8 @@ package com.example.home_study;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import static com.tom_roush.fontbox.ttf.IndexToLocationTable.TAG;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -37,19 +39,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * ChatActivity — supports Parents, shows admin title, and ensures real-time preview updates.
+ */
 public class ChatActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private ChatListAdapter adapter;
     private ImageView imageBack;
-    private TextView all, admin, teacher;
+    private TextView all, admin, teacher, parents;
     private List<ChatUser> chatUserList = new ArrayList<>();
 
     private final Set<String> loadedUserIds = new HashSet<>();
     private ChatCategory selectedCategory = ChatCategory.ALL;
 
-    private DatabaseReference studentRef, coursesRef, assignmentRef, teachersRef, usersRef;
+    private DatabaseReference studentRef, coursesRef, assignmentRef, teachersRef, usersRef, parentsRef, adminsRef;
 
     // track chat listeners so we attach once per Chats/{chatId}
     private final Set<String> chatListeningIds = new HashSet<>();
@@ -75,20 +80,26 @@ public class ChatActivity extends AppCompatActivity {
         all = findViewById(R.id.allCard);
         admin = findViewById(R.id.adminCard);
         teacher = findViewById(R.id.teachersCard);
+        parents = findViewById(R.id.ParentsCard); // new Parents pill (case-sensitive to your id)
 
         all.setOnClickListener(v -> {
             selectedCategory = ChatCategory.ALL;
-            selectedPill(all, admin, teacher);
+            selectedPill(all, admin, teacher, parents);
             applyFilter();
         });
         admin.setOnClickListener(v -> {
             selectedCategory = ChatCategory.ADMIN;
-            selectedPill(admin, all, teacher);
+            selectedPill(admin, all, teacher, parents);
             applyFilter();
         });
         teacher.setOnClickListener(v -> {
             selectedCategory = ChatCategory.TEACHER;
-            selectedPill(teacher, all, admin);
+            selectedPill(teacher, all, admin, parents);
+            applyFilter();
+        });
+        parents.setOnClickListener(v -> {
+            selectedCategory = ChatCategory.PARENTS;
+            selectedPill(parents, all, admin, teacher);
             applyFilter();
         });
 
@@ -107,31 +118,42 @@ public class ChatActivity extends AppCompatActivity {
         assignmentRef = FirebaseDatabase.getInstance().getReference("TeacherAssignments");
         teachersRef = FirebaseDatabase.getInstance().getReference("Teachers");
         usersRef = FirebaseDatabase.getInstance().getReference("Users");
+        parentsRef = FirebaseDatabase.getInstance().getReference("Parents");
+        adminsRef = FirebaseDatabase.getInstance().getReference("School_Admins");
 
-        loadAdmins();
-        loadStudentTeachers();
+        loadAdmins();           // loads admin entries (title used)
+        loadStudentTeachers();  // loads teachers and also parents for the student
     }
 
     public enum ChatCategory {
         ALL,
         ADMIN,
-        TEACHER
+        TEACHER,
+        PARENTS
     }
 
     private void applyFilter() {
-        // always build a new list instance to submit to adapter (avoids same-reference optimization)
         List<ChatUser> filtered = new ArrayList<>();
         for (ChatUser u : chatUserList) {
             if (selectedCategory == ChatCategory.ALL) {
                 filtered.add(u);
-            } else if (selectedCategory == ChatCategory.ADMIN && "ADMIN".equals(u.getRole())) {
+            } else if (selectedCategory == ChatCategory.ADMIN && u.getRole() != null && !u.getRole().isEmpty() && isAdminRole(u)) {
                 filtered.add(u);
             } else if (selectedCategory == ChatCategory.TEACHER && "TEACHER".equals(u.getRole())) {
                 filtered.add(u);
+            } else if (selectedCategory == ChatCategory.PARENTS && "PARENT".equals(u.getRole())) {
+                filtered.add(u);
             }
         }
-        // submit a brand new list instance (adapter will copy too)
         adapter.submitList(new ArrayList<>(filtered));
+    }
+
+    // Helper to decide whether a ChatUser corresponds to an admin-type entry (we stored admin title in role)
+    private boolean isAdminRole(ChatUser u) {
+        if (u == null || u.getRole() == null) return false;
+        // we treat roles that are not TEACHER/PARENT as admin titles (simple heuristic)
+        String r = u.getRole();
+        return !"TEACHER".equalsIgnoreCase(r) && !"PARENT".equalsIgnoreCase(r);
     }
 
     private void loadStudentTeachers() {
@@ -139,11 +161,12 @@ public class ChatActivity extends AppCompatActivity {
 
         studentRef.orderByChild("userId")
                 .equalTo(userId)
-                .addValueEventListener(new ValueEventListener() {
+                .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot studentSnap) {
                         if (!studentSnap.exists()) {
                             Log.e("chatActivity", "No student record found ");
+                            progressBar.setVisibility(GONE);
                             return;
                         }
 
@@ -151,19 +174,37 @@ public class ChatActivity extends AppCompatActivity {
                             String grade = snapshot.child("grade").getValue(String.class);
                             String section = snapshot.child("section").getValue(String.class);
 
-                            Log.d("chat_debug", "Student grade= " + grade + ", student section= " + section);
-
-                            if (grade == null || section == null) {
-                                Log.d("chat_debug", "grade and section is null");
+                            // Attempt to get studentId (for parent lookup)
+                            String studentId = null;
+                            if (snapshot.child("studentId").exists()) {
+                                studentId = snapshot.child("studentId").getValue(String.class);
                             }
 
+                            Log.d("chat_debug", "Student grade= " + grade + ", section= " + section + ", studentId=" + studentId);
+
                             loadCoursesForStudent(grade, section);
+
+                            // If we have studentId, load parents; otherwise try to retrieve from Users node
+                            if (studentId != null && !studentId.isEmpty()) {
+                                loadParentsForStudent(studentId);
+                            } else {
+                                // fallback: read Users/currentUser for studentId field
+                                usersRef.child(userId).get().addOnSuccessListener(uSnap -> {
+                                    if (uSnap.exists() && uSnap.child("studentId").exists()) {
+                                        String sid = uSnap.child("studentId").getValue(String.class);
+                                        if (sid != null && !sid.isEmpty()) loadParentsForStudent(sid);
+                                    }
+                                });
+                            }
+
                             break;
                         }
                     }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
+                        Log.w("chatActivity", "student lookup cancelled", error.toException());
+                        progressBar.setVisibility(GONE);
                     }
                 });
     }
@@ -175,8 +216,6 @@ public class ChatActivity extends AppCompatActivity {
                 for (DataSnapshot c : courseSnap.getChildren()) {
                     String courseGrade = c.child("grade").getValue(String.class);
                     String courseSection = c.child("section").getValue(String.class);
-
-                    Log.d("chat_debug", "checking course -> grade= " + courseGrade + ", section= " + courseSection);
                     if (grade != null && section != null && grade.equals(courseGrade) && section.equals(courseSection)) {
                         String courseId = c.getKey();
                         String courseName = c.child("name").getValue(String.class);
@@ -184,9 +223,9 @@ public class ChatActivity extends AppCompatActivity {
                     }
                 }
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+                Log.w("chatActivity", "Failed reading courses", error.toException());
             }
         });
     }
@@ -202,26 +241,21 @@ public class ChatActivity extends AppCompatActivity {
                             resolveTeacher(teacherId, courseName);
                         }
                     }
-
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
+                        Log.w("chatActivity", "Failed reading assignments", error.toException());
                     }
                 });
     }
 
     private void resolveTeacher(String teacherId, String courseName) {
         if (teacherId == null) return;
-        if (loadedUserIds.contains(teacherId)) {
-            return;
-        }
-        loadedUserIds.add(teacherId);
 
         teachersRef.child(teacherId)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot teacherSnap) {
                         if (!teacherSnap.exists()) return;
-
                         String userId = teacherSnap.child("userId").getValue(String.class);
                         if (userId == null) return;
 
@@ -234,101 +268,197 @@ public class ChatActivity extends AppCompatActivity {
                                         String profileImage = userSnap.child("profileImage").getValue(String.class);
 
                                         // Prevent duplicated chat users with same userId
-                                        boolean already = false;
                                         for (ChatUser cu : chatUserList) {
-                                            if (userId.equals(cu.getUserId())) {
-                                                already = true;
-                                                break;
-                                            }
+                                            if (userId.equals(cu.getUserId())) return;
                                         }
-                                        if (already) return;
+
+                                        if (loadedUserIds.contains(teacherId)) return;
+                                        loadedUserIds.add(teacherId);
 
                                         ChatUser chatUser = new ChatUser(userId, name, profileImage, courseName, "TEACHER");
-                                        chatUserList.add(chatUser);
+                                        // append
+                                        List<ChatUser> newList = new ArrayList<>(chatUserList);
+                                        newList.add(chatUser);
+                                        chatUserList = newList;
 
                                         // Attach single chat listener per Chats/{chatId}
                                         listenForChatNode(chatUser);
 
-                                        applyFilter();
+                                        sortAndApply();
                                         progressBar.setVisibility(GONE);
-                                        recyclerView.setVisibility(VISIBLE);
                                     }
-
                                     @Override
                                     public void onCancelled(@NonNull DatabaseError error) {
+                                        Log.w("chatActivity", "Failed reading user " + userId, error.toException());
                                     }
                                 });
                     }
-
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
+                        Log.w("chatActivity", "Failed reading teacher " + teacherId, error.toException());
                     }
                 });
     }
 
     private void loadAdmins() {
-        DatabaseReference adminRef = FirebaseDatabase.getInstance().getReference("School_Admins");
+        // School_Admins stores admin entries with title (position). We will read title and use it as role.
+        adminsRef.get().addOnSuccessListener(snapshot -> {
+            for (DataSnapshot adminSnap : snapshot.getChildren()) {
+                String userId = adminSnap.child("userId").getValue(String.class);
+                String title = adminSnap.child("title").getValue(String.class); // e.g., "Principal"
+                if (userId == null) continue;
 
-        adminRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot adminSnap : snapshot.getChildren()) {
-                    String userId = adminSnap.child("userId").getValue(String.class);
-                    if (userId == null) continue;
+                // Avoid duplicates
+                if (loadedUserIds.contains(userId)) {
+                    continue;
+                }
+                loadedUserIds.add(userId);
 
-                    usersRef.child(userId)
-                            .addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot userShot) {
-                                    if (!userShot.exists()) return;
+                usersRef.child(userId)
+                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot userShot) {
+                                if (!userShot.exists()) return;
+                                // Use title as role so UI displays actual position
+                                ChatUser admin = new ChatUser(
+                                        userId,
+                                        userShot.child("name").getValue(String.class),
+                                        userShot.child("profileImage").getValue(String.class),
+                                        title != null ? title : "Management",
+                                        title != null ? title : "Management"
+                                );
 
-                                    // Prevent duplicated chat users with same userId
-                                    boolean already = false;
-                                    for (ChatUser cu : chatUserList) {
-                                        if (userId.equals(cu.getUserId())) {
-                                            already = true;
-                                            break;
-                                        }
-                                    }
-                                    if (already) return;
+                                // put admins at the top
+                                List<ChatUser> newList = new ArrayList<>(chatUserList);
+                                newList.add(0, admin);
+                                chatUserList = newList;
 
-                                    ChatUser admin = new ChatUser(
-                                            userId,
-                                            userShot.child("name").getValue(String.class),
-                                            userShot.child("profileImage").getValue(String.class),
-                                            "Director",
-                                            "ADMIN"
-                                    );
+                                listenForChatNode(admin);
+                                sortAndApply();
+                            }
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                Log.w("chatActivity", "Failed reading admin user", error.toException());
+                            }
+                        });
+            }
+        }).addOnFailureListener(e -> Log.w("chatActivity", "Failed reading admins", e));
+    }
 
-                                    // put admins at the top but only if not present
-                                    chatUserList.add(0, admin);
+    private void loadParentsForStudent(String studentId) {
+        if (studentId == null || studentId.isEmpty()) return;
 
-                                    listenForChatNode(admin);
-                                    applyFilter();
+        // Fast path: query parents by studentId
+        parentsRef.orderByChild("studentId").equalTo(studentId)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snap) {
+                        if (snap.exists()) {
+                            for (DataSnapshot p : snap.getChildren()) {
+                                handleParentSnapshot(p, studentId);
+                            }
+                        } else {
+                            // Fallback: scan all parents and match either studentId or children entries
+                            parentsRef.get().addOnSuccessListener(allSnap -> {
+                                for (DataSnapshot p2 : allSnap.getChildren()) {
+                                    // if this parent already processed by fast path, skip
+                                    handleParentSnapshot(p2, studentId);
                                 }
+                            }).addOnFailureListener(e -> Log.w(TAG, "Failed scanning Parents fallback", e));
+                        }
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.w(TAG, "parents query cancelled", error.toException());
+                    }
+                });
+    }
 
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-                                }
-                            });
+    // helper to extract and add parent ChatUser if it matches studentId
+    // in ChatActivity.java (replace existing handleParentSnapshot)
+    // ChatActivity.java — replace existing handleParentSnapshot with this
+    private void handleParentSnapshot(@NonNull DataSnapshot parentSnap, @NonNull String studentId) {
+        try {
+            // Debug: log raw snapshot to inspect schema when needed
+            Log.d("chat_debug", "Parent raw: key=" + parentSnap.getKey() + " value=" + parentSnap.getValue());
+
+            String parentUserId = parentSnap.child("userId").getValue(String.class);
+            String rel = parentSnap.child("relationship").getValue(String.class);
+            String parentStudentId = parentSnap.child("studentId").getValue(String.class);
+
+            boolean matches = false;
+            if (studentId.equals(parentStudentId)) matches = true;
+
+            if (!matches && parentSnap.hasChild("children")) {
+                DataSnapshot childrenNode = parentSnap.child("children");
+                for (DataSnapshot childEntry : childrenNode.getChildren()) {
+                    // childEntry may be a simple value or nested map — handle both
+                    String childKey = childEntry.getKey();
+                    Object childValObj = childEntry.getValue();
+                    String childVal = childValObj instanceof String ? (String) childValObj : null;
+
+                    // If the child entry is a map with nested fields, try to find a studentId inside it
+                    if (childVal == null && childEntry.hasChild("studentId")) {
+                        childVal = childEntry.child("studentId").getValue(String.class);
+                    }
+
+                    if (studentId.equals(childVal) || studentId.equals(childKey)) {
+                        matches = true;
+                        break;
+                    }
                 }
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
-        });
-    }
+            Log.d("chat_debug", "handleParentSnapshot: parentKey=" + parentSnap.getKey()
+                    + " parentUserId=" + parentUserId + " matches=" + matches + " rel=" + rel);
 
-    /**
-     * Listen to Chats/{chatId} root. This reads:
-     * - lastMessage (text,senderId,seen,timeStamp)
-     * - unread (map of userId -> count) — used for badges (efficient)
-     *
-     * We attach one listener per chatId (tracked) to avoid duplicates on scroll.
-     * When the chat node changes we create a new ChatUser instance and replace it in the list
-     * so DiffUtil detects the change immediately (fixes "must scroll to refresh" problem).
-     */
+            if (!matches) return;
+            if (parentUserId == null) {
+                Log.w("chat_debug", "parent has no userId, skipping: " + parentSnap.getKey());
+                return;
+            }
+
+            // Ensure loadedUserIds holds Users.userId values only
+            if (loadedUserIds.contains(parentUserId)) {
+                Log.d("chat_debug", "parent already loaded (skipping): " + parentUserId);
+                return;
+            }
+            loadedUserIds.add(parentUserId);
+
+            usersRef.child(parentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override public void onDataChange(@NonNull DataSnapshot userSnap) {
+                    if (!userSnap.exists()) {
+                        Log.w("chat_debug", "Users/" + parentUserId + " does not exist");
+                        return;
+                    }
+                    String name = userSnap.child("name").getValue(String.class);
+                    String profileImage = userSnap.child("profileImage").getValue(String.class);
+
+                    ChatUser parent = new ChatUser(
+                            parentUserId,
+                            name != null ? name : "Parent",
+                            profileImage,
+                            rel != null ? rel : "Parent", // subtitle shows relationship (Father/Mother)
+                            "PARENT" // role used for filtering
+                    );
+
+                    // append parent and update list
+                    List<ChatUser> newList = new ArrayList<>(chatUserList);
+                    newList.add(parent);
+                    chatUserList = newList;
+
+                    listenForChatNode(parent);
+                    sortAndApply();
+                    Log.d("chat_debug", "Added parent userId=" + parentUserId + " name=" + name);
+                }
+                @Override public void onCancelled(@NonNull DatabaseError error) {
+                    Log.w("chat_debug", "Failed reading parent user " + parentUserId, error.toException());
+                }
+            });
+        } catch (Exception ex) {
+            Log.w("chat_debug", "handleParentSnapshot error", ex);
+        }
+    }
     private void listenForChatNode(ChatUser existingUser) {
         if (existingUser == null || existingUser.getUserId() == null) return;
 
@@ -344,7 +474,6 @@ public class ChatActivity extends AppCompatActivity {
         ValueEventListener listener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // Build preview fields from snapshot
                 String text = null;
                 String senderId = null;
                 boolean seen = false;
@@ -354,6 +483,7 @@ public class ChatActivity extends AppCompatActivity {
                 if (snapshot.exists()) {
                     DataSnapshot last = snapshot.child("lastMessage");
                     if (last.exists()) {
+                        // normal lastMessage structure
                         if (last.hasChild("text")) text = last.child("text").getValue(String.class);
                         else if (last.hasChild("message")) text = last.child("message").getValue(String.class);
                         else text = last.getValue(String.class);
@@ -378,9 +508,46 @@ public class ChatActivity extends AppCompatActivity {
                             if (t < 1_000_000_000_000L) t = t * 1000L;
                             time = t;
                         }
+                    } else {
+                        // fallback: iterate messages and pick latest by timestamp
+                        DataSnapshot messagesNode = snapshot.child("messages");
+                        if (messagesNode.exists()) {
+                            DataSnapshot lastMsg = null;
+                            long lastTs = Long.MIN_VALUE;
+                            for (DataSnapshot m : messagesNode.getChildren()) {
+                                Long t = m.child("timeStamp").getValue(Long.class);
+                                if (t == null) {
+                                    Integer ti = m.child("timeStamp").getValue(Integer.class);
+                                    if (ti != null) t = ti.longValue();
+                                    else {
+                                        Long t2 = m.child("timestamp").getValue(Long.class);
+                                        if (t2 != null) t = t2;
+                                    }
+                                }
+                                long tm = t != null ? (t < 1_000_000_000_000L ? t * 1000L : t) : 0L;
+                                if (tm >= lastTs) {
+                                    lastTs = tm;
+                                    lastMsg = m;
+                                }
+                            }
+                            if (lastMsg != null) {
+                                if (lastMsg.hasChild("text")) text = lastMsg.child("text").getValue(String.class);
+                                else if (lastMsg.hasChild("message")) text = lastMsg.child("message").getValue(String.class);
+                                else text = lastMsg.getValue(String.class);
+
+                                senderId = lastMsg.child("senderId").getValue(String.class);
+
+                                Object seenObj = lastMsg.child("seen").getValue();
+                                if (seenObj instanceof Boolean) seen = (Boolean) seenObj;
+                                else if (seenObj instanceof Long) seen = ((Long) seenObj) != 0L;
+                                else if (seenObj instanceof Integer) seen = ((Integer) seenObj) != 0;
+
+                                time = lastTs;
+                            }
+                        }
                     }
 
-                    // read unread map if present (preferred)
+                    // unread map preferred
                     DataSnapshot unreadNode = snapshot.child("unread").child(Continuity.userId);
                     if (unreadNode.exists()) {
                         Long l = unreadNode.getValue(Long.class);
@@ -390,7 +557,7 @@ public class ChatActivity extends AppCompatActivity {
                         }
                         if (l != null) unread = l.intValue();
                     } else {
-                        // fallback counting (should be rare if unread map present)
+                        // fallback: count messages addressed to current user and not seen
                         DataSnapshot messagesNode = snapshot.child("messages");
                         if (messagesNode.exists()) {
                             int count = 0;
@@ -424,7 +591,6 @@ public class ChatActivity extends AppCompatActivity {
 
                 if (idx >= 0) {
                     ChatUser old = chatUserList.get(idx);
-                    // create a new ChatUser instance preserving non-preview fields
                     ChatUser updated = new ChatUser(
                             old.getUserId(),
                             old.getName(),
@@ -438,14 +604,10 @@ public class ChatActivity extends AppCompatActivity {
                     updated.setLastMessageTime(time);
                     updated.setUnreadCount(unread);
 
-                    // create a new list copy and replace the item inside it
                     List<ChatUser> newList = new ArrayList<>(chatUserList);
                     newList.set(idx, updated);
-
-                    // replace reference atomically so subsequent reads see the new list
                     chatUserList = newList;
 
-                    // sort & submit (sortAndApply will create yet another new list and submit)
                     sortAndApply();
                     updatePillBadges();
                 }
@@ -453,6 +615,7 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+                Log.w("chatActivity", "chat listener cancelled", error.toException());
             }
         };
 
@@ -470,7 +633,7 @@ public class ChatActivity extends AppCompatActivity {
     private int getUnreadForRole(String role) {
         int total = 0;
         for (ChatUser u : chatUserList) {
-            if (role == null || role.equals(u.getRole())) {
+            if (role == null || role.equalsIgnoreCase(u.getRole())) {
                 total += u.getUnreadCount();
             }
         }
@@ -479,23 +642,22 @@ public class ChatActivity extends AppCompatActivity {
 
     private void updatePillBadges() {
         int allUnread = getUnreadForRole(null);
-        int adminUnread = getUnreadForRole("ADMIN");
+        int adminUnread = getUnreadForRole(null); // admins are included in the 'all' role; we compute by role title heuristic
         int teacherUnread = getUnreadForRole("TEACHER");
+        int parentsUnread = getUnreadForRole("PARENT");
 
         all.setText(allUnread > 0 ? "All (" + allUnread + ")" : "All");
-        admin.setText(adminUnread > 0 ? "Admins (" + adminUnread + ")" : "Admins");
+        admin.setText(adminUnread > 0 ? "Managements (" + adminUnread + ")" : "Managements");
         teacher.setText(teacherUnread > 0 ? "Teachers (" + teacherUnread + ")" : "Teachers");
+        parents.setText(parentsUnread > 0 ? "Parents (" + parentsUnread + ")" : "Parents");
     }
 
     private void sortAndApply() {
-        // create a new sorted list instance and assign it to chatUserList
         List<ChatUser> sorted = new ArrayList<>(chatUserList);
         Collections.sort(sorted, (a, b) ->
                 Long.compare(b.getLastMessageTime(), a.getLastMessageTime())
         );
-        // replace the reference with the new list instance (important)
         chatUserList = sorted;
-        // applyFilter will submit a fresh list to the adapter
         applyFilter();
     }
 

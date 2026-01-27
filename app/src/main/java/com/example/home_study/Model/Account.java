@@ -2,7 +2,7 @@ package com.example.home_study.Model;
 public class Account
 {
     private String userId ,username, name, password, profileImage, role, gender, email, phone
-            ,grade, section;
+            ,grade, section, studentId;
 
     private int age;
     private boolean isActive;
@@ -13,8 +13,9 @@ public class Account
 
     public Account(String userId, String username, String profileImage, String password,
                    String role, boolean isActive, String name, String gender,
-                   String email,String phone, String grade, String section, int age) {
+                   String email,String phone, String grade, String section, int age, String studentId) {
         this.userId = userId;
+        this.studentId = studentId;
         this.username = username;
         this.profileImage = profileImage;
         this.password = password;
@@ -27,6 +28,14 @@ public class Account
         this.grade = grade;
         this.section = section;
         this.age = age;
+    }
+
+    public String getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
     }
 
     public void setAge(int age) {

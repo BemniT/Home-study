@@ -1,0 +1,8 @@
+<!-- Simple illustration placeholder. Replace with production SVG/PNG for best results. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp" android:height="160dp" android:viewportWidth="240" android:viewportHeight="160">
+    <path android:fillColor="#FFBBDEFB" android:pathData="M0,120 Q60,40 120,120 T240,120 L240,160 L0,160z"/>
+    <path android:fillColor="#FF64B5F6" android:pathData="M40,40 h160 v48 h-160z"/>
+<!--    <circle android:cx="70" android:cy="64" android:r="12" android:fillColor="#FFFFFFFF"/>-->
+    <path android:fillColor="#FFFFFFFF" android:pathData="M100,64 h60 v8 h-60z M100,82 h60 v6 h-60z"/>
+</vector>

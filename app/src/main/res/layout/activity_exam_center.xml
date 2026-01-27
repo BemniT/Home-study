@@ -19,6 +19,37 @@
         app:navigationIcon="@drawable/ic_arrow_back_24"
         app:title="Questions" />
 
+    <!-- Back image (explicit) -->
+    <ImageView
+        android:id="@+id/imageBackBtn"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:contentDescription="image back"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="10dp"
+        android:src="@drawable/back"
+        android:layout_marginStart="10dp"
+        android:backgroundTint="@color/black" />
+
+    <!-- Chapter title -->
+    <TextView
+        android:id="@+id/examChapterTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="16dp"
+        android:textAlignment="center"
+        android:textSize="14sp"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:ellipsize="end"
+        android:maxLines="1" />
+
     <!-- Progress / meta row -->
     <LinearLayout
         android:id="@+id/metaRow"
@@ -42,17 +73,6 @@
             android:textStyle="bold"
             android:textSize="14sp" />
 
-        <Space android:layout_width="12dp" android:layout_height="wrap_content" />
-
-        <com.google.android.material.progressindicator.CircularProgressIndicator
-            android:id="@+id/progressCircular"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            app:indicatorSize="36dp"
-            app:indicatorColor="@color/primary_secondary"
-            app:trackThickness="4dp"
-            />
-
         <View
             android:layout_width="0dp"
             android:layout_height="1dp"
@@ -66,6 +86,21 @@
             android:textColor="@color/black_low"
             android:textSize="13sp" />
     </LinearLayout>
+
+    <!-- Linear progress sticking to top of card -->
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/progressLinear"
+        android:layout_width="0dp"
+        android:layout_height="6dp"
+        android:indeterminate="false"
+        app:layout_constraintTop_toBottomOf="@id/metaRow"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="2dp"
+        app:indicatorColor="@color/primary_secondary"
+        app:trackColor="@color/white" />
 
     <!-- Main card -->
     <com.google.android.material.card.MaterialCardView
@@ -89,106 +124,155 @@
             android:layout_height="match_parent"
             android:padding="18dp">
 
-            <!-- Question text (scrollable) -->
-            <ScrollView
-                android:id="@+id/questionScroll"
+
+
+            <!-- Skeleton placeholder container (visible while loading) -->
+            <LinearLayout
+                android:id="@+id/skeletonContainer"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:orientation="vertical"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                app:layout_constraintTop_toBottomOf="@id/progressLinear"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/explanationCard"
+                android:visibility="gone">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="28dp"
+                    android:background="@drawable/bg_skeleton_circle"
+                    android:layout_marginBottom="8dp" />
+
+                <View
+                    android:layout_width="80dp"
+                    android:layout_height="18dp"
+                    android:background="@drawable/bg_skeleton_circle"
+                    android:layout_marginBottom="16dp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_skeleton_circle"
+                    android:layout_marginBottom="8dp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_skeleton_circle"
+                    android:layout_marginBottom="8dp" />
+            </LinearLayout>
+
+            <!-- Content scroll (question + options) -->
+            <androidx.core.widget.NestedScrollView
+                android:id="@+id/contentScroll"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toTopOf="@id/optionsContainer">
+                app:layout_constraintBottom_toTopOf="@id/explanationCard"
+                android:fillViewport="true"
+                android:clipToPadding="false"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp">
 
-                <TextView
-                    android:id="@+id/question"
+                <LinearLayout
+                    android:id="@+id/contentInner"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Question here"
-                    android:textSize="18sp"
-                    android:textColor="@color/black"
-                    android:textStyle="bold" />
-            </ScrollView>
+                    android:orientation="vertical">
 
-            <!-- Options vertical list (we populate dynamically) -->
-            <LinearLayout
-                android:id="@+id/optionsContainer"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toTopOf="@id/explanation"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="12dp"
-                android:divider="@color/black_low"
-                android:showDividers="none" />
+                    <TextView
+                        android:id="@+id/question"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Question here"
+                        android:textSize="18sp"
+                        android:textColor="@color/black"
+                        android:textStyle="bold"
+                        android:breakStrategy="balanced"
+                        android:hyphenationFrequency="full"
+                        android:lineSpacingExtra="2dp"/>
 
-            <!-- Replace the old <TextView android:id="@+id/explanation" .../> with this block -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/optionsRecycler"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginBottom="12dp"/>
+                </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
+
+            <!-- Explanation card (collapsible) - kept inside card but outside the contentScroll for a stable position.
+                 We reveal it programmatically when needed. -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/explanationCard"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
+                app:cardElevation="1dp"
                 app:strokeWidth="1dp"
                 app:strokeColor="@color/option_border"
-                android:backgroundTint="@color/unselected_option"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent">
+                app:layout_constraintBottom_toBottomOf="parent"
+                >
 
-                <LinearLayout
-                    android:id="@+id/explanationContainer"
-                    android:orientation="vertical"
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="match_parent">
 
-                    <!-- Header row: clickable to toggle explanation -->
+                    <ImageView
+                        android:id="@+id/expandExplanation"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/expand_more"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginEnd="8dp"
+                        />
                     <LinearLayout
-                        android:id="@+id/explanationHeader"
+                        android:id="@+id/explanationContainer"
+                        android:orientation="vertical"
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:orientation="horizontal"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp"
-                        android:gravity="center_vertical"
-                        android:background="?attr/selectableItemBackground">
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        >
 
                         <TextView
                             android:id="@+id/explanationHeaderText"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:gravity="center_vertical"
                             android:text="Explanation"
                             android:textStyle="bold"
                             android:textSize="14sp"
                             android:textColor="@color/black" />
 
-                        <!-- Chevron icon which rotates when expanded/collapsed -->
-                        <ImageView
-                            android:id="@+id/explanationChevron"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/expand_more"
-                            android:tint="@color/black_low"
-                            android:contentDescription="Toggle explanation" />
+                        <TextView
+                            android:id="@+id/explanationBody"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:padding="12dp"
+                            android:text=""
+                            android:textSize="14sp"
+                            android:textColor="@color/black_low"
+                            android:visibility="gone" />
                     </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
-                    <!-- Collapsible body (initially gone) -->
-                    <TextView
-                        android:id="@+id/explanationBody"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:padding="12dp"
-                        android:text=""
-                        android:textSize="14sp"
-                        android:textColor="@color/black_low"
-                        android:visibility="gone" />
-                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Centered loading indicator while fetching -->
+            <!-- Center loading indicator (optional) -->
             <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/loadingIndicator"
                 android:layout_width="48dp"

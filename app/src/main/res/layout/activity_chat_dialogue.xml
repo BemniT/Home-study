@@ -173,27 +173,32 @@
         android:layout_margin="12dp"
         app:cardCornerRadius="24dp"
         app:cardElevation="4dp"
+        android:outlineSpotShadowColor="@color/primary_secondary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@drawable/cricle2"
+
             android:padding="8dp">
 
             <EditText
                 android:id="@+id/inputChat"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:background="@android:color/transparent"
                 android:hint="@string/type_a_message"
                 android:paddingStart="12dp"
+                android:textSize="14sp"
                 android:textColor="@color/black"
                 android:layout_marginEnd="20dp"
                 android:textColorHint="@color/black_low"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/layoutSend"
                 app:layout_constraintBottom_toBottomOf="parent"/>
 
             <ImageView

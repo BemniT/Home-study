@@ -136,37 +136,40 @@
         android:layout_marginEnd="16dp"
         android:layout_marginTop="12dp"/>
 
-    <!-- Empty state (kept id emptyStateText) -->
+    <!-- Empty state (illustration + message) -->
     <LinearLayout
         android:id="@+id/emptyStateContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp"
-        android:background="@drawable/cricle2"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="18dp"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/cardImage"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/contentProgress"
+        app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginStart="20dp"
         android:layout_marginTop="12dp"
         android:layout_marginEnd="12dp">
 
         <ImageView
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:src="@drawable/math"
-            android:tint="@color/black_low"
-            android:contentDescription="@null"/>
+            android:id="@+id/emptyStateImage"
+            android:layout_width="160dp"
+            android:layout_height="120dp"
+            android:src="@drawable/no_data_illustrator"
+            android:contentDescription="@null"
+            android:layout_marginBottom="12dp"/>
 
         <TextView
             android:id="@+id/emptyStateText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="No chapters found"
+            android:text="No chapters yet — new lessons coming soon!"
             android:textColor="@color/black_low"
-            android:layout_marginStart="12dp"
-            android:textSize="14sp"/>
+            android:layout_marginTop="4dp"
+            android:textSize="12sp"
+            android:textAlignment="center"/>
     </LinearLayout>
 
     <!-- RecyclerView (kept id examContentRecycler) -->
@@ -181,6 +184,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginTop="12dp"/>
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

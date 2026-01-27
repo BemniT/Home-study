@@ -9,11 +9,19 @@
     <color name="black_low_low">#F7F3F3</color>
     <color name="Green">#63CF48</color>
     <color name="LightBlue">#DEE7FA</color>
-    <color name="LightBlue3">#DEE7FA</color>
     <color name="LightBlue2">#D3E0FD</color>
     <color name="selected_option">#BC007AFB</color>
     <color name="unselected_option">#FFFFFF</color>
     <color name="red_badge">#E53935</color>
+
+    <color name="primary">#1976D2</color>
+    <color name="primary_dark">#0D47A1</color>
+    <color name="LightBlue3">#81D4FA</color>
+    <color name="grey50">#FAFAFA</color>
+    <color name="grey200">#EEEEEE</color>
+    <color name="grey600">#757575</color>
+    <color name="grey500">#9E9E9E</color>
+    <color name="black2">#212121</color>
     <!-- Duolingo-like feedback colors -->
     <color name="duo_green">#60C657</color>        <!-- soft green fill -->
     <color name="duo_green_dark">#2E7D32</color>   <!-- darker green for stroke/text -->

@@ -75,7 +75,7 @@
             <TextView
                 android:id="@+id/adminCard"
                 style="@style/ChatFilterPill"
-                android:text="Admins"
+                android:text="Managements"
                 android:background="@drawable/pill_unselected"
                 android:layout_weight="1"
 
@@ -88,6 +88,15 @@
                 android:background="@drawable/pill_unselected"
                 android:layout_weight="1"
                 />
+
+            <TextView
+                android:id="@+id/ParentsCard"
+                style="@style/ChatFilterPill"
+                android:text="Parents"
+                android:background="@drawable/pill_unselected"
+                android:layout_weight="1"
+                />
+
 
         </LinearLayout>
     </HorizontalScrollView>

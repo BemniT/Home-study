@@ -3,7 +3,6 @@ package com.example.home_study.Adapter;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,14 +19,18 @@ import com.example.home_study.Prevalent.Continuity;
 import com.example.home_study.R;
 import com.squareup.picasso.Picasso;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHolder> {
 
     private List<ChatUser> list = new ArrayList<>();
+    private final SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
 
     public ChatListAdapter(List<ChatUser> list) {
         this.list = list != null ? new ArrayList<>(list) : new ArrayList<>();
@@ -49,6 +52,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
     }
 
     // Partial bind using payloads
+    // inside onBindViewHolder(holder, position, payloads)
     @Override
     public void onBindViewHolder(@NonNull ChatListAdapter.ViewHolder holder, int position, @NonNull List<Object> payloads) {
         if (payloads == null || payloads.isEmpty()) {
@@ -57,6 +61,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
         }
 
         Object payload = payloads.get(payloads.size() - 1);
+        // get current item safely (position could be NO_POSITION, guard it)
+        ChatUser current = null;
+        if (position >= 0 && position < list.size()) current = list.get(position);
+
         if (payload instanceof Bundle) {
             Bundle b = (Bundle) payload;
             if (b.containsKey("lastMessage")) {
@@ -68,29 +76,32 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
                 if (ts > 0) {
                     if (ts < 1_000_000_000_000L) ts = ts * 1000L;
                     holder.lastMessageTime.setVisibility(View.VISIBLE);
-                    holder.lastMessageTime.setText(
-                            DateUtils.getRelativeTimeSpanString(ts, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS)
-                    );
+                    holder.lastMessageTime.setText(formatTime(ts));
                 } else {
                     holder.lastMessageTime.setVisibility(View.GONE);
                 }
             }
             if (b.containsKey("lastSeen")) {
                 boolean seen = b.getBoolean("lastSeen");
-                // If last message was sent by current user we show seen icon; otherwise hide icon
-                if (seen) {
+                // Only show seen icon if the last message was SENT by the current user
+                String senderIdInItem = current != null ? current.getLastMessageSenderId() : null;
+                if (senderIdInItem != null && senderIdInItem.equals(Continuity.userId)) {
                     holder.seenIcon.setVisibility(View.VISIBLE);
-                    holder.seenIcon.setImageResource(R.drawable.double_check);
+                    holder.seenIcon.setImageResource(seen ? R.drawable.double_check : R.drawable.single_check);
+                    holder.seenIcon.setAlpha(0f);
+                    holder.seenIcon.animate().alpha(1f).setDuration(200).start();
+                    holder.unreadCounter.setVisibility(View.GONE);
                 } else {
-                    holder.seenIcon.setVisibility(View.VISIBLE);
-                    holder.seenIcon.setImageResource(R.drawable.single_check);
+                    // If the last message is from someone else, hide seen icon (we show unread badge instead)
+                    holder.seenIcon.setVisibility(View.GONE);
+                    // If bundle provided unread, handle it below; otherwise leave unread as-is
                 }
-                holder.seenIcon.setAlpha(0f);
-                holder.seenIcon.animate().alpha(1f).setDuration(200).start();
             }
             if (b.containsKey("unread")) {
                 int unread = b.getInt("unread");
-                if (unread > 0) {
+                // If unread > 0 and last message was NOT sent by current user, show badge
+                String senderIdInItem = current != null ? current.getLastMessageSenderId() : null;
+                if (unread > 0 && (senderIdInItem == null || !senderIdInItem.equals(Continuity.userId))) {
                     holder.unreadCounter.setVisibility(View.VISIBLE);
                     holder.unreadCounter.setText(String.valueOf(unread));
                     ObjectAnimator.ofFloat(holder.unreadCounter, "scaleX", 0.8f, 1f).setDuration(160).start();
@@ -121,16 +132,16 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
         if (chatUser.getLastMessage() != null) {
             holder.lastMessage.setText(chatUser.getLastMessage());
         } else {
-            holder.lastMessage.setText(chatUser.getSubstitle());
+//            holder.lastMessage.setText(chatUser.getSubstitle());
+            holder.lastMessage.setText("Start a converstion");
+
         }
 
         if (chatUser.getLastMessageTime() > 0) {
             long ts = chatUser.getLastMessageTime();
             if (ts < 1_000_000_000_000L) ts = ts * 1000L;
             holder.lastMessageTime.setVisibility(View.VISIBLE);
-            holder.lastMessageTime.setText(
-                    DateUtils.getRelativeTimeSpanString(ts, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS)
-            );
+            holder.lastMessageTime.setText(formatTime(ts));
         } else {
             holder.lastMessageTime.setVisibility(View.GONE);
         }
@@ -150,6 +161,9 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
             }
         }
 
+        // role pill
+        holder.userRole.setText(chatUser.getRole() != null ? chatUser.getRole() : "");
+
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(v.getContext(), ChatDialogue.class);
             intent.putExtra("otherUserId", chatUser.getUserId());
@@ -160,13 +174,22 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
         });
     }
 
+    private String formatTime(long millis) {
+        try {
+            Date d = new Date(millis);
+            return timeFormat.format(d);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
     @Override
     public int getItemCount() {
         return list != null ? list.size() : 0;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        private TextView teacherName, lastMessage, unreadCounter, lastMessageTime;
+        private TextView teacherName, lastMessage, unreadCounter, lastMessageTime, userRole;
         private CircleImageView profileImage;
         private ImageView seenIcon;
 
@@ -178,6 +201,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHo
             profileImage = itemView.findViewById(R.id.imageProfile);
             lastMessageTime = itemView.findViewById(R.id.lastMessageTime);
             seenIcon = itemView.findViewById(R.id.seenIcon);
+            userRole = itemView.findViewById(R.id.userRole);
         }
     }
 

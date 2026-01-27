@@ -88,7 +88,7 @@
 
     <!-- Full name -->
     <TextView
-        android:id="@+id/fullName"
+        android:id="@+id/headerFullName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Full name"
@@ -102,13 +102,13 @@
 
     <!-- Username -->
     <TextView
-        android:id="@+id/username"
+        android:id="@+id/headerUsername"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="username"
-        android:textSize="14sp"
+        android:textSize="12sp"
         android:textColor="@color/black_low"
-        app:layout_constraintTop_toBottomOf="@id/fullName"
+        app:layout_constraintTop_toBottomOf="@id/headerFullName"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:gravity="center"
@@ -120,7 +120,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        app:layout_constraintTop_toBottomOf="@id/username"
+        app:layout_constraintTop_toBottomOf="@id/headerUsername"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         >
@@ -473,7 +473,7 @@
         app:cardElevation="3dp"
         android:padding="12dp"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/editProfile"
+        app:layout_constraintTop_toBottomOf="@id/shareBtn"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:outlineSpotShadowColor="@color/LightBlue"
@@ -503,6 +503,7 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
+<!--        share    -->
     <androidx.cardview.widget.CardView
         android:id="@+id/shareBtn"
         android:layout_width="0dp"
@@ -511,7 +512,7 @@
         app:cardElevation="3dp"
         android:padding="12dp"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/termAndPrivacy"
+        app:layout_constraintTop_toBottomOf="@id/editProfile"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:outlineSpotShadowColor="@color/LightBlue"
@@ -550,7 +551,7 @@
         app:cardElevation="3dp"
         android:padding="12dp"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/shareBtn"
+        app:layout_constraintTop_toBottomOf="@id/termAndPrivacy"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:outlineSpotShadowColor="@color/LightBlue"
