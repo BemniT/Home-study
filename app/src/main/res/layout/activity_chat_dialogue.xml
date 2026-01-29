@@ -117,7 +117,7 @@
         android:clipToPadding="false"
         android:orientation="vertical"
         android:overScrollMode="never"
-        android:padding="@dimen/_10sdp"
+        android:padding="10dp"
         app:stackFromEnd="true"
         android:visibility="gone"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
@@ -164,6 +164,20 @@
 
 <!--        </androidx.cardview.widget.CardView>-->
 
+    <ImageView
+        android:id="@+id/attachFile"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:padding="8dp"
+        android:src="@drawable/send"
+        app:tint="@color/white"
+        android:background="@drawable/circle"
+        android:layout_marginLeft="8dp"
+        android:backgroundTint="@color/primary_secondary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/chatBotInputContainer"
+        app:layout_constraintBottom_toBottomOf="@id/chatBotInputContainer"/>
+
 
 
     <androidx.cardview.widget.CardView
@@ -175,7 +189,7 @@
         app:cardElevation="4dp"
         android:outlineSpotShadowColor="@color/primary_secondary"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/attachFile"
         app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
