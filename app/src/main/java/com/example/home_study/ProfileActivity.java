@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
@@ -82,6 +83,7 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_profile); // your layout
 
         initViews();
@@ -93,6 +95,7 @@ public class ProfileActivity extends AppCompatActivity {
         animateInitialEntrance();
 
         // Attach touch/tactile effects to interactive cards (improves perceived responsiveness)
+        // in onCreate() after initViews()
         attachTouchEffectsToCards(
                 R.id.statCard1,
                 R.id.statCard2,
@@ -101,7 +104,11 @@ public class ProfileActivity extends AppCompatActivity {
                 R.id.editProfile,
                 R.id.shareBtn,
                 R.id.termAndPrivacy,
-                R.id.logoutBtn
+                R.id.logoutBtn,
+                R.id.contactCard,
+                R.id.telegramRow,
+                R.id.linkedinRow,
+                R.id.emailRow
         );
     }
 
@@ -168,7 +175,88 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void initClickListeners() {
-        if (backArrow != null) backArrow.setOnClickListener(v -> finish());
+
+        // --- Contact rows (Telegram / LinkedIn / Email) ---
+        View telegramRow = findViewById(R.id.telegramRow);
+        View linkedinRow = findViewById(R.id.linkedinRow);
+        View emailRow = findViewById(R.id.emailRow);
+
+// Replace these with your real contact values
+        final String telegramHandle = "your_telegram_handle";           // without @
+        final String supportEmail = "support@yourapp.com";
+        final String linkedInUrl = "https://www.linkedin.com/company/your-company"; // public profile/company URL
+
+// Telegram: try app, then web
+        if (telegramRow != null) {
+            telegramRow.setOnClickListener(v -> {
+                // try Telegram deep link
+                try {
+                    Uri tgUri = Uri.parse("tg://resolve?domain=" + telegramHandle);
+                    Intent tgIntent = new Intent(Intent.ACTION_VIEW, tgUri);
+                    if (tgIntent.resolveActivity(getPackageManager()) != null) {
+                        startActivity(tgIntent);
+                        return;
+                    }
+                } catch (Exception ignored) { }
+
+                // fallback to web
+                try {
+                    Uri web = Uri.parse("https://t.me/" + telegramHandle);
+                    Intent webIntent = new Intent(Intent.ACTION_VIEW, web);
+                    startActivity(webIntent);
+                } catch (Exception e) {
+                    Toast.makeText(this, "No app available to open Telegram link", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+// LinkedIn: prefer app, fallback to browser
+        if (linkedinRow != null) {
+            linkedinRow.setOnClickListener(v -> {
+                // try open in LinkedIn app via package + URL
+                try {
+                    Intent linkedInIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(linkedInUrl));
+                    linkedInIntent.setPackage("com.linkedin.android");
+                    if (linkedInIntent.resolveActivity(getPackageManager()) != null) {
+                        startActivity(linkedInIntent);
+                        return;
+                    }
+                } catch (Exception ignored) { }
+
+                // fallback to browser
+                try {
+                    Intent browser = new Intent(Intent.ACTION_VIEW, Uri.parse(linkedInUrl));
+                    startActivity(browser);
+                } catch (Exception e) {
+                    Toast.makeText(this, "No app available to open LinkedIn", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+// Email: open mail client with subject and optional body
+        if (emailRow != null) {
+            emailRow.setOnClickListener(v -> {
+                try {
+                    Intent mail = new Intent(Intent.ACTION_SENDTO);
+                    mail.setData(Uri.parse("mailto:" + supportEmail));
+                    mail.putExtra(Intent.EXTRA_SUBJECT, "HomeStudy Support");
+                    mail.putExtra(Intent.EXTRA_TEXT, "Hi team,\n\nI would like to report...");
+                    if (mail.resolveActivity(getPackageManager()) != null) {
+                        startActivity(mail);
+                    } else {
+                        Toast.makeText(this, "No email client found", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (Exception e) {
+                    Toast.makeText(this, "Unable to open email client", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        if (backArrow != null) backArrow.setOnClickListener(v -> {
+            Intent intent = new Intent(this, HomeActivity.class);
+            startActivity(intent);
+            finish();
+                });
 
         if (changeProfileBtn != null) changeProfileBtn.setOnClickListener(v -> {
             changeProfileBtn.animate().scaleX(0.92f).scaleY(0.92f).setDuration(100)
@@ -178,11 +266,14 @@ public class ProfileActivity extends AppCompatActivity {
         });
 
         View edit = findViewById(R.id.editProfile);
-        if (edit != null) edit.setOnClickListener(v ->
-                new EditProfileBottomSheet().show(getSupportFragmentManager(), "EditProfile"));
+        if (edit != null) edit.setOnClickListener(v ->{
+                new EditProfileBottomSheet().show(getSupportFragmentManager(), "EditProfile");
+        });
+
 
         View share = findViewById(R.id.shareBtn);
         if (share != null) share.setOnClickListener(v -> {
+//            animateClickFeedback(share);
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("text/plain");
             shareIntent.putExtra(Intent.EXTRA_TEXT, "Check out my profile on Home Study app!");
@@ -190,11 +281,18 @@ public class ProfileActivity extends AppCompatActivity {
         });
 
         View terms = findViewById(R.id.termAndPrivacy);
-        if (terms != null) terms.setOnClickListener(v -> Toast.makeText(this, "Open Terms & Privacy", Toast.LENGTH_SHORT).show());
+        if (terms != null) terms.setOnClickListener(v ->{
+//            animateClickFeedback(terms);
+                Toast.makeText(this, "Open Terms & Privacy", Toast.LENGTH_SHORT).show();
+
+        });
 
         View logout = findViewById(R.id.logoutBtn);
         if (logout != null) logout.setOnClickListener(v -> {
+//            animateClickFeedback(logout);
             Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
             finish();
         });
     }
@@ -205,6 +303,42 @@ public class ProfileActivity extends AppCompatActivity {
      * Entrance animation: stagger fade/translate for important views.
      * Keeps animations short and hardware-accelerated for good performance.
      */
+
+
+    /**
+     * Use this for programmatic click feedback (e.g., when you call an action and want the same visual).
+     * It performs a quick press/release animation and returns immediately.
+     */
+    private void animateClickFeedback(View v) {
+        if (v == null) return;
+        final float PRESSED_SCALE = 0.95f;
+        final long PRESS_DURATION = 90L;
+        final long RELEASE_DURATION = 220L;
+        final float LIFT_DP = 6f;
+        final float liftPx = getResources().getDisplayMetrics().density * LIFT_DP;
+        final DecelerateInterpolator decel = new DecelerateInterpolator();
+        final OvershootInterpolator overshoot = new OvershootInterpolator(1.05f);
+
+        v.animate().cancel();
+        v.bringToFront();
+        v.animate()
+                .scaleX(PRESSED_SCALE)
+                .scaleY(PRESSED_SCALE)
+                .translationZ(liftPx)
+                .setDuration(PRESS_DURATION)
+                .setInterpolator(decel)
+                .withEndAction(() -> {
+                    v.animate().cancel();
+                    v.animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .translationZ(0f)
+                            .setDuration(RELEASE_DURATION)
+                            .setInterpolator(overshoot)
+                            .start();
+                })
+                .start();
+    }
     private void animateInitialEntrance() {
         final int baseDelay = 80;
         final int itemDuration = 420;
@@ -268,49 +402,67 @@ public class ProfileActivity extends AppCompatActivity {
      * Keeps effect lightweight: quick scale and translationZ, restored on release/cancel.
      */
     private void attachTouchEffectsToCards(int... viewIds) {
-        final float pressedScale = 0.975f;
-        final long animDuration = 120L;
-        final float liftZ = getResources().getDisplayMetrics().density * 6f; // ~6dp translationZ
+        final float PRESSED_SCALE = 0.97f;          // scale when pressed
+        final long PRESS_DURATION = 90L;            // ms
+        final long RELEASE_DURATION = 220L;         // ms
+        final float LIFT_DP = 6f;                   // dp of translationZ when pressed
+        final float liftPx = getResources().getDisplayMetrics().density * LIFT_DP;
+        final DecelerateInterpolator decel = new DecelerateInterpolator();
+        final OvershootInterpolator overshoot = new OvershootInterpolator(1.05f);
 
         View.OnTouchListener touch = (v, event) -> {
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
-                    v.animate().scaleX(pressedScale).scaleY(pressedScale)
-                            .translationZ(liftZ)
-                            .setDuration(animDuration)
-                            .setInterpolator(new DecelerateInterpolator()).start();
-                    v.setPressed(true); // for ripple foreground if present
+                    // cancel any running animators cleanly
+                    v.animate().cancel();
+                    // ensure we draw above siblings during press (optional)
+                    v.bringToFront();
+
+                    // press animation: scale down + lift quickly
+                    v.animate()
+                            .scaleX(PRESSED_SCALE)
+                            .scaleY(PRESSED_SCALE)
+                            .translationZ(liftPx)
+                            .setDuration(PRESS_DURATION)
+                            .setInterpolator(decel)
+                            .start();
+
+                    // set pressed for ripple feedback
+                    v.setPressed(true);
                     break;
+
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
-                    v.animate().scaleX(1f).scaleY(1f)
+                    // cancel again and animate back with a pleasant overshoot
+                    v.animate().cancel();
+
+                    v.animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
                             .translationZ(0f)
-                            .setDuration(animDuration)
-                            .setInterpolator(new DecelerateInterpolator()).start();
+                            .setDuration(RELEASE_DURATION)
+                            .setInterpolator(overshoot)
+                            .start();
+
                     v.setPressed(false);
                     break;
             }
-            // Let click still be processed
+            // Return false so the normal click handling still occurs.
             return false;
         };
 
         for (int id : viewIds) {
             View v = findViewById(id);
             if (v == null) continue;
-            // make sure view is clickable/focusable for accessibility and ripple
             v.setClickable(true);
             v.setFocusable(true);
-
-            // Apply touch listener
+            // attach the touch listener
             v.setOnTouchListener(touch);
-
-            // If it's a MaterialCardView, slightly increase cardUseCompatPadding or elevation on press is handled
-            if (v instanceof MaterialCardView) {
-                // ensure card has foreground ripple (set in XML: android:foreground="?attr/selectableItemBackground")
-                // but here we ensure ripple works by enabling clickable
-            }
+            // optionally ensure ripple is visible by setting foreground (if using CardView/MaterialCardView)
+            // v.setForeground(ContextCompat.getDrawable(this, R.attr.selectableItemBackgroundBorderless));
         }
     }
+
 
     // -------------------- IMAGE PICK & CROP --------------------
 

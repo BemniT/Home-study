@@ -6,6 +6,8 @@
     android:layout_height="match_parent"
     android:overScrollMode="never"
     android:scrollbars="none"
+    android:background="@color/white"
+    android:fitsSystemWindows="true"
     tools:context=".LoginActivity">
 
 <androidx.constraintlayout.widget.ConstraintLayout
@@ -124,49 +126,20 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/login_password" />
 
-        <!--        <LinearLayout-->
-        <!--            android:id="@+id/linear_layout1"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:orientation="horizontal"-->
-        <!--            android:layout_below="@+id/login_btn"-->
-        <!--            >-->
-
-        <!--        <CheckBox-->
-        <!--            android:id="@+id/rememberMe_check"-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:layout_marginStart="30dp"-->
-        <!--            android:height="48dp"-->
-        <!--            android:text="@string/rememberMe"-->
-        <!--            android:textColor="@color/black"-->
-        <!--            tools:ignore="TouchTargetSizeCheck"-->
-        <!--            />-->
-
-        <!--        <TextView-->
-        <!--            android:id="@+id/forgot_password"-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="30dp"-->
-        <!--            android:text="@string/forgotPassword"-->
-        <!--            android:textColor="@color/border"-->
-        <!--            android:layout_marginStart="200dp"-->
-        <!--            android:textStyle="bold"-->
-        <!--            android:textAlignment="center"-->
-        <!--            android:paddingTop="5dp"-->
-
-        <!--            />-->
-        <!--        </LinearLayout>-->
-
-        <!--        <ImageView-->
-        <!--            android:id="@+id/or_dash"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:src="@drawable/or"-->
-        <!--            android:layout_below="@id/linear_layout1"-->
-        <!--            android:layout_marginTop="20dp"-->
-        <!--            android:layout_marginLeft="25dp"-->
-        <!--            android:layout_marginRight="25dp"-->
-        <!--            />-->
+    <TextView
+        android:id="@+id/copyright"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="© 2026 HomeStudy. All rights reserved."
+        android:textSize="12sp"
+        android:textColor="@color/black_low"
+        android:gravity="center"
+        android:layout_marginTop="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/login_btn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:paddingBottom="18dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

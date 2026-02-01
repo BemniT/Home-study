@@ -47,11 +47,6 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.drawer_layout), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         // remove shifting and set icon size if needed (you already do this)
@@ -103,7 +98,7 @@ public class HomeActivity extends AppCompatActivity {
                         break;
                     case 3:
                         bottomNavigationView.setSelectedItemId(R.id.profile);
-                        bottomNavigationView.getMenu().findItem(R.id.profile).setIcon(R.drawable.bot_icon_filled);
+                        bottomNavigationView.getMenu().findItem(R.id.profile).setIcon(R.drawable.class_mark_filled);
                         break;
                 }
             }
@@ -126,7 +121,8 @@ public class HomeActivity extends AppCompatActivity {
                     viewPager.setCurrentItem(2, true);
                     break;
                 case R.id.profile:
-                    item.setIcon(R.drawable.bot_icon_filled);
+                    item.setIcon(R.drawable.class_mark_filled);
+                    item.setChecked(true);
                     viewPager.setCurrentItem(3, true);
                     break;
             }
@@ -209,7 +205,9 @@ public class HomeActivity extends AppCompatActivity {
         bottomNavigationView.getMenu().findItem(R.id.home).setIcon(R.drawable.home);
         bottomNavigationView.getMenu().findItem(R.id.book).setIcon(R.drawable.book);
         bottomNavigationView.getMenu().findItem(R.id.exam).setIcon(R.drawable.exam);
-        bottomNavigationView.getMenu().findItem(R.id.profile).setIcon(R.drawable.bot_icon_outline);
+        bottomNavigationView.getMenu().findItem(R.id.profile).setIcon(R.drawable.class_mark_outline);
+
+        bottomNavigationView.getMenu().setGroupCheckable(0, true, true);
     }
 
     private static class ScreenSlidePagerAdapter extends FragmentStateAdapter {

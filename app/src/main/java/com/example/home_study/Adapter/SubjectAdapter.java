@@ -65,7 +65,7 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
 
         Picasso.get()
                 .load(resId)
-                .placeholder(R.drawable.examfill) // create a small placeholder drawable
+                .placeholder(R.drawable.image_placeholder) // create a small placeholder drawable
                 .resize(targetPx, targetPx)   // downsample to view size during decode
                 .centerCrop()
                 .config(Bitmap.Config.RGB_565) // reduce memory usage
@@ -95,6 +95,10 @@ public class SubjectAdapter extends RecyclerView.Adapter<SubjectAdapter.SubjectV
         if (key.contains("history")) return R.drawable.history;
         if (key.contains("civics")) return R.drawable.civics;
         if (key.contains("ict")) return R.drawable.ict;
+        if (key.contains("oromifa")) return R.drawable.language;
+        if (key.contains("physical education")) return R.drawable.hpe;
+
+
         return R.drawable.math;
     }
 

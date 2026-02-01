@@ -161,15 +161,15 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             Picasso.get()
                     .load(R.drawable.math)
                     .fit().centerCrop()
-                    .placeholder(R.drawable.examfill)
-                    .error(R.drawable.examfill)
+                    .placeholder(R.drawable.image_placeholder)
+                    .error(R.drawable.image_placeholder)
                     .into(holder.postImage);
         } else {
             Picasso.get()
                     .load(post.getPostUrl())
                     .fit().centerCrop()
-                    .placeholder(R.drawable.examfill)
-                    .error(R.drawable.examfill)
+                    .placeholder(R.drawable.image_placeholder)
+                    .error(R.drawable.image_placeholder)
                     .into(holder.postImage);
         }
 

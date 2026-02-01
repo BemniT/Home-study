@@ -23,5 +23,5 @@
     <item
         android:id="@+id/profile"
         android:title=""
-        android:icon="@drawable/bot_icon_outline"/>
+        android:icon="@drawable/class_mark_outline"/>
 </menu>

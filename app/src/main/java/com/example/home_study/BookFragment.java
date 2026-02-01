@@ -84,13 +84,18 @@ public class BookFragment extends Fragment {
 
     private void loadBooks()
     {
-        bookList.add(new Book("English", "Grade 9", R.drawable.english));
-        bookList.add(new Book("Mathematics", "Grade 9", R.drawable.math));
-        bookList.add(new Book("Physics", "Grade 9", R.drawable.physics));
-        bookList.add(new Book("Biology", "Grade 9", R.drawable.biology));
-        bookList.add(new Book("Chemistry", "Grade 9", R.drawable.chemistry));
-        bookList.add(new Book("Geography", "Grade 9", R.drawable.history));
-        bookList.add(new Book("History", "Grade 9", R.drawable.history));
+        bookList.add(new Book("English", "Grade 7", R.drawable.english));
+        bookList.add(new Book("Mathematics", "Grade 7", R.drawable.math));
+        bookList.add(new Book("Physics", "Grade 7", R.drawable.physics));
+        bookList.add(new Book("Biology", "Grade 7", R.drawable.biology));
+        bookList.add(new Book("Chemistry", "Grade 7", R.drawable.chemistry));
+        bookList.add(new Book("Geography", "Grade 7", R.drawable.geography));
+        bookList.add(new Book("History", "Grade 7", R.drawable.history));
+        bookList.add(new Book("ICT", "Grade 7", R.drawable.ict));
+        bookList.add(new Book("Physical Education", "Grade 7", R.drawable.hpe));
+        bookList.add(new Book("Oromifa", "Grade 7", R.drawable.language));
+
+
 
     }
 

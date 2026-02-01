@@ -7,6 +7,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -18,6 +19,8 @@ import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,7 +28,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.home_study.Adapter.ChatMessageAdapter;
 import com.example.home_study.Model.Message;
 import com.example.home_study.Prevalent.Continuity;
-import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.storage.UploadTask;
 import com.google.firebase.storage.StorageReference;
@@ -37,9 +44,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.squareup.picasso.Picasso;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import android.util.Log;
 
@@ -113,7 +117,7 @@ public class ChatDialogue extends AppCompatActivity {
         adapter = new ChatMessageAdapter(messageList, currentUserId,
                 new ChatMessageAdapter.OnMessageActionListener() {
                     @Override public void onEdit(Message message, int postion) { showEditDialog(message); }
-                    @Override public void onDelete(Message message, int postion) { deleteMessage(message); }
+                    @Override public void onDelete(Message message, int postion) { showDeleteConfirmationDialog(message); }
                 });
         chatRecyclerView.setAdapter(adapter);
 
@@ -132,65 +136,184 @@ public class ChatDialogue extends AppCompatActivity {
         attachFile.setOnClickListener(v -> pickImageLauncher.launch("image/*"));
     }
 
+    /**
+     * Modern Edit dialog:
+     * - custom layout (TextInputEditText)
+     * - Save button disabled until text changed and non-empty
+     * - shows small circular progress indicator while saving
+     * - performs the DB update and updates chat lastMessage
+     */
     private void showEditDialog(Message message) {
-        EditText editText = new EditText(this);
-        editText.setText(message.getText());
-        editText.setSelection(editText.getText().length());
+        if (message == null) return;
 
-        new AlertDialog.Builder(this)
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View dialogView = inflater.inflate(R.layout.dialog_edit, null, false);
+
+        final com.google.android.material.textfield.TextInputEditText editInput =
+                dialogView.findViewById(R.id.edit_message_input);
+        final CircularProgressIndicator progress =
+                dialogView.findViewById(R.id.edit_progress);
+
+        final String originalText = message.getText() == null ? "" : message.getText();
+
+        editInput.setText(originalText);
+        editInput.setSelection(originalText.length());
+
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this, com.google.android.material.R.style.ThemeOverlay_MaterialComponents_Dialog)
                 .setTitle("Edit message")
-                .setView(editText)
-                .setPositiveButton("Save", (dialog, which) -> {
+                .setView(dialogView)
+                .setNegativeButton("Cancel", (d, which) -> { /* dismiss */ })
+                .setPositiveButton("Save", null); // click overridden below to prevent auto-dismiss
 
-                    String newText = editText.getText().toString().trim();
-                    String oldText = message.getText().trim();
+        final androidx.appcompat.app.AlertDialog dialog = builder.create();
+        dialog.setOnShowListener(dialogInterface -> {
+            final android.widget.Button saveBtn = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            final android.widget.Button cancelBtn = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+            // initial state: disable save because nothing changed yet
+            saveBtn.setEnabled(false);
 
-                    if (newText.isEmpty() || newText.equals(oldText)) {
-                        return;
-                    }
-                    messagesRef.child(message.getMessageId())
-                            .updateChildren(new HashMap<String, Object>() {{
-                                put("text", newText);
-                                put("edited", true);
-                            }});
+            // enable save when text non-empty and changed
+            editInput.addTextChangedListener(new android.text.TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    String val = s.toString().trim();
+                    boolean changed = !val.equals(originalText.trim());
+                    saveBtn.setEnabled(changed && !val.isEmpty());
+                }
+                @Override public void afterTextChanged(android.text.Editable s) { }
+            });
 
-                    // Update chat lastMessage text/time to reflect edit
-                    Map<String, Object> metaUpdate = new HashMap<>();
-                    metaUpdate.put("text", newText);
-                    metaUpdate.put("senderId", currentUserId);
-                    metaUpdate.put("timeStamp", ServerValue.TIMESTAMP);
-                    metaUpdate.put("seen", false);
-                    chatRootRef.child("lastMessage").updateChildren(metaUpdate);
+            saveBtn.setOnClickListener(v -> {
+                String newText = editInput.getText() == null ? "" : editInput.getText().toString().trim();
+                if (newText.isEmpty()) {
+                    editInput.setError("Message cannot be empty");
+                    return;
+                }
+                // disable buttons and show progress
+                saveBtn.setEnabled(false);
+                cancelBtn.setEnabled(false);
+                progress.setVisibility(View.VISIBLE);
 
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+                Map<String, Object> update = new HashMap<>();
+                update.put("text", newText);
+                update.put("edited", true);
+
+                messagesRef.child(message.getMessageId())
+                        .updateChildren(update)
+                        .addOnSuccessListener(aVoid -> {
+                            // update lastMessage if necessary
+                            Map<String, Object> metaUpdate = new HashMap<>();
+                            metaUpdate.put("text", newText);
+                            metaUpdate.put("senderId", currentUserId);
+                            metaUpdate.put("timeStamp", ServerValue.TIMESTAMP);
+                            metaUpdate.put("seen", false);
+                            chatRootRef.child("lastMessage").updateChildren(metaUpdate);
+
+                            progress.setVisibility(GONE);
+                            dialog.dismiss();
+                        })
+                        .addOnFailureListener(e -> {
+                            progress.setVisibility(GONE);
+                            saveBtn.setEnabled(true);
+                            cancelBtn.setEnabled(true);
+                            Toast.makeText(ChatDialogue.this, "Failed to save edit", Toast.LENGTH_SHORT).show();
+                        });
+            });
+        });
+
+        dialog.show();
     }
 
-    private void deleteMessage(Message message) {
+    /**
+     * Shows a modern delete confirmation dialog; on delete performs existing deleteMessage().
+     * After deletion shows a Snackbar with Undo that restores the previous message text and deleted=false.
+     */
+    private void showDeleteConfirmationDialog(final Message message) {
+        if (message == null) return;
+        final String originalText = message.getText() == null ? "" : message.getText();
+
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
+                .setTitle("Delete message")
+                .setMessage("Are you sure you want to delete this message? You can undo this action briefly.")
+                .setNegativeButton("Cancel", (d, w) -> { /* dismiss */ })
+                .setPositiveButton("Delete", (d, w) -> {
+                    // perform deletion and show undo
+                    performDeleteWithUndo(message, originalText);
+                });
+
+        androidx.appcompat.app.AlertDialog dlg = builder.create();
+        dlg.setOnShowListener(dialogInterface -> {
+            // style the positive (delete) button in red to emphasize destructive action
+            android.widget.Button pos = dlg.getButton(AlertDialog.BUTTON_POSITIVE);
+            if (pos != null) pos.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+        });
+        dlg.show();
+    }
+
+    /**
+     * Executes the deletion and shows a Snackbar with Undo option.
+     */
+    private void performDeleteWithUndo(final Message message, final String originalText) {
+        // update DB to mark deleted + change text
+        Map<String, Object> update = new HashMap<>();
+        update.put("text", "This message was deleted");
+        update.put("deleted", true);
 
         messagesRef.child(message.getMessageId())
-                .updateChildren(new HashMap<String, Object>() {{
-                    put("text", "This message was deleted");
-                    put("deleted", true);
-                }});
+                .updateChildren(update)
+                .addOnSuccessListener(aVoid -> {
+                    // If this message was last, update lastMessage metadata
+                    if (!messageList.isEmpty() && messageList.get(messageList.size() - 1).getMessageId().equals(message.getMessageId())) {
+                        Map<String, Object> metaUpdate = new HashMap<>();
+                        metaUpdate.put("text", "This message was deleted");
+                        metaUpdate.put("senderId", currentUserId);
+                        metaUpdate.put("timeStamp", ServerValue.TIMESTAMP);
+                        metaUpdate.put("seen", false);
+                        chatRootRef.child("lastMessage").updateChildren(metaUpdate);
+                    }
 
-        // If this message was the lastMessage, update lastMessage text/time
-        if (!messageList.isEmpty() && messageList.get(messageList.size() - 1).getMessageId().equals(message.getMessageId())) {
-            Map<String, Object> metaUpdate = new HashMap<>();
-            metaUpdate.put("text", "This message was deleted");
-            metaUpdate.put("senderId", currentUserId);
-            metaUpdate.put("timeStamp", ServerValue.TIMESTAMP);
-            metaUpdate.put("seen", false);
-            chatRootRef.child("lastMessage").updateChildren(metaUpdate);
-        }
+                    // show undo snackbar anchored to RecyclerView
+                    View anchor = findViewById(R.id.chatRecyclerView);
+                    Snackbar.make(anchor != null ? anchor : findViewById(android.R.id.content),
+                                    "Message deleted", Snackbar.LENGTH_LONG)
+                            .setAction("Undo", v -> {
+                                // undo: restore original text and deleted=false
+                                Map<String, Object> undo = new HashMap<>();
+                                undo.put("text", originalText);
+                                undo.put("deleted", false);
+                                messagesRef.child(message.getMessageId()).updateChildren(undo)
+                                        .addOnSuccessListener(aVoid1 -> {
+                                            // restore lastMessage if needed (optional)
+                                            if (!messageList.isEmpty() && messageList.get(messageList.size() - 1).getMessageId().equals(message.getMessageId())) {
+                                                Map<String, Object> meta = new HashMap<>();
+                                                meta.put("text", originalText);
+                                                meta.put("senderId", currentUserId);
+                                                meta.put("timeStamp", ServerValue.TIMESTAMP);
+                                                meta.put("seen", false);
+                                                chatRootRef.child("lastMessage").updateChildren(meta);
+                                            }
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Toast.makeText(ChatDialogue.this, "Undo failed", Toast.LENGTH_SHORT).show();
+                                        });
+                            })
+                            .show();
+
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(ChatDialogue.this, "Failed to delete message", Toast.LENGTH_SHORT).show();
+                });
     }
 
+    // ... rest of your code (listenForMessages, uploadImageAndSend, sendMessage, etc.)
+    // copied unchanged from your original implementation; omitted here for brevity but keep them in your file.
+    // Make sure to keep methods listenForMessages(), uploadImageAndSend(...), sendMessage(), generateChatId(...) unchanged.
+
+    // For completeness, include your existing methods below (unchanged):
     private void listenForMessages() {
         messagesRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
                 Message msg = snapshot.getValue(Message.class);
                 if (msg == null) {
                     msg = new Message();
@@ -244,10 +367,8 @@ public class ChatDialogue extends AppCompatActivity {
                 }
 
                 if (msg != null) {
-                    // Mark as seen if chat open and this message is for me
                     if (isChatOpen && msg.getReceiverId() != null && msg.getReceiverId().equals(currentUserId) && !msg.isSeen()) {
                         messagesRef.child(msg.getMessageId()).child("seen").setValue(true);
-                        // clearing unread is handled in onStart (we set unread/currentUser to 0)
                     }
 
                     messageList.add(msg);
@@ -325,23 +446,15 @@ public class ChatDialogue extends AppCompatActivity {
             }
 
             @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-            }
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) { }
 
             @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) { }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
+            public void onCancelled(@NonNull DatabaseError error) { }
         });
     }
-
-
 
     private void uploadImageAndSend(Uri imageUri) {
         if (imageUri == null) return;
@@ -448,8 +561,4 @@ public class ChatDialogue extends AppCompatActivity {
         if (a.compareTo(b) < 0) return a + "_" + b;
         return b + "_" + a;
     }
-
-    // include your listenForMessages(), showEditDialog(), deleteMessage() code as before,
-    // but when reading messages from snapshot, read message.setType(snapshot.child("type").getValue(String.class));
-    // and message.setImageUrl(snapshot.child("imageUrl").getValue(String.class));
 }
