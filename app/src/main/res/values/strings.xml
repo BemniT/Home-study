@@ -24,4 +24,6 @@
     <string name="edit_info">Edit Info</string>
     <string name="subject">Subject</string>
     <string name="type_a_message">Write a message...</string>
+    <string name="n_a">N/A</string>
+    <string name="account_data_info">Account Data Info</string>
 </resources>

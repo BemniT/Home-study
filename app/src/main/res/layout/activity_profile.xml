@@ -155,7 +155,7 @@
                     android:id="@+id/scoreValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="82%"
+                    android:text="--"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/primary_secondary"/>
@@ -191,7 +191,7 @@
                     android:id="@+id/gradeValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="9"
+                    android:text="@string/n_a"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/black"/>
@@ -227,7 +227,7 @@
                     android:id="@+id/sectionValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="A"
+                    android:text="@string/n_a"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/black"/>
@@ -242,6 +242,9 @@
         android:layout_height="wrap_content"
         app:cardElevation="1dp"
         android:layout_marginTop="8dp"
+        android:clickable="true"
+        app:cardCornerRadius="20dp"
+        android:focusable="true"
         app:layout_constraintTop_toBottomOf="@id/statsRow"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -336,6 +339,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="6dp"
                 android:gravity="end"
+                android:hint="email@example.com"
                 android:text="email@example.com"
                 android:textColor="@color/black"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -417,13 +421,14 @@
 
                     <ImageView
                         android:id="@+id/telegram"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
                         android:contentDescription="telegram"
                         android:src="@drawable/telegram"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="@color/primary_secondary" />
 
                     <LinearLayout
                         android:id="@+id/telegramTextGroup"
@@ -446,14 +451,14 @@
                             android:textSize="14sp"
                             android:textStyle="bold" />
 
-                        <!--                        <TextView-->
-                        <!--                            android:id="@+id/tgSubtitle"-->
-                        <!--                            android:layout_width="wrap_content"-->
-                        <!--                            android:layout_height="wrap_content"-->
-                        <!--                            android:text="your_telegram_handle"-->
-                        <!--                            android:textSize="12sp"-->
-                        <!--                            android:textColor="@color/black_low"-->
-                        <!--                            android:layout_marginTop="4dp" />-->
+                                                <TextView
+                                                    android:id="@+id/tgSubtitle"
+                                                    android:layout_width="wrap_content"
+                                                    android:layout_height="wrap_content"
+                                                    android:text="https://t.me/gojo_edu"
+                                                    android:textSize="12sp"
+                                                    android:textColor="@color/black_low"
+                                                    android:layout_marginTop="4dp" />
                     </LinearLayout>
 
                     <!-- divider that starts aligned with text group start -->
@@ -468,72 +473,73 @@
                         app:layout_constraintTop_toBottomOf="@id/telegramTextGroup" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <!-- LINKEDIN ROW -->
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/linkedinRow"
-                    android:layout_width="0dp"
-                    android:layout_height="64dp"
-                    android:layout_marginTop="4dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/telegramRow">
+<!--                &lt;!&ndash; LINKEDIN ROW &ndash;&gt;-->
+<!--                <androidx.constraintlayout.widget.ConstraintLayout-->
+<!--                    android:id="@+id/linkedinRow"-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="64dp"-->
+<!--                    android:layout_marginTop="4dp"-->
+<!--                    android:background="?attr/selectableItemBackground"-->
+<!--                    android:clickable="true"-->
+<!--                    android:focusable="true"-->
+<!--                    android:paddingStart="8dp"-->
+<!--                    android:paddingEnd="8dp"-->
+<!--                    app:layout_constraintEnd_toEndOf="parent"-->
+<!--                    app:layout_constraintStart_toStartOf="parent"-->
+<!--                    app:layout_constraintTop_toBottomOf="@id/telegramRow">-->
 
-                    <ImageView
-                        android:id="@+id/linkedinDeveloper"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:contentDescription="linkedin"
-                        android:src="@drawable/linkedin"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+<!--                    <ImageView-->
+<!--                        android:id="@+id/linkedinDeveloper"-->
+<!--                        android:layout_width="30dp"-->
+<!--                        android:layout_height="30dp"-->
+<!--                        android:contentDescription="linkedin"-->
+<!--                        android:src="@drawable/linkedin"-->
+<!--                        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                        app:layout_constraintStart_toStartOf="parent"-->
+<!--                        app:layout_constraintTop_toTopOf="parent"-->
+<!--                        app:tint="@color/primary_secondary" />-->
 
-                    <LinearLayout
-                        android:id="@+id/linkedinTextGroup"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginEnd="8dp"
-                        android:orientation="vertical"
-                        app:layout_constraintBottom_toBottomOf="@id/linkedinDeveloper"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/linkedinDeveloper"
-                        app:layout_constraintTop_toTopOf="parent">
+<!--                    <LinearLayout-->
+<!--                        android:id="@+id/linkedinTextGroup"-->
+<!--                        android:layout_width="0dp"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_marginStart="12dp"-->
+<!--                        android:layout_marginEnd="8dp"-->
+<!--                        android:orientation="vertical"-->
+<!--                        app:layout_constraintBottom_toBottomOf="@id/linkedinDeveloper"-->
+<!--                        app:layout_constraintEnd_toEndOf="parent"-->
+<!--                        app:layout_constraintStart_toEndOf="@id/linkedinDeveloper"-->
+<!--                        app:layout_constraintTop_toTopOf="parent">-->
 
-                        <TextView
-                            android:id="@+id/linkedinTitle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="LinkedIn"
-                            android:textColor="@color/black"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
+<!--                        <TextView-->
+<!--                            android:id="@+id/linkedinTitle"-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:text="LinkedIn"-->
+<!--                            android:textColor="@color/black"-->
+<!--                            android:textSize="14sp"-->
+<!--                            android:textStyle="bold" />-->
 
-                        <!--                        <TextView-->
-                        <!--                            android:id="@+id/linkedinSubtitle"-->
-                        <!--                            android:layout_width="wrap_content"-->
-                        <!--                            android:layout_height="wrap_content"-->
-                        <!--                            android:text="Company / Developer"-->
-                        <!--                            android:textSize="12sp"-->
-                        <!--                            android:textColor="@color/black_low"-->
-                        <!--                            android:layout_marginTop="4dp" />-->
-                    </LinearLayout>
+<!--                        &lt;!&ndash;                        <TextView&ndash;&gt;-->
+<!--                        &lt;!&ndash;                            android:id="@+id/linkedinSubtitle"&ndash;&gt;-->
+<!--                        &lt;!&ndash;                            android:layout_width="wrap_content"&ndash;&gt;-->
+<!--                        &lt;!&ndash;                            android:layout_height="wrap_content"&ndash;&gt;-->
+<!--                        &lt;!&ndash;                            android:text="Company / Developer"&ndash;&gt;-->
+<!--                        &lt;!&ndash;                            android:textSize="12sp"&ndash;&gt;-->
+<!--                        &lt;!&ndash;                            android:textColor="@color/black_low"&ndash;&gt;-->
+<!--                        &lt;!&ndash;                            android:layout_marginTop="4dp" />&ndash;&gt;-->
+<!--                    </LinearLayout>-->
 
-                    <View
-                        android:id="@+id/linkedinDivider"
-                        android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:layout_marginTop="12dp"
-                        android:background="@color/black_low"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="@id/linkedinTextGroup"
-                        app:layout_constraintTop_toBottomOf="@id/linkedinTextGroup" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
+<!--                    <View-->
+<!--                        android:id="@+id/linkedinDivider"-->
+<!--                        android:layout_width="0dp"-->
+<!--                        android:layout_height="1dp"-->
+<!--                        android:layout_marginTop="12dp"-->
+<!--                        android:background="@color/black_low"-->
+<!--                        app:layout_constraintEnd_toEndOf="parent"-->
+<!--                        app:layout_constraintStart_toStartOf="@id/linkedinTextGroup"-->
+<!--                        app:layout_constraintTop_toBottomOf="@id/linkedinTextGroup" />-->
+<!--                </androidx.constraintlayout.widget.ConstraintLayout>-->
 
                 <!-- EMAIL ROW -->
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -549,17 +555,18 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/linkedinRow">
+                    app:layout_constraintTop_toBottomOf="@id/telegramRow">
 
                     <ImageView
                         android:id="@+id/emailDeveloper"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
                         android:contentDescription="email"
                         android:src="@drawable/email"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="@color/primary_secondary" />
 
                     <LinearLayout
                         android:id="@+id/emailTextGroup"
@@ -582,14 +589,14 @@
                             android:textSize="14sp"
                             android:textStyle="bold" />
 
-                        <!--                        <TextView-->
-                        <!--                            android:id="@+id/emailSubtitle"-->
-                        <!--                            android:layout_width="wrap_content"-->
-                        <!--                            android:layout_height="wrap_content"-->
-                        <!--                            android:text="support@yourapp.com"-->
-                        <!--                            android:textSize="12sp"-->
-                        <!--                            android:textColor="@color/black_low"-->
-                        <!--                            android:layout_marginTop="4dp" />-->
+                                                <TextView
+                                                    android:id="@+id/emailSubtitle"
+                                                    android:layout_width="wrap_content"
+                                                    android:layout_height="wrap_content"
+                                                    android:text="gojo.education1@gmail.com"
+                                                    android:textSize="12sp"
+                                                    android:textColor="@color/black_low"
+                                                    android:layout_marginTop="4dp" />
                     </LinearLayout>
 
                     <!-- divider aligned to text group -->
@@ -606,12 +613,13 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
+
     <!-- Edit profile action -->
     <androidx.cardview.widget.CardView
         android:id="@+id/editProfile"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="12dp"
+        app:cardCornerRadius="20dp"
         app:cardElevation="3dp"
         android:padding="12dp"
         android:layout_marginTop="8dp"
@@ -620,6 +628,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:outlineSpotShadowColor="@color/LightBlue"
         android:background="@drawable/cricle2"
+
+        android:foreground="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
         >
 
         <LinearLayout
@@ -651,14 +663,18 @@
         android:id="@+id/termAndPrivacy"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="12dp"
+        app:cardCornerRadius="20dp"
         app:cardElevation="3dp"
         android:padding="12dp"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/shareBtn"
+        app:layout_constraintTop_toBottomOf="@id/accountDataInfo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:outlineSpotShadowColor="@color/LightBlue"
+
+        android:foreground="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
         >
 
         <LinearLayout
@@ -687,10 +703,10 @@
 
 <!--        share    -->
     <androidx.cardview.widget.CardView
-        android:id="@+id/shareBtn"
+        android:id="@+id/accountDataInfo"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="12dp"
+        app:cardCornerRadius="20dp"
         app:cardElevation="3dp"
         android:padding="12dp"
         android:layout_marginTop="8dp"
@@ -698,6 +714,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:outlineSpotShadowColor="@color/LightBlue"
+
+        android:foreground="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
         >
 
         <LinearLayout
@@ -713,14 +733,14 @@
                 android:id="@+id/shareIcon"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:src="@drawable/share" />
+                android:src="@drawable/info" />
 
             <TextView
-                android:id="@+id/shareTxt"
+                android:id="@+id/AccountTxt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:text="Share" />
+                android:text="@string/account_data_info" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
@@ -729,7 +749,7 @@
         android:id="@+id/logoutBtn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="12dp"
+        app:cardCornerRadius="20dp"
         app:cardElevation="3dp"
         android:padding="12dp"
         android:layout_marginTop="8dp"
@@ -737,6 +757,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:outlineSpotShadowColor="@color/LightBlue"
+
+        android:foreground="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
         >
 
         <LinearLayout
@@ -780,3 +804,5 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </ScrollView>
+
+

@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -103,6 +104,7 @@ public class ExamCenterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_exam_center);
 
         bindViews();
@@ -186,7 +188,7 @@ public class ExamCenterActivity extends AppCompatActivity {
         imageBackBtn = findViewById(R.id.imageBackBtn);
         examChapterTitle = findViewById(R.id.examChapterTitle);
         questionCounterTv = findViewById(R.id.questionCounter);
-        timerText = findViewById(R.id.timerText);
+//        timerText = findViewById(R.id.timerText);
 
         contentScroll = findViewById(R.id.contentScroll);
         questionTv = findViewById(R.id.question);

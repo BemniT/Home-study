@@ -1,5 +1,6 @@
 package com.example.home_study;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -19,13 +20,11 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.ViewCompat;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.home_study.Prevalent.Continuity;
 import com.example.home_study.Prevalent.SessionManager;
-import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
@@ -41,11 +40,7 @@ import java.util.Map;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
- * ProfileActivity with polished entrance animations and tactile touch effects on cards.
- *
- * - Staggered entrance animation for header, stats and cards.
- * - Press (touch) animation: subtle scale down & lift (translationZ) on ACTION_DOWN, revert on ACTION_UP/CANCEL.
- * - Uses efficient property animations (ViewPropertyAnimator) to preserve performance.
+ * ProfileActivity - refined touch animations and click-feedback handling.
  */
 public class ProfileActivity extends AppCompatActivity {
 
@@ -85,36 +80,33 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_profile); // your layout
+        setContentView(R.layout.activity_profile);
 
         initViews();
         initFirebase();
-        populateUserData();   // public so other components (bottomsheet) can call it
+        populateUserData();
         initClickListeners();
 
         // Entrance animations
         animateInitialEntrance();
 
-        // Attach touch/tactile effects to interactive cards (improves perceived responsiveness)
-        // in onCreate() after initViews()
+        // Attach tactile effects for interactive cards/rows (use IDs present in layout)
         attachTouchEffectsToCards(
                 R.id.statCard1,
                 R.id.statCard2,
                 R.id.statCard3,
                 R.id.personalInfoContainer,
                 R.id.editProfile,
-                R.id.shareBtn,
+                R.id.accountDataInfo,
                 R.id.termAndPrivacy,
                 R.id.logoutBtn,
                 R.id.contactCard,
                 R.id.telegramRow,
-                R.id.linkedinRow,
                 R.id.emailRow
         );
     }
 
     private void initViews() {
-        // Header (optional; ensure your layout has these ids if used)
         headerFullName = findViewById(R.id.headerFullName);
         headerUsername = findViewById(R.id.headerUsername);
 
@@ -143,9 +135,6 @@ public class ProfileActivity extends AppCompatActivity {
         populateUserData();
     }
 
-    /**
-     * Public so bottomsheet or other components can refresh UI after edits.
-     */
     public void populateUserData() {
         if (Continuity.currentOnlineUser == null) return;
 
@@ -176,21 +165,22 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void initClickListeners() {
+        final String telegramHandle = "gojo_edu"; // without @
+        final String supportEmail = "gojo.education1@gmail.com";
+        final String accountDataInfoLink = "https://ephrem-t.github.io/Gojo-Account-Data-Info/";
+        final String termsAndPrivacy = "https://sites.google.com/view/gojo-parent-privacy";
 
-        // --- Contact rows (Telegram / LinkedIn / Email) ---
         View telegramRow = findViewById(R.id.telegramRow);
-        View linkedinRow = findViewById(R.id.linkedinRow);
         View emailRow = findViewById(R.id.emailRow);
+        View accountDataInfo = findViewById(R.id.accountDataInfo);
+        View terms = findViewById(R.id.termAndPrivacy);
+        View logout = findViewById(R.id.logoutBtn);
+        View edit = findViewById(R.id.editProfile);
 
-// Replace these with your real contact values
-        final String telegramHandle = "your_telegram_handle";           // without @
-        final String supportEmail = "support@yourapp.com";
-        final String linkedInUrl = "https://www.linkedin.com/company/your-company"; // public profile/company URL
-
-// Telegram: try app, then web
-        if (telegramRow != null) {
-            telegramRow.setOnClickListener(v -> {
-                // try Telegram deep link
+        // Telegram
+        if (telegramRow != null) telegramRow.setOnClickListener(v -> {
+            animateClickFeedback(v);
+            v.postDelayed(() -> {
                 try {
                     Uri tgUri = Uri.parse("tg://resolve?domain=" + telegramHandle);
                     Intent tgIntent = new Intent(Intent.ACTION_VIEW, tgUri);
@@ -199,136 +189,134 @@ public class ProfileActivity extends AppCompatActivity {
                         return;
                     }
                 } catch (Exception ignored) { }
-
-                // fallback to web
                 try {
                     Uri web = Uri.parse("https://t.me/" + telegramHandle);
-                    Intent webIntent = new Intent(Intent.ACTION_VIEW, web);
-                    startActivity(webIntent);
+                    startActivity(new Intent(Intent.ACTION_VIEW, web));
                 } catch (Exception e) {
-                    Toast.makeText(this, "No app available to open Telegram link", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "No app/browser available to open Telegram", Toast.LENGTH_SHORT).show();
                 }
-            });
-        }
+            }, 120);
+        });
 
-// LinkedIn: prefer app, fallback to browser
-        if (linkedinRow != null) {
-            linkedinRow.setOnClickListener(v -> {
-                // try open in LinkedIn app via package + URL
+        // Email
+        if (emailRow != null) emailRow.setOnClickListener(v -> {
+            animateClickFeedback(v);
+            v.postDelayed(() -> {
+                String subject = "GojoStudy Support";
+                String body = "Hi team,\n\nI would like to report...";
                 try {
-                    Intent linkedInIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(linkedInUrl));
-                    linkedInIntent.setPackage("com.linkedin.android");
-                    if (linkedInIntent.resolveActivity(getPackageManager()) != null) {
-                        startActivity(linkedInIntent);
+                    // 1) Preferred: ACTION_SENDTO with a properly encoded mailto: URI
+                    String uriText = "mailto:" + Uri.encode(supportEmail) +
+                            "?subject=" + Uri.encode(subject) +
+                            "&body=" + Uri.encode(body);
+                    Uri mailUri = Uri.parse(uriText);
+                    Intent mailIntent = new Intent(Intent.ACTION_SENDTO, mailUri);
+
+                    if (mailIntent.resolveActivity(getPackageManager()) != null) {
+                        startActivity(mailIntent);
                         return;
                     }
-                } catch (Exception ignored) { }
 
-                // fallback to browser
-                try {
-                    Intent browser = new Intent(Intent.ACTION_VIEW, Uri.parse(linkedInUrl));
-                    startActivity(browser);
-                } catch (Exception e) {
-                    Toast.makeText(this, "No app available to open LinkedIn", Toast.LENGTH_SHORT).show();
+                    // 2) Fallback: ACTION_SEND with chooser (covers more apps)
+                    Intent fallback = new Intent(Intent.ACTION_SEND);
+                    fallback.setType("message/rfc822");
+                    fallback.putExtra(Intent.EXTRA_EMAIL, new String[]{ supportEmail });
+                    fallback.putExtra(Intent.EXTRA_SUBJECT, subject);
+                    fallback.putExtra(Intent.EXTRA_TEXT, body);
+                    startActivity(Intent.createChooser(fallback, "Send email"));
+                } catch (android.content.ActivityNotFoundException ex) {
+                    // No email clients installed
+                    Toast.makeText(this, "No email client found on this device", Toast.LENGTH_SHORT).show();
+                } catch (Exception ex) {
+                    Toast.makeText(this, "Unable to open email client: " + ex.getMessage(), Toast.LENGTH_SHORT).show();
                 }
-            });
-        }
-
-// Email: open mail client with subject and optional body
-        if (emailRow != null) {
-            emailRow.setOnClickListener(v -> {
+            }, 100); // small delay so the touch animation is visible
+        });
+        // Account data info link
+        if (accountDataInfo != null) accountDataInfo.setOnClickListener(v -> {
+            animateClickFeedback(v);
+            v.postDelayed(() -> {
                 try {
-                    Intent mail = new Intent(Intent.ACTION_SENDTO);
-                    mail.setData(Uri.parse("mailto:" + supportEmail));
-                    mail.putExtra(Intent.EXTRA_SUBJECT, "HomeStudy Support");
-                    mail.putExtra(Intent.EXTRA_TEXT, "Hi team,\n\nI would like to report...");
-                    if (mail.resolveActivity(getPackageManager()) != null) {
-                        startActivity(mail);
-                    } else {
-                        Toast.makeText(this, "No email client found", Toast.LENGTH_SHORT).show();
-                    }
+                    Uri web = Uri.parse(accountDataInfoLink);
+                    startActivity(new Intent(Intent.ACTION_VIEW, web));
                 } catch (Exception e) {
-                    Toast.makeText(this, "Unable to open email client", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Failed to open the link", Toast.LENGTH_SHORT).show();
                 }
-            });
-        }
-
-        if (backArrow != null) backArrow.setOnClickListener(v -> {
-            Intent intent = new Intent(this, HomeActivity.class);
-            startActivity(intent);
-            finish();
-                });
-
-        if (changeProfileBtn != null) changeProfileBtn.setOnClickListener(v -> {
-            changeProfileBtn.animate().scaleX(0.92f).scaleY(0.92f).setDuration(100)
-                    .withEndAction(() -> changeProfileBtn.animate().scaleX(1f).scaleY(1f).setDuration(100)).start();
-            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            imagePickerLauncher.launch(intent);
+            }, 120);
         });
 
-        View edit = findViewById(R.id.editProfile);
-        if (edit != null) edit.setOnClickListener(v ->{
-                new EditProfileBottomSheet().show(getSupportFragmentManager(), "EditProfile");
+        // Terms
+        if (terms != null) terms.setOnClickListener(v -> {
+            animateClickFeedback(v);
+            v.postDelayed(() -> {
+                try {
+                    Uri web = Uri.parse(termsAndPrivacy);
+                    startActivity(new Intent(Intent.ACTION_VIEW, web));
+                } catch (Exception e) {
+                    Toast.makeText(this, "Failed to open the link", Toast.LENGTH_SHORT).show();
+                }
+            }, 120);
         });
 
-
-        View share = findViewById(R.id.shareBtn);
-        if (share != null) share.setOnClickListener(v -> {
-//            animateClickFeedback(share);
-            Intent shareIntent = new Intent(Intent.ACTION_SEND);
-            shareIntent.setType("text/plain");
-            shareIntent.putExtra(Intent.EXTRA_TEXT, "Check out my profile on Home Study app!");
-            startActivity(Intent.createChooser(shareIntent, "Share via"));
+        // Edit Profile (bottom sheet)
+        if (edit != null) edit.setOnClickListener(v -> {
+            animateClickFeedback(v);
+            v.postDelayed(() -> new EditProfileBottomSheet().show(getSupportFragmentManager(), "EditProfile"), 120);
         });
 
-        View terms = findViewById(R.id.termAndPrivacy);
-        if (terms != null) terms.setOnClickListener(v ->{
-//            animateClickFeedback(terms);
-                Toast.makeText(this, "Open Terms & Privacy", Toast.LENGTH_SHORT).show();
-
-        });
-
-        View logout = findViewById(R.id.logoutBtn);
+        // Logout
         if (logout != null) logout.setOnClickListener(v -> {
-            // clear in-memory user
-            Continuity.currentOnlineUser = null;
-            Continuity.userId = null;
+            animateClickFeedback(v);
+            v.postDelayed(() -> {
+                // clear in-memory user
+                Continuity.currentOnlineUser = null;
+                Continuity.userId = null;
 
-            // clear persisted session
-            new SessionManager(ProfileActivity.this).clearSession();
+                // clear persisted session
+                new SessionManager(ProfileActivity.this).clearSession();
 
-            // go to login
-            Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            finish();
+                // go to login
+                Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
+            }, 120);
+        });
+
+        // Back arrow
+        if (backArrow != null) backArrow.setOnClickListener(v -> {
+            animateClickFeedback(v);
+            v.postDelayed(() -> {
+                startActivity(new Intent(this, HomeActivity.class));
+                finish();
+            }, 80);
+        });
+
+        // Change profile image
+        if (changeProfileBtn != null) changeProfileBtn.setOnClickListener(v -> {
+            animateClickFeedback(v);
+            v.postDelayed(() -> imagePickerLauncher.launch(new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)), 120);
         });
     }
 
     // -------------------- ANIMATIONS --------------------
 
     /**
-     * Entrance animation: stagger fade/translate for important views.
-     * Keeps animations short and hardware-accelerated for good performance.
+     * Use this for programmatic click feedback.
+     * Removed bringToFront() to avoid layout re-orders that cause stutter.
      */
-
-
-    /**
-     * Use this for programmatic click feedback (e.g., when you call an action and want the same visual).
-     * It performs a quick press/release animation and returns immediately.
-     */
+    // Replaces your current animateClickFeedback & attachTouchEffectsToCards
     private void animateClickFeedback(View v) {
         if (v == null) return;
-        final float PRESSED_SCALE = 0.95f;
-        final long PRESS_DURATION = 90L;
-        final long RELEASE_DURATION = 220L;
-        final float LIFT_DP = 6f;
+        final float PRESSED_SCALE = 0.96f;
+        final long PRESS_DURATION = 100L;      // visible press time
+        final long RELEASE_DURATION = 180L;    // smooth release
+        final float LIFT_DP = 4f;
         final float liftPx = getResources().getDisplayMetrics().density * LIFT_DP;
         final DecelerateInterpolator decel = new DecelerateInterpolator();
-        final OvershootInterpolator overshoot = new OvershootInterpolator(1.05f);
+        final OvershootInterpolator overshoot = new OvershootInterpolator(1.02f);
 
         v.animate().cancel();
-        v.bringToFront();
         v.animate()
                 .scaleX(PRESSED_SCALE)
                 .scaleY(PRESSED_SCALE)
@@ -347,86 +335,20 @@ public class ProfileActivity extends AppCompatActivity {
                 })
                 .start();
     }
-    private void animateInitialEntrance() {
-        final int baseDelay = 80;
-        final int itemDuration = 420;
-        final DecelerateInterpolator decel = new DecelerateInterpolator();
 
-        // profile avatar
-        if (profileImage != null) {
-            profileImage.setTranslationY(-6f);
-            profileImage.setAlpha(0f);
-            profileImage.animate()
-                    .translationY(0f).alpha(1f)
-                    .setStartDelay(60)
-                    .setDuration(itemDuration)
-                    .setInterpolator(new OvershootInterpolator(1.0f))
-                    .start();
-        }
-
-        // small header texts
-        View[] headerItems = new View[] {
-                headerFullName != null ? headerFullName : null,
-                headerUsername != null ? headerUsername : null
-        };
-        int index = 0;
-        for (View v : headerItems) {
-            if (v == null) continue;
-            v.setTranslationY(20f);
-            v.setAlpha(0f);
-            v.animate()
-                    .translationY(0f)
-                    .alpha(1f)
-                    .setStartDelay(120 + index * baseDelay)
-                    .setDuration(itemDuration)
-                    .setInterpolator(decel)
-                    .start();
-            index++;
-        }
-
-        // stats cards and content
-        int[] entranceIds = new int[] {
-                R.id.statCard1, R.id.statCard2, R.id.statCard3,
-                R.id.personalInfoContainer, R.id.editProfile, R.id.shareBtn, R.id.termAndPrivacy, R.id.logoutBtn
-        };
-
-        for (int i = 0; i < entranceIds.length; i++) {
-            View item = findViewById(entranceIds[i]);
-            if (item == null) continue;
-            item.setTranslationY(28f);
-            item.setAlpha(0f);
-            item.animate()
-                    .translationY(0f)
-                    .alpha(1f)
-                    .setStartDelay(200 + i * baseDelay)
-                    .setDuration(itemDuration)
-                    .setInterpolator(decel)
-                    .start();
-        }
-    }
-
-    /**
-     * Attach tactile touch effect (scale + lift) to MaterialCardView or any view.
-     * Keeps effect lightweight: quick scale and translationZ, restored on release/cancel.
-     */
     private void attachTouchEffectsToCards(int... viewIds) {
-        final float PRESSED_SCALE = 0.97f;          // scale when pressed
-        final long PRESS_DURATION = 90L;            // ms
-        final long RELEASE_DURATION = 220L;         // ms
-        final float LIFT_DP = 6f;                   // dp of translationZ when pressed
+        final float PRESSED_SCALE = 0.97f;
+        final long PRESS_DURATION = 90L;
+        final long RELEASE_DURATION = 160L;
+        final float LIFT_DP = 4f;
         final float liftPx = getResources().getDisplayMetrics().density * LIFT_DP;
         final DecelerateInterpolator decel = new DecelerateInterpolator();
-        final OvershootInterpolator overshoot = new OvershootInterpolator(1.05f);
+        final OvershootInterpolator overshoot = new OvershootInterpolator(1.02f);
 
-        View.OnTouchListener touch = (v, event) -> {
+        @SuppressLint("ClickableViewAccessibility") View.OnTouchListener touch = (v, event) -> {
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
-                    // cancel any running animators cleanly
                     v.animate().cancel();
-                    // ensure we draw above siblings during press (optional)
-                    v.bringToFront();
-
-                    // press animation: scale down + lift quickly
                     v.animate()
                             .scaleX(PRESSED_SCALE)
                             .scaleY(PRESSED_SCALE)
@@ -434,16 +356,12 @@ public class ProfileActivity extends AppCompatActivity {
                             .setDuration(PRESS_DURATION)
                             .setInterpolator(decel)
                             .start();
-
-                    // set pressed for ripple feedback
+                    // keep ripple visible
                     v.setPressed(true);
                     break;
-
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
-                    // cancel again and animate back with a pleasant overshoot
                     v.animate().cancel();
-
                     v.animate()
                             .scaleX(1f)
                             .scaleY(1f)
@@ -451,11 +369,10 @@ public class ProfileActivity extends AppCompatActivity {
                             .setDuration(RELEASE_DURATION)
                             .setInterpolator(overshoot)
                             .start();
-
                     v.setPressed(false);
                     break;
             }
-            // Return false so the normal click handling still occurs.
+            // Return false so ripple and click are handled by the system
             return false;
         };
 
@@ -464,16 +381,11 @@ public class ProfileActivity extends AppCompatActivity {
             if (v == null) continue;
             v.setClickable(true);
             v.setFocusable(true);
-            // attach the touch listener
             v.setOnTouchListener(touch);
-            // optionally ensure ripple is visible by setting foreground (if using CardView/MaterialCardView)
-            // v.setForeground(ContextCompat.getDrawable(this, R.attr.selectableItemBackgroundBorderless));
         }
     }
 
-
     // -------------------- IMAGE PICK & CROP --------------------
-
     private void startCrop(Uri sourceUri) {
         Uri destinationUri = Uri.fromFile(new File(getCacheDir(), System.currentTimeMillis() + "_crop.jpg"));
         UCrop.Options options = new UCrop.Options();
@@ -489,7 +401,6 @@ public class ProfileActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // UCrop returns here
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
             croppedImageUri = UCrop.getOutput(data);
@@ -501,7 +412,6 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     // -------------------- UPLOAD --------------------
-
     private void uploadProfileImage() {
         if (croppedImageUri == null) return;
         if (uploadProgressBar != null) uploadProgressBar.setVisibility(View.VISIBLE);
@@ -546,10 +456,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     // -------------------- STUDENT DATA LOADING --------------------
-
-    private interface StudentSnapshotHandler {
-        void handle(DataSnapshot ds);
-    }
+    private interface StudentSnapshotHandler { void handle(DataSnapshot ds); }
 
     private void loadStudentData() {
         if (Continuity.currentOnlineUser == null) {
@@ -654,8 +561,66 @@ public class ProfileActivity extends AppCompatActivity {
                 });
     }
 
-    // -------------------- USER PROGRESS --------------------
+    private void animateInitialEntrance() {
+        final int baseDelay = 80;
+        final int itemDuration = 420;
+        final DecelerateInterpolator decel = new DecelerateInterpolator();
 
+        // profile avatar
+        if (profileImage != null) {
+            profileImage.setTranslationY(-6f);
+            profileImage.setAlpha(0f);
+            profileImage.animate()
+                    .translationY(0f).alpha(1f)
+                    .setStartDelay(60)
+                    .setDuration(itemDuration)
+                    .setInterpolator(new OvershootInterpolator(1.0f))
+                    .start();
+        }
+
+        // small header texts
+        View[] headerItems = new View[] {
+                headerFullName != null ? headerFullName : null,
+                headerUsername != null ? headerUsername : null
+        };
+        int index = 0;
+        for (View v : headerItems) {
+            if (v == null) continue;
+            v.setTranslationY(20f);
+            v.setAlpha(0f);
+            v.animate()
+                    .translationY(0f)
+                    .alpha(1f)
+                    .setStartDelay(120 + index * baseDelay)
+                    .setDuration(itemDuration)
+                    .setInterpolator(decel)
+                    .start();
+            index++;
+        }
+
+        // stats cards and content
+        int[] entranceIds = new int[] {
+                R.id.statCard1, R.id.statCard2, R.id.statCard3,
+                R.id.personalInfoContainer, R.id.editProfile, R.id.accountDataInfo, R.id.termAndPrivacy, R.id.logoutBtn
+        };
+
+        for (int i = 0; i < entranceIds.length; i++) {
+            View item = findViewById(entranceIds[i]);
+            if (item == null) continue;
+            item.setTranslationY(28f);
+            item.setAlpha(0f);
+            item.animate()
+                    .translationY(0f)
+                    .alpha(1f)
+                    .setStartDelay(200 + i * baseDelay)
+                    .setDuration(itemDuration)
+                    .setInterpolator(decel)
+                    .start();
+        }
+    }
+
+    // -------------------- USER PROGRESS --------------------
+    @SuppressLint("SetTextI18n")
     private void loadUserProgress() {
         if (Continuity.userId == null || Continuity.userId.isEmpty()) {
             if (scoreValue != null) scoreValue.setText("--");
