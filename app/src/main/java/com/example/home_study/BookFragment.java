@@ -3,6 +3,7 @@ package com.example.home_study;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -11,92 +12,59 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.home_study.Adapter.BookAdapter;
-import com.example.home_study.Model.Book;
+import com.example.home_study.db.SubjectEntity;
+import com.example.home_study.repo.ContentRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link BookFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class BookFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-    private List bookList;
     private RecyclerView bookRecycler;
+    private BookAdapter bookAdapter;
+    private List<com.example.home_study.Model.Book> bookList;
+    private ContentRepository repository;
+    private String gradeKey = "grade_7"; // change according to current student
 
-    public BookFragment() {
-        // Required empty public constructor
-    }
+    public BookFragment() { }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment BookFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static BookFragment newInstance(String param1, String param2) {
-        BookFragment fragment = new BookFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    public static BookFragment newInstance() { return new BookFragment(); }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        repository = new ContentRepository(requireContext());
+        bookList = new ArrayList<>();
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_book, container, false);
         bookRecycler = view.findViewById(R.id.bookRecyclerView);
         bookRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
         bookRecycler.setHasFixedSize(true);
-        bookList = new ArrayList<>();
-
-        loadBooks();
-
-        BookAdapter bookAdapter = new BookAdapter(bookList, getActivity());
+        bookAdapter = new BookAdapter(bookList, getActivity());
         bookRecycler.setAdapter(bookAdapter);
+
+        // Observe subjects in room for the grade
+        repository.getSubjectsForGradeLive(gradeKey).observe(getViewLifecycleOwner(), new Observer<List<SubjectEntity>>() {
+            @Override
+            public void onChanged(List<SubjectEntity> subjectEntities) {
+                bookList.clear();
+                if (subjectEntities != null) {
+                    for (SubjectEntity s : subjectEntities) {
+                        // translate subjectEntity to your Book model
+                        int icon = com.example.home_study.ResourceUtils.chooseDrawableForBook(s.title); // make chooseDrawableForBook static or replicate mapping
+                        bookList.add(new com.example.home_study.Model.Book(s.title, s.grade, icon, s.key));
+                    }
+                }
+                bookAdapter.notifyDataSetChanged();
+            }
+        });
+
+        // Trigger initial sync from Firebase (will update Room)
+        repository.syncSubjectsForGrade(gradeKey);
 
         return view;
     }
-
-    private void loadBooks()
-    {
-        bookList.add(new Book("English", "Grade 7", R.drawable.english));
-        bookList.add(new Book("Mathematics", "Grade 7", R.drawable.math));
-        bookList.add(new Book("Physics", "Grade 7", R.drawable.physics));
-        bookList.add(new Book("Biology", "Grade 7", R.drawable.biology));
-        bookList.add(new Book("Chemistry", "Grade 7", R.drawable.chemistry));
-        bookList.add(new Book("Geography", "Grade 7", R.drawable.geography));
-        bookList.add(new Book("History", "Grade 7", R.drawable.history));
-        bookList.add(new Book("ICT", "Grade 7", R.drawable.ict));
-        bookList.add(new Book("Physical Education", "Grade 7", R.drawable.hpe));
-        bookList.add(new Book("Oromifa", "Grade 7", R.drawable.language));
-
-
-
-    }
-
 }

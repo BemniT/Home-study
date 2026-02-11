@@ -59,9 +59,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scaleType="centerCrop"
-        android:maxHeight="350dp"
+        android:maxHeight="375dp"
         android:adjustViewBounds="true"
-        android:background="@color/black_low"
+        android:background="@color/white"
         android:contentDescription="@string/Pimage" />
 
     <LinearLayout

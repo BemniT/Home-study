@@ -24,6 +24,7 @@ import androidx.core.view.ViewCompat;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.home_study.Prevalent.Continuity;
+import com.example.home_study.Prevalent.SessionManager;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.database.DataSnapshot;
@@ -289,9 +290,16 @@ public class ProfileActivity extends AppCompatActivity {
 
         View logout = findViewById(R.id.logoutBtn);
         if (logout != null) logout.setOnClickListener(v -> {
-//            animateClickFeedback(logout);
-            Toast.makeText(this, "Logged out", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(this, LoginActivity.class);
+            // clear in-memory user
+            Continuity.currentOnlineUser = null;
+            Continuity.userId = null;
+
+            // clear persisted session
+            new SessionManager(ProfileActivity.this).clearSession();
+
+            // go to login
+            Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             finish();
         });

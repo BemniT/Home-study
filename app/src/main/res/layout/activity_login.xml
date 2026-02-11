@@ -130,7 +130,7 @@
         android:id="@+id/copyright"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="© 2026 HomeStudy. All rights reserved."
+        android:text="© 2026 GojoStudy. All rights reserved."
         android:textSize="12sp"
         android:textColor="@color/black_low"
         android:gravity="center"

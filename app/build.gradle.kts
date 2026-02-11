@@ -44,6 +44,15 @@ android {
 
 dependencies {
 
+
+    implementation ("com.google.guava:guava:32.1.2-android")
+    annotationProcessor ("androidx.room:room-compiler:2.5.2")
+
+    implementation("androidx.room:room-ktx:2.5.2")
+    implementation("androidx.room:room-runtime:2.5.2")
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
+
     // AndroidX / UI
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("com.google.android.material:material:1.13.0")

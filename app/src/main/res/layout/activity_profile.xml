@@ -386,14 +386,14 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:background="@drawable/cricle2">
+                android:background="@drawable/cricle2"
+                android:padding="16dp">
 
                 <TextView
                     android:id="@+id/contactInfoTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Contact"
+                    android:text="Contact Dev"
                     android:textColor="@color/black"
                     android:textSize="16sp"
                     android:textStyle="bold"
@@ -406,54 +406,54 @@
                     android:layout_width="0dp"
                     android:layout_height="64dp"
                     android:layout_marginTop="12dp"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true"
-                    android:background="?attr/selectableItemBackground"
-                    app:layout_constraintTop_toBottomOf="@id/contactInfoTitle"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent">
+                    app:layout_constraintTop_toBottomOf="@id/contactInfoTitle">
 
                     <ImageView
                         android:id="@+id/telegram"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:src="@drawable/telegram"
                         android:contentDescription="telegram"
+                        android:src="@drawable/telegram"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <LinearLayout
                         android:id="@+id/telegramTextGroup"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
                         android:orientation="vertical"
-                        app:layout_constraintStart_toEndOf="@id/telegram"
-                        app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="@id/telegram"
                         app:layout_constraintEnd_toEndOf="parent"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginEnd="8dp">
+                        app:layout_constraintStart_toEndOf="@id/telegram"
+                        app:layout_constraintTop_toTopOf="parent">
 
                         <TextView
                             android:id="@+id/tgTitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Telegram"
+                            android:textColor="@color/black"
                             android:textSize="14sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/black" />
+                            android:textStyle="bold" />
 
-<!--                        <TextView-->
-<!--                            android:id="@+id/tgSubtitle"-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:text="your_telegram_handle"-->
-<!--                            android:textSize="12sp"-->
-<!--                            android:textColor="@color/black_low"-->
-<!--                            android:layout_marginTop="4dp" />-->
+                        <!--                        <TextView-->
+                        <!--                            android:id="@+id/tgSubtitle"-->
+                        <!--                            android:layout_width="wrap_content"-->
+                        <!--                            android:layout_height="wrap_content"-->
+                        <!--                            android:text="your_telegram_handle"-->
+                        <!--                            android:textSize="12sp"-->
+                        <!--                            android:textColor="@color/black_low"-->
+                        <!--                            android:layout_marginTop="4dp" />-->
                     </LinearLayout>
 
                     <!-- divider that starts aligned with text group start -->
@@ -461,11 +461,11 @@
                         android:id="@+id/telegramDivider"
                         android:layout_width="0dp"
                         android:layout_height="1dp"
+                        android:layout_marginTop="12dp"
                         android:background="@color/black_low"
-                        app:layout_constraintStart_toStartOf="@id/telegramTextGroup"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/telegramTextGroup"
-                        android:layout_marginTop="12dp"/>
+                        app:layout_constraintStart_toStartOf="@id/telegramTextGroup"
+                        app:layout_constraintTop_toBottomOf="@id/telegramTextGroup" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <!-- LINKEDIN ROW -->
@@ -474,65 +474,65 @@
                     android:layout_width="0dp"
                     android:layout_height="64dp"
                     android:layout_marginTop="4dp"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true"
-                    android:background="?attr/selectableItemBackground"
-                    app:layout_constraintTop_toBottomOf="@id/telegramRow"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent">
+                    app:layout_constraintTop_toBottomOf="@id/telegramRow">
 
                     <ImageView
                         android:id="@+id/linkedinDeveloper"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:src="@drawable/linkedin"
                         android:contentDescription="linkedin"
+                        android:src="@drawable/linkedin"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <LinearLayout
                         android:id="@+id/linkedinTextGroup"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
                         android:orientation="vertical"
-                        app:layout_constraintStart_toEndOf="@id/linkedinDeveloper"
-                        app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="@id/linkedinDeveloper"
                         app:layout_constraintEnd_toEndOf="parent"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginEnd="8dp">
+                        app:layout_constraintStart_toEndOf="@id/linkedinDeveloper"
+                        app:layout_constraintTop_toTopOf="parent">
 
                         <TextView
                             android:id="@+id/linkedinTitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="LinkedIn"
+                            android:textColor="@color/black"
                             android:textSize="14sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/black" />
+                            android:textStyle="bold" />
 
-<!--                        <TextView-->
-<!--                            android:id="@+id/linkedinSubtitle"-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:text="Company / Developer"-->
-<!--                            android:textSize="12sp"-->
-<!--                            android:textColor="@color/black_low"-->
-<!--                            android:layout_marginTop="4dp" />-->
+                        <!--                        <TextView-->
+                        <!--                            android:id="@+id/linkedinSubtitle"-->
+                        <!--                            android:layout_width="wrap_content"-->
+                        <!--                            android:layout_height="wrap_content"-->
+                        <!--                            android:text="Company / Developer"-->
+                        <!--                            android:textSize="12sp"-->
+                        <!--                            android:textColor="@color/black_low"-->
+                        <!--                            android:layout_marginTop="4dp" />-->
                     </LinearLayout>
 
                     <View
                         android:id="@+id/linkedinDivider"
                         android:layout_width="0dp"
                         android:layout_height="1dp"
+                        android:layout_marginTop="12dp"
                         android:background="@color/black_low"
-                        app:layout_constraintStart_toStartOf="@id/linkedinTextGroup"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/linkedinTextGroup"
-                        android:layout_marginTop="12dp"/>
+                        app:layout_constraintStart_toStartOf="@id/linkedinTextGroup"
+                        app:layout_constraintTop_toBottomOf="@id/linkedinTextGroup" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <!-- EMAIL ROW -->
@@ -541,55 +541,55 @@
                     android:layout_width="0dp"
                     android:layout_height="64dp"
                     android:layout_marginTop="4dp"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
+                    android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true"
-                    android:background="?attr/selectableItemBackground"
-                    app:layout_constraintTop_toBottomOf="@id/linkedinRow"
-                    app:layout_constraintStart_toStartOf="parent"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent">
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/linkedinRow">
 
                     <ImageView
                         android:id="@+id/emailDeveloper"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:src="@drawable/email"
                         android:contentDescription="email"
+                        android:src="@drawable/email"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <LinearLayout
                         android:id="@+id/emailTextGroup"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
                         android:orientation="vertical"
-                        app:layout_constraintStart_toEndOf="@id/emailDeveloper"
-                        app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="@id/emailDeveloper"
                         app:layout_constraintEnd_toEndOf="parent"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginEnd="8dp">
+                        app:layout_constraintStart_toEndOf="@id/emailDeveloper"
+                        app:layout_constraintTop_toTopOf="parent">
 
                         <TextView
                             android:id="@+id/emailTitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Email"
+                            android:textColor="@color/black"
                             android:textSize="14sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/black" />
+                            android:textStyle="bold" />
 
-<!--                        <TextView-->
-<!--                            android:id="@+id/emailSubtitle"-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:text="support@yourapp.com"-->
-<!--                            android:textSize="12sp"-->
-<!--                            android:textColor="@color/black_low"-->
-<!--                            android:layout_marginTop="4dp" />-->
+                        <!--                        <TextView-->
+                        <!--                            android:id="@+id/emailSubtitle"-->
+                        <!--                            android:layout_width="wrap_content"-->
+                        <!--                            android:layout_height="wrap_content"-->
+                        <!--                            android:text="support@yourapp.com"-->
+                        <!--                            android:textSize="12sp"-->
+                        <!--                            android:textColor="@color/black_low"-->
+                        <!--                            android:layout_marginTop="4dp" />-->
                     </LinearLayout>
 
                     <!-- divider aligned to text group -->
@@ -597,11 +597,11 @@
                         android:id="@+id/emailDivider"
                         android:layout_width="0dp"
                         android:layout_height="1dp"
+                        android:layout_marginTop="12dp"
                         android:background="@color/black_low"
-                        app:layout_constraintStart_toStartOf="@id/emailTextGroup"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/emailTextGroup"
-                        android:layout_marginTop="12dp"/>
+                        app:layout_constraintStart_toStartOf="@id/emailTextGroup"
+                        app:layout_constraintTop_toBottomOf="@id/emailTextGroup" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -768,7 +768,7 @@
             android:id="@+id/copyright"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="© 2026 HomeStudy. All rights reserved."
+            android:text="© 2026 GojoStudy. All rights reserved."
             android:textSize="12sp"
             android:textColor="@color/black_low"
             android:gravity="center"

@@ -60,10 +60,11 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(bookContext, ContentActivity.class);
-                intent.putExtra("bookTitle",book.getBookTitle());
-                intent.putExtra("bookGrade", book.getBookGrade());
-                bookContext.startActivity(intent);
+                Intent i = new Intent(bookContext, ContentActivity.class);
+                i.putExtra("subjectKey", book.getSubjectKey()); // subject key from DB (e.g., "mathematics")
+                i.putExtra("gradeKey", book.getBookGrade());    // if Book.bookGrade stores "grade_7"
+                i.putExtra("bookTitle", book.getBookTitle());   // optional display title fallback
+                bookContext.startActivity(i);
             }
         });
 
